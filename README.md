@@ -16,4 +16,4 @@ A recreation of my <a href="https://github.com/tripleducke/Capstone-Project">Uda
 
 ##License:
 
-UCI Transit is released under the <a href="">MIT License</a>.
+UCI Transit is released under the <a href="https://github.com/tripleducke/UCITransit/blob/master/LICENSE">MIT License</a>.

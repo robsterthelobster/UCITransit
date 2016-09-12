@@ -1,10 +1,9 @@
-package com.robsterthelobster.ucitransit.data;
+package com.robsterthelobster.ucitransit.retrofit;
 
-import com.robsterthelobster.ucitransit.models.*;
+import com.robsterthelobster.ucitransit.retrofit.models.*;
 
 import java.util.List;
 
-import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import rx.Observable;
@@ -13,7 +12,7 @@ import rx.Observable;
  * Created by robin on 6/21/2016.
  * Retrofit interface
  */
-public interface BusRestApi {
+public interface BusApiService {
     @GET("Region/0/Routes")
     Observable<List<Route>> getRoutes();
 

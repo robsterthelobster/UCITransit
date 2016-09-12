@@ -13,10 +13,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.robsterthelobster.ucitransit.R;
-import com.robsterthelobster.ucitransit.data.BusRestApi;
-import com.robsterthelobster.ucitransit.models.*;
-
-import java.util.List;
+import com.robsterthelobster.ucitransit.retrofit.BusApiService;
+import com.robsterthelobster.ucitransit.retrofit.models.*;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -26,8 +24,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity
@@ -105,18 +101,23 @@ public class MainActivity extends AppCompatActivity
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
 
-        BusRestApi apiService = retrofit.create(BusRestApi.class);
+        BusApiService apiService = retrofit.create(BusApiService.class);
 
         apiService.getRoutes()
                 .flatMap(routes -> Observable.from(routes))
-                .flatMap(route -> apiService.getStops(route.getId()))
+                .flatMap(route -> {
+                    return apiService.getStops(route.getId());
+                })
                 .flatMap(stops -> Observable.from(stops))
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Stop>() {
+                    int count = 0;
+
                     @Override
                     public void onCompleted() {
                         Log.d("fetchData", "Completed");
+                        Log.d("Count of stops", count + "");
                     }
 
                     @Override
@@ -126,6 +127,7 @@ public class MainActivity extends AppCompatActivity
 
                     @Override
                     public void onNext(Stop stop) {
+                        count++;
                         Log.d("Stop", stop.getName());
                     }
                 });

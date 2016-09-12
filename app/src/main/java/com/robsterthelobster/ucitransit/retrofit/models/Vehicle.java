@@ -1,4 +1,4 @@
-package com.robsterthelobster.ucitransit.models;
+package com.robsterthelobster.ucitransit.retrofit.models;
 
 import com.google.gson.annotations.SerializedName;
 

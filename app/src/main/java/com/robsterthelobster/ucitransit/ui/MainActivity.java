@@ -14,7 +14,7 @@ import android.view.MenuItem;
 
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.data.BusRestApi;
-import com.robsterthelobster.ucitransit.models.Route;
+import com.robsterthelobster.ucitransit.models.*;
 
 import java.util.List;
 
@@ -107,52 +107,27 @@ public class MainActivity extends AppCompatActivity
 
         BusRestApi apiService = retrofit.create(BusRestApi.class);
 
-        apiService.getRoutes().subscribeOn(Schedulers.io())
+        apiService.getRoutes()
+                .flatMap(routes -> Observable.from(routes))
+                .flatMap(route -> apiService.getStops(route.getId()))
+                .flatMap(stops -> Observable.from(stops))
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .flatMap(new Func1<List<Route>, Observable<Route>>(){
+                .subscribe(new Subscriber<Stop>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.d("fetchData", "Completed");
+                    }
 
-            @Override
-            public Observable<Route> call(List<Route> routes) {
-                return Observable.from(routes);
-            }
-        }).subscribe(new Subscriber<Route>() {
-            @Override
-            public void onCompleted() {
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("Error", e.toString());
+                    }
 
-            }
-
-            @Override
-            public void onError(Throwable e) {
-
-            }
-
-            @Override
-            public void onNext(Route route) {
-                Log.d("Route", route.getDisplayName());
-            }
-        });
-
-//        apiService.getRoutes()
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Subscriber<List<Route>>(){
-//
-//            @Override
-//            public void onCompleted() {
-//
-//            }
-//
-//            @Override
-//            public void onError(Throwable e) {
-//
-//            }
-//
-//            @Override
-//            public void onNext(List<Route> routes) {
-//                for(Route route : routes){
-//                    Log.d("Route", route.getDisplayName());
-//                }
-//            }
-//        });
+                    @Override
+                    public void onNext(Stop stop) {
+                        Log.d("Stop", stop.getName());
+                    }
+                });
     }
 }

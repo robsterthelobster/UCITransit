@@ -1,11 +1,13 @@
-package com.robsterthelobster.ucitransit.retrofit.models;
+package com.robsterthelobster.ucitransit.data.models;
 
 import com.google.gson.annotations.SerializedName;
+
+import io.realm.RealmObject;
 
 /**
  * Created by robin on 6/20/2016.
  */
-public class Vehicle {
+public class Vehicle extends RealmObject {
     @SerializedName("ID")
     private int id;
     @SerializedName("APCPercentage")

@@ -1,6 +1,6 @@
-package com.robsterthelobster.ucitransit.retrofit;
+package com.robsterthelobster.ucitransit.data;
 
-import com.robsterthelobster.ucitransit.retrofit.models.*;
+import com.robsterthelobster.ucitransit.data.models.*;
 
 import java.util.List;
 

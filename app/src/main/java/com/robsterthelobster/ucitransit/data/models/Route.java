@@ -1,15 +1,15 @@
-package com.robsterthelobster.ucitransit.retrofit.models;
+package com.robsterthelobster.ucitransit.data.models;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.realm.RealmList;
+import io.realm.RealmObject;
 
 /**
  * Created by robin on 6/20/2016.
  *
  */
-public class Route {
+public class Route extends RealmObject {
     @SerializedName("ID")
     private Integer id;
     @SerializedName("ArrivalsEnabled")
@@ -19,9 +19,9 @@ public class Route {
     @SerializedName("CustomerID")
     private Integer customerID;
     @SerializedName("DirectionStops")
-    private Object directionStops;
+    private String directionStops;
     @SerializedName("Points")
-    private Object points;
+    private String points;
     @SerializedName("Color")
     private String color;
     @SerializedName("TextColor")
@@ -37,7 +37,7 @@ public class Route {
     @SerializedName("ShortName")
     private String shortName;
     @SerializedName("RegionIDs")
-    private List<Object> regionIDs = new ArrayList<>();
+    private RealmList<RealmString> regionIDs;
     @SerializedName("ForwardDirectionName")
     private String forwardDirectionName;
     @SerializedName("BackwardDirectionName")
@@ -45,7 +45,7 @@ public class Route {
     @SerializedName("NumberOfVehicles")
     private int numberOfVehicles;
     @SerializedName("Patterns")
-    private Object patterns;
+    private String patterns;
 
     public boolean isArrivalsEnabled() {
         return arrivalsEnabled;
@@ -79,19 +79,19 @@ public class Route {
         this.customerID = customerID;
     }
 
-    public Object getDirectionStops() {
+    public String getDirectionStops() {
         return directionStops;
     }
 
-    public void setDirectionStops(Object directionStops) {
+    public void setDirectionStops(String directionStops) {
         this.directionStops = directionStops;
     }
 
-    public Object getPoints() {
+    public String getPoints() {
         return points;
     }
 
-    public void setPoints(Object points) {
+    public void setPoints(String points) {
         this.points = points;
     }
 
@@ -151,11 +151,11 @@ public class Route {
         this.shortName = shortName;
     }
 
-    public List<Object> getRegionIDs() {
+    public RealmList<RealmString> getRegionIDs() {
         return regionIDs;
     }
 
-    public void setRegionIDs(List<Object> regionIDs) {
+    public void setRegionIDs(RealmList<RealmString> regionIDs) {
         this.regionIDs = regionIDs;
     }
 
@@ -183,11 +183,11 @@ public class Route {
         this.numberOfVehicles = numberOfVehicles;
     }
 
-    public Object getPatterns() {
+    public String getPatterns() {
         return patterns;
     }
 
-    public void setPatterns(Object patterns) {
+    public void setPatterns(String patterns) {
         this.patterns = patterns;
     }
 }

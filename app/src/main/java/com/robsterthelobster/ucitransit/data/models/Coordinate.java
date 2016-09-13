@@ -1,11 +1,13 @@
-package com.robsterthelobster.ucitransit.retrofit.models;
+package com.robsterthelobster.ucitransit.data.models;
 
 import com.google.gson.annotations.SerializedName;
+
+import io.realm.RealmObject;
 
 /**
  * Created by robin on 6/20/2016.
  */
-public class Coordinate {
+public class Coordinate extends RealmObject {
     @SerializedName("Latitude")
     private double latitude;
     @SerializedName("Longitude")

@@ -1,11 +1,13 @@
-package com.robsterthelobster.ucitransit.retrofit.models;
+package com.robsterthelobster.ucitransit.data.models;
 
 import com.google.gson.annotations.SerializedName;
+
+import io.realm.RealmObject;
 
 /**
  * Created by robin on 6/20/2016.
  */
-public class Prediction {
+public class Prediction extends RealmObject {
     @SerializedName("RouteId")
     private int routeId;
     @SerializedName("RouteName")
@@ -27,19 +29,19 @@ public class Prediction {
     @SerializedName("IsLayover")
     private boolean isLayover;
     @SerializedName("Rules")
-    private Object rules;
+    private String rules;
     @SerializedName("ScheduledTime")
-    private Object scheduledTime;
+    private String scheduledTime;
     @SerializedName("SecondsToArrival")
     private double secondsToArrival;
     @SerializedName("OnBreak")
     private boolean onBreak;
     @SerializedName("ScheduledArriveTime")
-    private Object scheduledArriveTime;
+    private String scheduledArriveTime;
     @SerializedName("ScheduledMinutes")
     private int scheduledMinutes;
     @SerializedName("TripId")
-    private Object tripId;
+    private String tripId;
     @SerializedName("TripOrder")
     private int tripOrder;
 
@@ -123,19 +125,19 @@ public class Prediction {
         isLayover = layover;
     }
 
-    public Object getRules() {
+    public String getRules() {
         return rules;
     }
 
-    public void setRules(Object rules) {
+    public void setRules(String rules) {
         this.rules = rules;
     }
 
-    public Object getScheduledTime() {
+    public String getScheduledTime() {
         return scheduledTime;
     }
 
-    public void setScheduledTime(Object scheduledTime) {
+    public void setScheduledTime(String scheduledTime) {
         this.scheduledTime = scheduledTime;
     }
 
@@ -155,11 +157,11 @@ public class Prediction {
         this.onBreak = onBreak;
     }
 
-    public Object getScheduledArriveTime() {
+    public String getScheduledArriveTime() {
         return scheduledArriveTime;
     }
 
-    public void setScheduledArriveTime(Object scheduledArriveTime) {
+    public void setScheduledArriveTime(String scheduledArriveTime) {
         this.scheduledArriveTime = scheduledArriveTime;
     }
 
@@ -171,11 +173,11 @@ public class Prediction {
         this.scheduledMinutes = scheduledMinutes;
     }
 
-    public Object getTripId() {
+    public String getTripId() {
         return tripId;
     }
 
-    public void setTripId(Object tripId) {
+    public void setTripId(String tripId) {
         this.tripId = tripId;
     }
 

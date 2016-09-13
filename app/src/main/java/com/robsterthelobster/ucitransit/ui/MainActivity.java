@@ -99,11 +99,12 @@ public class MainActivity extends AppCompatActivity
 
     private void fetchData(){
         // Create a RealmConfiguration that saves the Realm file in the app's "files" directory.
-        RealmConfiguration realmConfig = new RealmConfiguration.Builder(this).build();
+        RealmConfiguration realmConfig = new RealmConfiguration
+                .Builder(this)
+                .deleteRealmIfMigrationNeeded()
+                .build();
         Realm.setDefaultConfiguration(realmConfig);
-
-        // Get a Realm instance for this thread
-        Realm realm = Realm.getDefaultInstance();
+        Realm.deleteRealm(realmConfig);
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
@@ -113,17 +114,27 @@ public class MainActivity extends AppCompatActivity
 
         BusApiService apiService = retrofit.create(BusApiService.class);
 
-        realm.beginTransaction();
+
         apiService.getRoutes()
                 .flatMap(routes -> {
+                    // Get a Realm instance for this thread
+                    Realm realm = Realm.getDefaultInstance();
+                    realm.beginTransaction();
                     realm.copyToRealm(routes);
+                    realm.commitTransaction();
+
+                    final RealmResults<Route> myRoutes = realm.where(Route.class).findAll();
+                    for(Route route : myRoutes){
+                        Log.d("Realm Results", route.getDisplayName());
+                    }
+                    realm.close();
                     return Observable.from(routes);
                 })
                 .flatMap(route -> {
                     return apiService.getStops(route.getId());
                 })
                 .flatMap(stops -> Observable.from(stops))
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Stop>() {
                     int count = 0;
@@ -145,11 +156,8 @@ public class MainActivity extends AppCompatActivity
                         Log.d("Stop", stop.getName());
                     }
                 });
-        realm.commitTransaction();
 
-        final RealmResults<Route> myRoutes = realm.where(Route.class).findAll();
-        for(Route route : myRoutes){
-            Log.d("Realm Results", route.getDisplayName());
-        }
+
+
     }
 }

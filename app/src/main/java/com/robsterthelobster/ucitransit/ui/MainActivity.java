@@ -12,9 +12,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.robsterthelobster.ucitransit.DaggerUCITransitComponent;
 import com.robsterthelobster.ucitransit.R;
+import com.robsterthelobster.ucitransit.UCITransitComponent;
 import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.models.*;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -36,12 +40,15 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.nav_view) NavigationView navigationView;
     @BindView(R.id.toolbar) Toolbar toolbar;
 
-    private final String BASE_URL = "http://www.ucishuttles.com/";
+    @Inject BusApiService apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        UCITransitComponent component = DaggerUCITransitComponent.create();
+        component.inject(this);
 
         ButterKnife.bind(this);
 
@@ -101,19 +108,9 @@ public class MainActivity extends AppCompatActivity
         // Create a RealmConfiguration that saves the Realm file in the app's "files" directory.
         RealmConfiguration realmConfig = new RealmConfiguration
                 .Builder(this)
-                .deleteRealmIfMigrationNeeded()
+                .deleteRealmIfMigrationNeeded() // if schema is changed, just set up new database
                 .build();
         Realm.setDefaultConfiguration(realmConfig);
-        Realm.deleteRealm(realmConfig);
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .build();
-
-        BusApiService apiService = retrofit.create(BusApiService.class);
-
 
         apiService.getRoutes()
                 .flatMap(routes -> {
@@ -127,12 +124,9 @@ public class MainActivity extends AppCompatActivity
                     for(Route route : myRoutes){
                         Log.d("Realm Results", route.getDisplayName());
                     }
-                    realm.close();
                     return Observable.from(routes);
                 })
-                .flatMap(route -> {
-                    return apiService.getStops(route.getId());
-                })
+                .flatMap(route -> apiService.getStops(route.getId()))
                 .flatMap(stops -> Observable.from(stops))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -156,8 +150,5 @@ public class MainActivity extends AppCompatActivity
                         Log.d("Stop", stop.getName());
                     }
                 });
-
-
-
     }
 }

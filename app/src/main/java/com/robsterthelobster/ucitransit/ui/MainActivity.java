@@ -13,11 +13,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.robsterthelobster.ucitransit.R;
-import com.robsterthelobster.ucitransit.retrofit.BusApiService;
-import com.robsterthelobster.ucitransit.retrofit.models.*;
+import com.robsterthelobster.ucitransit.data.BusApiService;
+import com.robsterthelobster.ucitransit.data.models.*;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -95,6 +98,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void fetchData(){
+        // Create a RealmConfiguration that saves the Realm file in the app's "files" directory.
+        RealmConfiguration realmConfig = new RealmConfiguration.Builder(this).build();
+        Realm.setDefaultConfiguration(realmConfig);
+
+        // Get a Realm instance for this thread
+        Realm realm = Realm.getDefaultInstance();
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -103,8 +113,12 @@ public class MainActivity extends AppCompatActivity
 
         BusApiService apiService = retrofit.create(BusApiService.class);
 
+        realm.beginTransaction();
         apiService.getRoutes()
-                .flatMap(routes -> Observable.from(routes))
+                .flatMap(routes -> {
+                    realm.copyToRealm(routes);
+                    return Observable.from(routes);
+                })
                 .flatMap(route -> {
                     return apiService.getStops(route.getId());
                 })
@@ -131,5 +145,11 @@ public class MainActivity extends AppCompatActivity
                         Log.d("Stop", stop.getName());
                     }
                 });
+        realm.commitTransaction();
+
+        final RealmResults<Route> myRoutes = realm.where(Route.class).findAll();
+        for(Route route : myRoutes){
+            Log.d("Realm Results", route.getDisplayName());
+        }
     }
 }

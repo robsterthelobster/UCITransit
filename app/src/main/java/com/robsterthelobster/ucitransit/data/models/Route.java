@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by robin on 6/20/2016.
@@ -11,6 +12,7 @@ import io.realm.RealmObject;
  */
 public class Route extends RealmObject {
     @SerializedName("ID")
+    @PrimaryKey
     private Integer id;
     @SerializedName("ArrivalsEnabled")
     private boolean arrivalsEnabled;

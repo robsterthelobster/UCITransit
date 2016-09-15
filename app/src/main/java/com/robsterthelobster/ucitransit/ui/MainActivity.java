@@ -111,23 +111,51 @@ public class MainActivity extends AppCompatActivity
                 .deleteRealmIfMigrationNeeded() // if schema is changed, just set up new database
                 .build();
         Realm.setDefaultConfiguration(realmConfig);
+        //Realm.deleteRealm(realmConfig);
 
         apiService.getRoutes()
                 .flatMap(routes -> {
                     // Get a Realm instance for this thread
                     Realm realm = Realm.getDefaultInstance();
                     realm.beginTransaction();
-                    realm.copyToRealm(routes);
-                    realm.commitTransaction();
+                    realm.copyToRealmOrUpdate(routes);
 
+                    RealmResults<RouteStop> routeStops = realm.where(RouteStop.class).findAll();
+                    routeStops.deleteAllFromRealm();
+
+                    realm.commitTransaction();
+                    int count = 0;
                     final RealmResults<Route> myRoutes = realm.where(Route.class).findAll();
                     for(Route route : myRoutes){
-                        Log.d("Realm Results", route.getDisplayName());
+                        count++;
+                        Log.d("Realm Route", route.getDisplayName());
                     }
+                    Log.d("Realm Route", "Count is " + count);
+
+                    realm.close();
                     return Observable.from(routes);
                 })
-                .flatMap(route -> apiService.getStops(route.getId()))
-                .flatMap(stops -> Observable.from(stops))
+                /*
+                    Nested flatMap to pass the route parameter
+                 */
+                .flatMap(route -> apiService.getStops(route.getId())
+                        .flatMap(stops -> {
+
+                            // Get a Realm instance for this thread
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            realm.copyToRealmOrUpdate(stops);
+
+                            for(Stop stop : stops){
+                                RouteStop routeStop = realm.createObject(RouteStop.class);
+                                routeStop.setRouteID(route.getId());
+                                routeStop.setStopID(stop.getId());
+                            }
+                            realm.commitTransaction();
+                            realm.close();
+
+                            return Observable.from(stops);
+                        }))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Stop>() {

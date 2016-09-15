@@ -115,29 +115,18 @@ public class MainActivity extends AppCompatActivity
 
         apiService.getRoutes()
                 .flatMap(routes -> {
-                    // Get a Realm instance for this thread
                     Realm realm = Realm.getDefaultInstance();
                     realm.beginTransaction();
-                    realm.copyToRealmOrUpdate(routes);
 
+                    realm.copyToRealmOrUpdate(routes);
+                    // delete junction table
                     RealmResults<RouteStop> routeStops = realm.where(RouteStop.class).findAll();
                     routeStops.deleteAllFromRealm();
 
                     realm.commitTransaction();
-                    int count = 0;
-                    final RealmResults<Route> myRoutes = realm.where(Route.class).findAll();
-                    for(Route route : myRoutes){
-                        count++;
-                        Log.d("Realm Route", route.getDisplayName());
-                    }
-                    Log.d("Realm Route", "Count is " + count);
-
                     realm.close();
                     return Observable.from(routes);
                 })
-                /*
-                    Nested flatMap to pass the route parameter
-                 */
                 .flatMap(route -> apiService.getStops(route.getId())
                         .flatMap(stops -> {
 
@@ -164,7 +153,6 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onCompleted() {
                         Log.d("fetchData", "Completed");
-                        Log.d("Count of stops", count + "");
                     }
 
                     @Override

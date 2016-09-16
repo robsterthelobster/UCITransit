@@ -25,11 +25,9 @@ import butterknife.ButterKnife;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.Subscriber;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -41,6 +39,8 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.toolbar) Toolbar toolbar;
 
     @Inject BusApiService apiService;
+
+    Subscription stopRoutes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity
 
         navigationView.setNavigationItemSelectedListener(this);
 
-        fetchData();
+        fetchRouteData();
     }
 
     @Override
@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private void fetchData(){
+    private void fetchRouteData(){
         // Create a RealmConfiguration that saves the Realm file in the app's "files" directory.
         RealmConfiguration realmConfig = new RealmConfiguration
                 .Builder(this)
@@ -113,14 +113,14 @@ public class MainActivity extends AppCompatActivity
         Realm.setDefaultConfiguration(realmConfig);
         //Realm.deleteRealm(realmConfig);
 
-        apiService.getRoutes()
+        stopRoutes = apiService.getRoutes()
                 .flatMap(routes -> {
                     Realm realm = Realm.getDefaultInstance();
                     realm.beginTransaction();
 
                     realm.copyToRealmOrUpdate(routes);
                     // delete junction table
-                    RealmResults<RouteStop> routeStops = realm.where(RouteStop.class).findAll();
+                    RealmResults<RouteStop> routeStops = realm.where(RouteStop.class).findAllAsync();
                     routeStops.deleteAllFromRealm();
 
                     realm.commitTransaction();
@@ -141,18 +141,21 @@ public class MainActivity extends AppCompatActivity
                                 routeStop.setStopID(stop.getId());
                             }
                             realm.commitTransaction();
-                            realm.close();
 
-                            return Observable.from(stops);
+                            Observable<RealmResults<RouteStop>> routeStops
+                                    = realm.where(RouteStop.class).findAllAsync().asObservable();
+                            realm.close();
+                            return routeStops;
                         }))
+                .flatMap(routeStop -> Observable.from(routeStop))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Stop>() {
+                .subscribe(new Subscriber<RouteStop>() {
                     int count = 0;
 
                     @Override
                     public void onCompleted() {
-                        Log.d("fetchData", "Completed");
+                        Log.d("fetchRouteData", "Completed");
                     }
 
                     @Override
@@ -161,10 +164,16 @@ public class MainActivity extends AppCompatActivity
                     }
 
                     @Override
-                    public void onNext(Stop stop) {
+                    public void onNext(RouteStop stop) {
                         count++;
-                        Log.d("Stop", stop.getName());
+                        Log.d("RouteStop", stop.getRouteID()+"");
                     }
                 });
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        stopRoutes.unsubscribe();
     }
 }

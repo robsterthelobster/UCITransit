@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity
 
                     realm.copyToRealmOrUpdate(routes);
                     // delete junction table
-                    RealmResults<RouteStop> routeStops = realm.where(RouteStop.class).findAllAsync();
+                    RealmResults<RouteStop> routeStops = realm.where(RouteStop.class).findAll();
                     routeStops.deleteAllFromRealm();
 
                     realm.commitTransaction();
@@ -143,13 +143,12 @@ public class MainActivity extends AppCompatActivity
                             realm.commitTransaction();
 
                             Observable<RealmResults<RouteStop>> routeStops
-                                    = realm.where(RouteStop.class).findAllAsync().asObservable();
-                            realm.close();
+                                    = realm.where(RouteStop.class).findAll().asObservable();
                             return routeStops;
                         }))
                 .flatMap(routeStop -> Observable.from(routeStop))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<RouteStop>() {
                     int count = 0;
 

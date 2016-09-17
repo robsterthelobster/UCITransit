@@ -23,7 +23,9 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.realm.Realm;
+import io.realm.RealmChangeListener;
 import io.realm.RealmConfiguration;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 import rx.Observable;
 import rx.Subscriber;
@@ -61,7 +63,16 @@ public class MainActivity extends AppCompatActivity
 
         navigationView.setNavigationItemSelectedListener(this);
 
-        fetchRouteData();
+        // Create a RealmConfiguration that saves the Realm file in the app's "files" directory.
+        RealmConfiguration realmConfig = new RealmConfiguration
+                .Builder(this)
+                .deleteRealmIfMigrationNeeded() // if schema is changed, just set up new database
+                .build();
+        //Realm.deleteRealm(realmConfig);
+        Realm.setDefaultConfiguration(realmConfig);
+
+        //fetchRouteData();
+        callRealm();
     }
 
     @Override
@@ -105,53 +116,28 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void fetchRouteData(){
-        // Create a RealmConfiguration that saves the Realm file in the app's "files" directory.
-        RealmConfiguration realmConfig = new RealmConfiguration
-                .Builder(this)
-                .deleteRealmIfMigrationNeeded() // if schema is changed, just set up new database
-                .build();
-        Realm.setDefaultConfiguration(realmConfig);
-        //Realm.deleteRealm(realmConfig);
 
         stopRoutes = apiService.getRoutes()
-                .flatMap(routes -> {
-                    Realm realm = Realm.getDefaultInstance();
-                    realm.beginTransaction();
-
-                    realm.copyToRealmOrUpdate(routes);
-                    // delete junction table
-                    RealmResults<RouteStop> routeStops = realm.where(RouteStop.class).findAll();
-                    routeStops.deleteAllFromRealm();
-
-                    realm.commitTransaction();
-                    realm.close();
-                    return Observable.from(routes);
-                })
+                .flatMap(routes -> Observable.from(routes))
                 .flatMap(route -> apiService.getStops(route.getId())
                         .flatMap(stops -> {
-
-                            // Get a Realm instance for this thread
                             Realm realm = Realm.getDefaultInstance();
                             realm.beginTransaction();
                             realm.copyToRealmOrUpdate(stops);
 
-                            for(Stop stop : stops){
-                                RouteStop routeStop = realm.createObject(RouteStop.class);
-                                routeStop.setRouteID(route.getId());
-                                routeStop.setStopID(stop.getId());
-                            }
+                            final RealmList<Stop> realmStops = new RealmList<>();
+                            realmStops.addAll(stops);
+                            route.setStops(realmStops);
+
+                            realm.copyToRealmOrUpdate(route);
                             realm.commitTransaction();
+                            realm.close();
 
-                            Observable<RealmResults<RouteStop>> routeStops
-                                    = realm.where(RouteStop.class).findAll().asObservable();
-                            return routeStops;
+                            return Observable.from(stops);
                         }))
-                .flatMap(routeStop -> Observable.from(routeStop))
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<RouteStop>() {
-                    int count = 0;
-
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(new Subscriber<Stop>() {
                     @Override
                     public void onCompleted() {
                         Log.d("fetchRouteData", "Completed");
@@ -163,9 +149,46 @@ public class MainActivity extends AppCompatActivity
                     }
 
                     @Override
-                    public void onNext(RouteStop stop) {
+                    public void onNext(Stop stop) {
+                        //Log.d("RouteStop", stop.getName()+"");
+                    }
+                });
+    }
+
+    private void callRealm(){
+
+        Realm realm = Realm.getDefaultInstance();
+        realm.where(Route.class).findAll().asObservable()
+                .flatMap(route -> Observable.from(route))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Route>() {
+                    int count = 0;
+
+                    @Override
+                    public void onCompleted() {
+                        Log.d("RealmRoute", "count is " + count);
+                        Log.d("RealmStop", "Completed");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("Error", e.toString());
+                    }
+
+                    @Override
+                    public void onNext(Route route) {
                         count++;
-                        Log.d("RouteStop", stop.getRouteID()+"");
+                        Log.d("RealmRoute", route.getDisplayName());
+
+//                        if(route.getName().equals("A - AV-Admin-ARC")){
+//                            realm.beginTransaction();
+//                            for(Stop stop : route.getStops()){
+//                                stop.setFavorited(true);
+//                            }
+//
+//                            realm.copyToRealmOrUpdate(route);
+//                            realm.commitTransaction();
+//                        }
                     }
                 });
     }
@@ -173,6 +196,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onDestroy(){
         super.onDestroy();
-        stopRoutes.unsubscribe();
+        //stopRoutes.unsubscribe();
     }
 }

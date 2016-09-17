@@ -24,18 +24,10 @@ public class RestModule {
     @Provides
     @Singleton
     BusApiService provideApiService(){
-        OkHttpClient client = new OkHttpClient.Builder().hostnameVerifier(new HostnameVerifier() {
-            @Override
-            public boolean verify(String s, SSLSession sslSession) {
-                return true;
-            }
-        }).build();
-
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                //.client(client)
                 .build();
 
         return retrofit.create(BusApiService.class);

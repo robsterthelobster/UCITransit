@@ -49,6 +49,8 @@ public class Route extends RealmObject {
     @SerializedName("Patterns")
     private String patterns;
 
+    private RealmList<Stop> stops;
+
     public boolean isArrivalsEnabled() {
         return arrivalsEnabled;
     }
@@ -191,5 +193,13 @@ public class Route extends RealmObject {
 
     public void setPatterns(String patterns) {
         this.patterns = patterns;
+    }
+
+    public RealmList<Stop> getStops() {
+        return stops;
+    }
+
+    public void setStops(RealmList<Stop> stops) {
+        this.stops = stops;
     }
 }

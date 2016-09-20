@@ -17,12 +17,12 @@ import android.widget.Toast;
 
 import com.google.android.gms.location.LocationRequest;
 import com.jakewharton.rxbinding.support.design.widget.RxNavigationView;
-import com.jakewharton.rxbinding.support.v4.widget.RxDrawerLayout;
 import com.robsterthelobster.ucitransit.DaggerUCITransitComponent;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitComponent;
 import com.robsterthelobster.ucitransit.data.BusApiService;
-import com.robsterthelobster.ucitransit.data.models.*;
+import com.robsterthelobster.ucitransit.data.models.Route;
+import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.tbruyelle.rxpermissions.RxPermissions;
 
 import java.util.concurrent.Executors;
@@ -33,10 +33,8 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.realm.Realm;
-import io.realm.RealmChangeListener;
 import io.realm.RealmConfiguration;
 import io.realm.RealmList;
-import io.realm.RealmResults;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.Observable;
 import rx.Scheduler;
@@ -44,7 +42,6 @@ import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
@@ -66,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
     Subscription stopRoutes;
     Subscription subscription;
     Subscription navViewSub;
+
+    Location mLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,6 +136,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        subscription.unsubscribe();
     }
 
     @Override
@@ -233,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
         LocationRequest request = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setNumUpdates(5)
-                .setInterval(100);
+                .setInterval(5000);
 
         ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(this);
         subscription = locationProvider
@@ -245,15 +250,10 @@ public class MainActivity extends AppCompatActivity {
                         locationTestToast(location);
                     }
                 });
-
-//        ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(this);
-//        locationProvider.getLastKnownLocation()
-//                .subscribe(location -> {
-//                    Log.d("Location", location.toString());
-//                });
     }
 
     private void locationTestToast(Location location){
-        Toast.makeText(this, "Location is " + location.toString(), Toast.LENGTH_SHORT).show();
+        String text = "Location: " + location.getLatitude() + ". " + location.getLongitude();
+        Toast.makeText(this, text, Toast.LENGTH_LONG).show();
     }
 }

@@ -1,6 +1,8 @@
 package com.robsterthelobster.ucitransit.ui;
 
+import android.Manifest;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -11,12 +13,20 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
+import com.google.android.gms.location.LocationRequest;
+import com.jakewharton.rxbinding.support.design.widget.RxNavigationView;
+import com.jakewharton.rxbinding.support.v4.widget.RxDrawerLayout;
 import com.robsterthelobster.ucitransit.DaggerUCITransitComponent;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitComponent;
 import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.models.*;
+import com.tbruyelle.rxpermissions.RxPermissions;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -27,22 +37,35 @@ import io.realm.RealmChangeListener;
 import io.realm.RealmConfiguration;
 import io.realm.RealmList;
 import io.realm.RealmResults;
+import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.Observable;
+import rx.Scheduler;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity {
 
-    @BindView(R.id.drawer_layout) DrawerLayout drawer;
-    @BindView(R.id.nav_view) NavigationView navigationView;
-    @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.drawer_layout)
+    DrawerLayout drawer;
+    @BindView(R.id.nav_view)
+    NavigationView navigationView;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
-    @Inject BusApiService apiService;
+    @Inject
+    BusApiService apiService;
 
+    /**
+     * All my subscriptions
+     * Not all of them will be used, most of for testing at the moment
+     **/
     Subscription stopRoutes;
+    Subscription subscription;
+    Subscription navViewSub;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +84,28 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView.setNavigationItemSelectedListener(this);
+        navViewSub = RxNavigationView
+                .itemSelections(navigationView)
+                .map(MenuItem::getItemId)
+                .subscribe(id -> {
+                    Log.d("navViewSub", "id is " + id);
+                    if(id == R.id.nav_gallery){
+                        Intent intent = new Intent(this, DetailActivity.class);
+                        startActivity(intent);
+                    }
+                });
+
+        // Must be done during an initialization phase like onCreate
+        RxPermissions.getInstance(this)
+                .request(Manifest.permission.ACCESS_FINE_LOCATION)
+                .subscribe(granted -> {
+                    if (granted) {
+                        getLocation();
+                    } else {
+                        Toast.makeText(this, "Location Permission denied.", Toast.LENGTH_SHORT)
+                                .show();
+                    }
+                });
 
         // Create a RealmConfiguration that saves the Realm file in the app's "files" directory.
         RealmConfiguration realmConfig = new RealmConfiguration
@@ -92,32 +136,23 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-      if (id == R.id.nav_slideshow) {
-            Intent intent = new Intent(this, DetailActivity.class);
-            startActivity(intent);
+    public void onDestroy() {
+        super.onDestroy();
+        if (stopRoutes != null || !stopRoutes.isUnsubscribed()) {
+            stopRoutes.unsubscribe();
         }
-
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
     }
 
-    private void fetchRouteData(){
+    private void fetchRouteData() {
 
-        stopRoutes = apiService.getRoutes()
+        final Scheduler scheduler = Schedulers.from(Executors.newSingleThreadExecutor());
+
+        stopRoutes = Observable.interval(60, TimeUnit.SECONDS, scheduler)
+                .flatMap(n -> apiService.getRoutes())
                 .flatMap(routes -> Observable.from(routes))
                 .flatMap(route -> apiService.getStops(route.getId())
                         .flatMap(stops -> {
@@ -155,7 +190,7 @@ public class MainActivity extends AppCompatActivity
                 });
     }
 
-    private void callRealm(){
+    private void callRealm() {
 
         Realm realm = Realm.getDefaultInstance();
         realm.where(Route.class).findAll().asObservable()
@@ -193,9 +228,32 @@ public class MainActivity extends AppCompatActivity
                 });
     }
 
-    @Override
-    public void onDestroy(){
-        super.onDestroy();
-        //stopRoutes.unsubscribe();
+    private void getLocation() {
+        Log.d("getLocation", "called");
+        LocationRequest request = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setNumUpdates(5)
+                .setInterval(100);
+
+        ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(this);
+        subscription = locationProvider
+                .getUpdatedLocation(request)
+                .subscribe(location -> new Action1<Location>() {
+                    @Override
+                    public void call(Location location) {
+                        Log.d("Location", location.toString());
+                        locationTestToast(location);
+                    }
+                });
+
+//        ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(this);
+//        locationProvider.getLastKnownLocation()
+//                .subscribe(location -> {
+//                    Log.d("Location", location.toString());
+//                });
+    }
+
+    private void locationTestToast(Location location){
+        Toast.makeText(this, "Location is " + location.toString(), Toast.LENGTH_SHORT).show();
     }
 }

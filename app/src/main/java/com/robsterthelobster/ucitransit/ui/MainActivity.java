@@ -251,33 +251,10 @@ public class MainActivity extends AppCompatActivity {
         Log.d("getLocation", "called");
         LocationRequest locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setNumUpdates(5)
-                .setInterval(5000);
+                .setInterval(1000 * 5); // number of seconds
 
         ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(this);
-        locationUpdatesObservable = locationProvider
-                .checkLocationSettings(
-                        new LocationSettingsRequest.Builder()
-                                .addLocationRequest(locationRequest)
-                                .setAlwaysShow(true)
-                                .build()
-                )
-                .doOnNext(locationSettingsResult -> {
-                    Status status = locationSettingsResult.getStatus();
-                    if (status.getStatusCode() == LocationSettingsStatusCodes.RESOLUTION_REQUIRED) {
-                        try {
-                            status.startResolutionForResult(MainActivity.this, 1);
-                        } catch (IntentSender.SendIntentException th) {
-                            Log.e("MainActivity", "Error opening settings activity.", th);
-                        }
-                    }
-                })
-                .flatMap(new Func1<LocationSettingsResult, Observable<Location>>() {
-                    @Override
-                    public Observable<Location> call(LocationSettingsResult locationSettingsResult) {
-                        return locationProvider.getUpdatedLocation(locationRequest);
-                    }
-                });
+        locationUpdatesObservable = locationProvider.getUpdatedLocation(locationRequest);
     }
 
     private void locationTestToast(Location location){

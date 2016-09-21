@@ -2,6 +2,7 @@ package com.robsterthelobster.ucitransit.ui;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -15,11 +16,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.jakewharton.rxbinding.support.design.widget.RxNavigationView;
 import com.robsterthelobster.ucitransit.DaggerUCITransitComponent;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitComponent;
+import com.robsterthelobster.ucitransit.Utils;
 import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.Stop;
@@ -42,6 +48,7 @@ import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
@@ -63,8 +70,7 @@ public class MainActivity extends AppCompatActivity {
     Subscription stopRoutes;
     Subscription subscription;
     Subscription navViewSub;
-
-    Location mLocation;
+    Observable<Location> locationUpdatesObservable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,17 +145,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onStart(){
+        super.onStart();
+        locationUpdatesObservable
+                .subscribe(location -> {
+                    Log.d("Location", location.toString());
+                    locationTestToast(location);
+                });
+    }
+
+    @Override
     public void onStop(){
         super.onStop();
-        subscription.unsubscribe();
+        Utils.unsubscribe(subscription);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (stopRoutes != null || !stopRoutes.isUnsubscribed()) {
-            stopRoutes.unsubscribe();
-        }
+        Utils.unsubscribe(stopRoutes);
     }
 
     private void fetchRouteData() {
@@ -235,19 +249,33 @@ public class MainActivity extends AppCompatActivity {
 
     private void getLocation() {
         Log.d("getLocation", "called");
-        LocationRequest request = LocationRequest.create()
+        LocationRequest locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setNumUpdates(5)
                 .setInterval(5000);
 
         ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(this);
-        subscription = locationProvider
-                .getUpdatedLocation(request)
-                .subscribe(location -> new Action1<Location>() {
+        locationUpdatesObservable = locationProvider
+                .checkLocationSettings(
+                        new LocationSettingsRequest.Builder()
+                                .addLocationRequest(locationRequest)
+                                .setAlwaysShow(true)
+                                .build()
+                )
+                .doOnNext(locationSettingsResult -> {
+                    Status status = locationSettingsResult.getStatus();
+                    if (status.getStatusCode() == LocationSettingsStatusCodes.RESOLUTION_REQUIRED) {
+                        try {
+                            status.startResolutionForResult(MainActivity.this, 1);
+                        } catch (IntentSender.SendIntentException th) {
+                            Log.e("MainActivity", "Error opening settings activity.", th);
+                        }
+                    }
+                })
+                .flatMap(new Func1<LocationSettingsResult, Observable<Location>>() {
                     @Override
-                    public void call(Location location) {
-                        Log.d("Location", location.toString());
-                        locationTestToast(location);
+                    public Observable<Location> call(LocationSettingsResult locationSettingsResult) {
+                        return locationProvider.getUpdatedLocation(locationRequest);
                     }
                 });
     }

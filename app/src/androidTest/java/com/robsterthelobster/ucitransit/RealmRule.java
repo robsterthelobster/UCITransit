@@ -37,6 +37,7 @@ class RealmRule implements TestRule{
             try {
                 RealmConfiguration config =
                         new RealmConfiguration.Builder(InstrumentationRegistry.getTargetContext())
+                                .name("test.realm")
                                 .build();
                 Realm.setDefaultConfiguration(config);
                 realm = Realm.getDefaultInstance();

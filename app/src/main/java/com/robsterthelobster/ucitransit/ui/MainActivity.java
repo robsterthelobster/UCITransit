@@ -207,6 +207,10 @@ public class MainActivity extends AppCompatActivity {
     private void callRealm() {
 
         Realm realm = Realm.getDefaultInstance();
+        int size = realm
+                .where(Stop.class).equalTo("name", "Test Stop").findAll()
+                .size();
+        Log.d("Test test", "size is " + size);
         realm.where(Route.class).findAll().asObservable()
                 .flatMap(Observable::from)
                 .observeOn(AndroidSchedulers.mainThread())

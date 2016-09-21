@@ -2,7 +2,6 @@ package com.robsterthelobster.ucitransit.ui;
 
 import android.Manifest;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -16,11 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.jakewharton.rxbinding.support.design.widget.RxNavigationView;
 import com.robsterthelobster.ucitransit.DaggerUCITransitComponent;
 import com.robsterthelobster.ucitransit.R;
@@ -47,8 +42,6 @@ import rx.Scheduler;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
@@ -147,11 +140,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart(){
         super.onStart();
-        locationUpdatesObservable
-                .subscribe(location -> {
-                    Log.d("Location", location.toString());
-                    locationTestToast(location);
-                });
+        if(locationUpdatesObservable != null) {
+            locationUpdatesObservable
+                    .subscribe(location -> {
+                        Log.d("Location", location.toString());
+                        locationTestToast(location);
+                    });
+        }
     }
 
     @Override
@@ -172,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
 
         stopRoutes = Observable.interval(60, TimeUnit.SECONDS, scheduler)
                 .flatMap(n -> apiService.getRoutes())
-                .flatMap(routes -> Observable.from(routes))
+                .flatMap(Observable::from)
                 .flatMap(route -> apiService.getStops(route.getId())
                         .flatMap(stops -> {
                             Realm realm = Realm.getDefaultInstance();
@@ -213,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
 
         Realm realm = Realm.getDefaultInstance();
         realm.where(Route.class).findAll().asObservable()
-                .flatMap(route -> Observable.from(route))
+                .flatMap(Observable::from)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Route>() {
                     int count = 0;

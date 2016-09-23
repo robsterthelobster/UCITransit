@@ -22,6 +22,7 @@ import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitComponent;
 import com.robsterthelobster.ucitransit.Utils;
 import com.robsterthelobster.ucitransit.data.BusApiService;
+import com.robsterthelobster.ucitransit.data.models.Prediction;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.tbruyelle.rxpermissions.RxPermissions;
@@ -33,25 +34,27 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmList;
+import io.realm.RealmResults;
+import io.realm.Sort;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
-    @BindView(R.id.drawer_layout)
-    DrawerLayout drawer;
-    @BindView(R.id.nav_view)
-    NavigationView navigationView;
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
+    @BindView(R.id.drawer_layout) DrawerLayout drawer;
+    @BindView(R.id.nav_view) NavigationView navigationView;
+    @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.realm_recycler_view) RealmRecyclerView recyclerView;
 
     @Inject
     BusApiService apiService;
@@ -115,6 +118,26 @@ public class MainActivity extends AppCompatActivity {
 
         //fetchRouteData();
         callRealm();
+
+        Realm realm = Realm.getDefaultInstance();
+
+        // DUMMY DATA
+        realm.beginTransaction();
+        for(int i = 0; i < 100; i++){
+            Prediction prediction = new Prediction();
+            prediction.setId(i);
+            prediction.setRouteName("Route " + i);
+            prediction.setStopId(i);
+            prediction.setMinutes(i);
+            realm.copyToRealmOrUpdate(prediction);
+        }
+        realm.commitTransaction();
+        RealmResults<Prediction> predictions = realm
+                .where(Prediction.class).findAll();
+        realm.close();
+
+        PredictionAdapter predictionAdapter = new PredictionAdapter(this, predictions, true, true);
+        recyclerView.setAdapter(predictionAdapter);
     }
 
     @Override
@@ -142,9 +165,22 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         if(locationUpdatesObservable != null) {
             locationUpdatesObservable
-                    .subscribe(location -> {
-                        Log.d("Location", location.toString());
-                        locationTestToast(location);
+                    .subscribe(new Subscriber<Location>() {
+                        @Override
+                        public void onCompleted() {
+                            Log.d("Location obs", "Completed");
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.d("Location obs error", e.toString());
+                        }
+
+                        @Override
+                        public void onNext(Location location) {
+                            Log.d("Location", location.toString());
+                            locationTestToast(location);
+                        }
                     });
         }
     }

@@ -3,11 +3,15 @@ package com.robsterthelobster.ucitransit.data.models;
 import com.google.gson.annotations.SerializedName;
 
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by robin on 6/20/2016.
  */
 public class Prediction extends RealmObject {
+
+    @PrimaryKey
+    private int id;
     @SerializedName("RouteId")
     private int routeId;
     @SerializedName("RouteName")
@@ -187,5 +191,13 @@ public class Prediction extends RealmObject {
 
     public void setTripOrder(int tripOrder) {
         this.tripOrder = tripOrder;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

@@ -17,4 +17,11 @@
         android:layout_height="wrap_content"
         android:id="@+id/hello"/>
 
+    <co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView
+        android:id="@+id/realm_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:rrvIsRefreshable="true"
+        app:rrvLayoutType="LinearLayout"/>
+
 </RelativeLayout>

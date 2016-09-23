@@ -26,8 +26,8 @@ public class SampleEspressoTest {
 
     @Test
     public void validateEditText() {
-//        onView(withId(R.id.hello))
-//                .perform(typeText("Hello"))
-//                .check(matches(withText("Hello")));
+        onView(withId(R.id.hello))
+                .perform(typeText("Hello"))
+                .check(matches(withText("Hello")));
     }
 }

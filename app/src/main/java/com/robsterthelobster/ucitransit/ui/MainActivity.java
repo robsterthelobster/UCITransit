@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.widget.Toast;
 
 import com.google.android.gms.location.LocationRequest;
@@ -25,6 +26,7 @@ import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.models.Prediction;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.Stop;
+import com.robsterthelobster.ucitransit.utils.PredictionAdapter;
 import com.tbruyelle.rxpermissions.RxPermissions;
 
 import java.util.concurrent.Executors;
@@ -39,14 +41,12 @@ import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmList;
 import io.realm.RealmResults;
-import io.realm.Sort;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
@@ -56,13 +56,10 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.realm_recycler_view) RealmRecyclerView recyclerView;
 
-    @Inject
-    BusApiService apiService;
+    @Inject BusApiService apiService;
 
-    /**
-     * All my subscriptions
-     * Not all of them will be used, most of for testing at the moment
-     **/
+    SubMenu routesMenu;
+
     Subscription stopRoutes;
     Subscription subscription;
     Subscription navViewSub;
@@ -85,6 +82,9 @@ public class MainActivity extends AppCompatActivity {
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        Menu menu = navigationView.getMenu();
+        routesMenu = menu.addSubMenu("Routes");
+
         navViewSub = RxNavigationView
                 .itemSelections(navigationView)
                 .map(MenuItem::getItemId)
@@ -101,22 +101,21 @@ public class MainActivity extends AppCompatActivity {
                 .request(Manifest.permission.ACCESS_FINE_LOCATION)
                 .subscribe(granted -> {
                     if (granted) {
-                        getLocation();
+                        callLocationService();
                     } else {
                         Toast.makeText(this, "Location Permission denied.", Toast.LENGTH_SHORT)
                                 .show();
                     }
                 });
 
-        // Create a RealmConfiguration that saves the Realm file in the app's "files" directory.
         RealmConfiguration realmConfig = new RealmConfiguration
                 .Builder(this)
-                .deleteRealmIfMigrationNeeded() // if schema is changed, just set up new database
+                .deleteRealmIfMigrationNeeded()
                 .build();
         //Realm.deleteRealm(realmConfig);
         Realm.setDefaultConfiguration(realmConfig);
 
-        //fetchRouteData();
+        fetchRouteData();
         callRealm();
 
         Realm realm = Realm.getDefaultInstance();
@@ -134,10 +133,12 @@ public class MainActivity extends AppCompatActivity {
         realm.commitTransaction();
         RealmResults<Prediction> predictions = realm
                 .where(Prediction.class).findAll();
+
         realm.close();
 
         PredictionAdapter predictionAdapter = new PredictionAdapter(this, predictions, true, true);
         recyclerView.setAdapter(predictionAdapter);
+
     }
 
     @Override
@@ -268,22 +269,13 @@ public class MainActivity extends AppCompatActivity {
                     public void onNext(Route route) {
                         count++;
                         Log.d("RealmRoute", route.getDisplayName());
-
-//                        if(route.getName().equals("A - AV-Admin-ARC")){
-//                            realm.beginTransaction();
-//                            for(Stop stop : route.getStops()){
-//                                stop.setFavorited(true);
-//                            }
-//
-//                            realm.copyToRealmOrUpdate(route);
-//                            realm.commitTransaction();
-//                        }
+                        navigationView.getMenu().add(route.getDisplayName());
                     }
                 });
     }
 
-    private void getLocation() {
-        Log.d("getLocation", "called");
+    private void callLocationService() {
+        Log.d("callLocationService", "called");
         LocationRequest locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(1000 * 5); // number of seconds

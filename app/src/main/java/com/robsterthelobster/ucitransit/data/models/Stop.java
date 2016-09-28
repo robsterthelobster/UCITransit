@@ -100,4 +100,4 @@ public class Stop extends RealmObject {
     public void setShowVehicleName(boolean showVehicleName) {
         this.showVehicleName = showVehicleName;
     }
-}
+ }

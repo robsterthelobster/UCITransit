@@ -10,8 +10,6 @@ import io.realm.annotations.PrimaryKey;
  */
 public class Prediction extends RealmObject {
 
-    @PrimaryKey
-    private int id;
     @SerializedName("RouteId")
     private int routeId;
     @SerializedName("RouteName")
@@ -191,13 +189,5 @@ public class Prediction extends RealmObject {
 
     public void setTripOrder(int tripOrder) {
         this.tripOrder = tripOrder;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 }

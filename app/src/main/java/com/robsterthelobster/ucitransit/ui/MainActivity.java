@@ -112,21 +112,24 @@ public class MainActivity extends AppCompatActivity {
         RealmResults<Prediction> predictions = realm
                 .where(Prediction.class).findAll();
 
-        predictionAdapter = new PredictionAdapter(this, predictions, true, true);
+        predictionAdapter = new PredictionAdapter(this, predictions, true, false);
         recyclerView.setAdapter(predictionAdapter);
-        recyclerView.setOnRefreshListener(this::testRefresh);
+        recyclerView.setOnRefreshListener(() -> testRefresh());
 
         if (realm.isEmpty()) {
             fetchInitialRouteData();
         }
+//        predictions.asObservable()
+//                .subscribe(
+//                      predictions1 -> predictionAdapter.updateRealmResults(predictions1)
+//                );
     }
 
     private void testRefresh() {
         Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show();
-        realm.where(Prediction.class).findAll().asObservable()
-                .subscribe(predictionAdapter::updateRealmResults);
-        RealmResults<Prediction> predictions = realm.where(Prediction.class).findAll();
-        predictionAdapter.updateRealmResults(predictions);
+
+//        RealmResults<Prediction> predictions = realm.where(Prediction.class).findAll();
+//        predictionAdapter.updateRealmResults(predictions);
         recyclerView.setRefreshing(false);
     }
 

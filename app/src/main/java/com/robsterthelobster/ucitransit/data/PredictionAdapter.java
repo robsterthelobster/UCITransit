@@ -1,6 +1,8 @@
-package com.robsterthelobster.ucitransit.utils;
+package com.robsterthelobster.ucitransit.data;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.support.v7.widget.CardView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -37,6 +39,7 @@ public class PredictionAdapter
     public void onBindRealmViewHolder(PredictionAdapter.ViewHolder viewHolder, int position) {
         final Prediction prediction = realmResults.get(position);
         String toDoFormat = prediction.getMinutes() + " min";
+        viewHolder.cardView.setBackgroundColor(Color.parseColor(prediction.getColor()));
         viewHolder.arrivalText.setText(toDoFormat);
         viewHolder.routeText.setText(prediction.getRouteName());
         viewHolder.stopText.setText(String.valueOf(prediction.getStopId()));
@@ -45,6 +48,7 @@ public class PredictionAdapter
     public class ViewHolder extends RealmViewHolder{
 
         LinearLayout container;
+        @BindView(R.id.card_view) CardView cardView;
         @BindView(R.id.prediction_route_name) TextView routeText;
         @BindView(R.id.prediction_stop_name) TextView stopText;
         @BindView(R.id.prediction_favorite_button) CheckBox favoriteCheck;

@@ -10,6 +10,10 @@ import io.realm.annotations.PrimaryKey;
  */
 public class Prediction extends RealmObject {
 
+    @PrimaryKey
+    private int id;
+    private String color;
+    private boolean isFavorite;
     @SerializedName("RouteId")
     private int routeId;
     @SerializedName("RouteName")
@@ -46,6 +50,34 @@ public class Prediction extends RealmObject {
     private String tripId;
     @SerializedName("TripOrder")
     private int tripOrder;
+
+    public Prediction(){
+        id = routeId + stopId;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public boolean isFavorited() {
+        return isFavorite;
+    }
+
+    public void setFavorited(boolean favorited) {
+        isFavorite = favorited;
+    }
 
     public int getRouteId() {
         return routeId;

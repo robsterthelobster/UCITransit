@@ -3,6 +3,7 @@ package com.robsterthelobster.ucitransit.ui;
 import android.Manifest;
 import android.content.Intent;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -21,11 +22,11 @@ import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitComponent;
 import com.robsterthelobster.ucitransit.Utils;
 import com.robsterthelobster.ucitransit.data.BusApiService;
+import com.robsterthelobster.ucitransit.data.PredictionAdapter;
 import com.robsterthelobster.ucitransit.data.models.Arrivals;
 import com.robsterthelobster.ucitransit.data.models.Prediction;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.Stop;
-import com.robsterthelobster.ucitransit.utils.PredictionAdapter;
 import com.tbruyelle.rxpermissions.RxPermissions;
 
 import java.util.List;
@@ -41,11 +42,9 @@ import io.realm.RealmList;
 import io.realm.RealmResults;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.Observable;
-import rx.Scheduler;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
@@ -119,18 +118,29 @@ public class MainActivity extends AppCompatActivity {
         if (realm.isEmpty()) {
             fetchInitialRouteData();
         }
-//        predictions.asObservable()
-//                .subscribe(
-//                      predictions1 -> predictionAdapter.updateRealmResults(predictions1)
-//                );
+
     }
 
     private void testRefresh() {
-        Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show();
 
-//        RealmResults<Prediction> predictions = realm.where(Prediction.class).findAll();
-//        predictionAdapter.updateRealmResults(predictions);
-        recyclerView.setRefreshing(false);
+        AsyncTask<Void, Void, Void> remoteItem = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                toast();
+                recyclerView.setRefreshing(false);
+            }
+        };
+        remoteItem.execute();
+    }
+
+    private void toast(){
+        Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -306,37 +316,51 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetchArrivals() {
-        RealmResults<Route> routes = realm.where(Route.class).findAll();
-        Log.d("predictions", "size is " + routes.size());
-        for (Route route : routes) {
+        Observable<Arrivals> concat = null;
+        for (Route route : realm.where(Route.class).findAll()) {
             Log.d("predictions", "route name: " + route.getDisplayName());
             for (Stop stop : route.getStops()) {
                 Log.d("predictions", "      stop name: " + stop.getName());
-                apiService.getArrivalTimes(route.getId(), stop.getId())
-                        .subscribeOn(Schedulers.io())
-                        .subscribe(new Subscriber<Arrivals>() {
-                            @Override
-                            public void onCompleted() {
-                                Log.d("predictions", "completed");
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-                                Log.d("predictions", e.getMessage());
-                            }
-
-                            @Override
-                            public void onNext(Arrivals arrivals) {
-                                final Realm realm = Realm.getDefaultInstance();
-                                try{
-                                    realm.executeTransaction(r -> r.copyToRealmOrUpdate(arrivals.getPredictions()));
-                                }finally {
-                                    realm.close();
-                                }
-                            }
-                        });
+                Observable<Arrivals> predictionObservable =
+                        apiService.getArrivalTimes(route.getId(), stop.getId());
+                if(concat == null){
+                    concat = predictionObservable;
+                }else{
+                    concat = Observable.concat(concat, predictionObservable);
+                }
             }
         }
+
+        concat.flatMap(arrivals -> Observable.from(arrivals.getPredictions()))
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Subscriber<Prediction>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.d("predictions", "completed");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("predictions", e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(Prediction prediction) {
+                        final Realm realm = Realm.getDefaultInstance();
+                        try{
+                            RealmResults<Route> result =
+                                    realm.where(Route.class)
+                                            .equalTo("id", prediction.getRouteId())
+                                            .findAll();
+                            Route route = result.first();
+                            prediction.setId(route.getId() + prediction.getStopId());
+                            prediction.setColor(route.getColor());
+                            realm.executeTransaction(r -> r.copyToRealmOrUpdate(prediction));
+                        }finally {
+                            realm.close();
+                        }
+                    }
+                });
 
 //        Observable.from(routes)
 //                .flatMap(route -> Observable.from(route.getStops())

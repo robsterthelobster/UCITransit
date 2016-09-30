@@ -16,6 +16,7 @@
         android:id="@+id/realm_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:rrvIsRefreshable="true"
         app:rrvEmptyLayoutId="@layout/empty_view"
         app:rrvLayoutType="LinearLayout"/>
 

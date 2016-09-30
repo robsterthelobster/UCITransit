@@ -14,6 +14,7 @@ public class Prediction extends RealmObject {
     private int id;
     private String color;
     private boolean isFavorite;
+    private int secondaryMinutes;
     @SerializedName("RouteId")
     private int routeId;
     @SerializedName("RouteName")
@@ -61,6 +62,14 @@ public class Prediction extends RealmObject {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getSecondaryMinutes() {
+        return secondaryMinutes;
+    }
+
+    public void setSecondaryMinutes(int secondaryMinutes) {
+        this.secondaryMinutes = secondaryMinutes;
     }
 
     public String getColor() {

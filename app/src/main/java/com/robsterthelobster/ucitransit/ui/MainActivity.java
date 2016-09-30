@@ -17,6 +17,8 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.gms.location.LocationRequest;
+import com.jakewharton.rxbinding.internal.Preconditions;
+import com.jakewharton.rxbinding.support.v7.widget.RxRecyclerView;
 import com.robsterthelobster.ucitransit.DaggerUCITransitComponent;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitComponent;
@@ -65,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
     PredictionAdapter predictionAdapter;
 
     Subscription routeData;
-    Subscription stopData;
     Subscription stopRoutes;
     Subscription subscription;
     Observable<Location> locationUpdatesObservable;
@@ -113,34 +114,12 @@ public class MainActivity extends AppCompatActivity {
 
         predictionAdapter = new PredictionAdapter(this, predictions, true, false);
         recyclerView.setAdapter(predictionAdapter);
-        recyclerView.setOnRefreshListener(() -> testRefresh());
+        recyclerView.setOnRefreshListener(() -> fetchArrivals());
 
         if (realm.isEmpty()) {
             fetchInitialRouteData();
         }
 
-    }
-
-    private void testRefresh() {
-
-        AsyncTask<Void, Void, Void> remoteItem = new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                toast();
-                recyclerView.setRefreshing(false);
-            }
-        };
-        remoteItem.execute();
-    }
-
-    private void toast(){
-        Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -202,67 +181,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void fetchInitialRouteData() {
         final Intent intent = new Intent(this, DetailActivity.class);
-
-//        apiService.getRoutes().switchMap(routes -> {
-//            final Observable<Route> routeObservable = Observable.from(routes);
-//            return routeObservable
-//                    .switchMap(route -> {
-//                        apiService.getStops(route.getId());
-//                        return Observable.from(routes);
-//                    });
-//        }).subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Subscriber<Route>() {
-//                    @Override
-//                    public void onCompleted() {
-//                        Log.d("route", "completed");
-//                        fetchArrivals();
-//                    }
-//
-//                    @Override
-//                    public void onError(Throwable e) {
-//                        Log.d("route", e.getMessage());
-//                    }
-//
-//                    @Override
-//                    public void onNext(Route route) {
-//                        Log.d("route", route.getDisplayName());
-//                        MenuItem item = navigationView.getMenu().add(route.getDisplayName());
-//                        item.setIntent(intent);
-//                    }
-//                });
-
-//        routeData = apiService.getRoutes()
-//                .switchMap(routes -> Observable.from(routes)
-//                        .switchMap(route -> {
-//                            return apiService.getStops(route.getId())
-//                                    .switchMap(stops -> {
-//                                        return Observable.from(routes);
-//                                    });
-//                        }))
-//
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Subscriber<Route>() {
-//                    @Override
-//                    public void onCompleted() {
-//                        Log.d("route", "completed");
-//                        fetchArrivals();
-//                    }
-//
-//                    @Override
-//                    public void onError(Throwable e) {
-//                        Log.d("route", e.getMessage());
-//                    }
-//
-//                    @Override
-//                    public void onNext(Route route) {
-//                        Log.d("route", route.getDisplayName());
-//                        MenuItem item = navigationView.getMenu().add(route.getDisplayName());
-//                        item.setIntent(intent);
-//                    }
-//                });
-
         routeData = apiService.getRoutes()
                 .flatMap(Observable::from).map(route -> {
                     RealmList<Stop> stops = new RealmList<>();
@@ -331,12 +249,13 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        concat.flatMap(arrivals -> Observable.from(arrivals.getPredictions()))
-                .subscribeOn(Schedulers.io())
-                .subscribe(new Subscriber<Prediction>() {
+        concat.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Arrivals>() {
                     @Override
                     public void onCompleted() {
                         Log.d("predictions", "completed");
+                        recyclerView.setRefreshing(false);
                     }
 
                     @Override
@@ -345,54 +264,31 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onNext(Prediction prediction) {
+                    public void onNext(Arrivals arrivals) {
                         final Realm realm = Realm.getDefaultInstance();
                         try{
-                            RealmResults<Route> result =
-                                    realm.where(Route.class)
-                                            .equalTo("id", prediction.getRouteId())
-                                            .findAll();
-                            Route route = result.first();
-                            prediction.setId(route.getId() + prediction.getStopId());
-                            prediction.setColor(route.getColor());
-                            realm.executeTransaction(r -> r.copyToRealmOrUpdate(prediction));
+                            RealmList<Prediction> predictionList = arrivals.getPredictions();
+                            int size = predictionList.size();
+                            if(size > 0){
+                                final Prediction prediction = predictionList.get(0);
+                                if(size > 1){
+                                    prediction.setSecondaryMinutes(predictionList.get(1).getSecondaryMinutes());
+                                }
+                                RealmResults<Route> result =
+                                        realm.where(Route.class)
+                                                .equalTo("id", prediction.getRouteId())
+                                                .findAll();
+                                Route route = result.first();
+                                prediction.setId(route.getId() + prediction.getStopId());
+                                prediction.setColor(route.getColor());
+                                realm.executeTransaction(r -> r.copyToRealmOrUpdate(prediction));
+                            }
+
                         }finally {
                             realm.close();
                         }
                     }
                 });
-
-//        Observable.from(routes)
-//                .flatMap(route -> Observable.from(route.getStops())
-//                        .flatMap(stop -> apiService.getArrivalTimes(route.getId(), stop.getId())))
-//                .subscribeOn(Schedulers.io())
-//                .subscribe(new Subscriber<Arrivals>() {
-//                    @Override
-//                    public void onCompleted() {
-//                        Log.d("predictions", "completed");
-//                    }
-//
-//                    @Override
-//                    public void onError(Throwable e) {
-//                        Log.d("predictions", e.getMessage());
-//                    }
-//
-//                    @Override
-//                    public void onNext(Arrivals arrivals) {
-//                        for (Prediction prediction : arrivals.getPredictions()) {
-//                            Log.d("predictions", prediction.getBusName() + " " + prediction.getArriveTime());
-//                        }
-//                        final Realm realm = Realm.getDefaultInstance();
-//                        try{
-//                            realm.beginTransaction();
-//                            realm.copyToRealmOrUpdate(arrivals.getPredictions());
-//                            realm.commitTransaction();
-//                        }finally {
-//                            realm.close();
-//                        }
-//                    }
-//                });
-
     }
 
     private void callLocationService() {

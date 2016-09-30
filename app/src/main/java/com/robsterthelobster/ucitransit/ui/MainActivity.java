@@ -274,13 +274,19 @@ public class MainActivity extends AppCompatActivity {
                                 if(size > 1){
                                     prediction.setSecondaryMinutes(predictionList.get(1).getSecondaryMinutes());
                                 }
-                                RealmResults<Route> result =
+                                RealmResults<Route> routeResult =
                                         realm.where(Route.class)
                                                 .equalTo("id", prediction.getRouteId())
                                                 .findAll();
-                                Route route = result.first();
+                                RealmResults<Stop> stopResult =
+                                        realm.where(Stop.class)
+                                                .equalTo("id", prediction.getStopId())
+                                                .findAll();
+                                Route route = routeResult.first();
+                                Stop stop = stopResult.first();
                                 prediction.setId(route.getId() + prediction.getStopId());
                                 prediction.setColor(route.getColor());
+                                prediction.setStopName(stop.getName());
                                 realm.executeTransaction(r -> r.copyToRealmOrUpdate(prediction));
                             }
 

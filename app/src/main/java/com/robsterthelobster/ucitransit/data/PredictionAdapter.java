@@ -42,7 +42,7 @@ public class PredictionAdapter
         viewHolder.cardView.setBackgroundColor(Color.parseColor(prediction.getColor()));
         viewHolder.arrivalText.setText(toDoFormat);
         viewHolder.routeText.setText(prediction.getRouteName());
-        viewHolder.stopText.setText(String.valueOf(prediction.getStopId()));
+        viewHolder.stopText.setText(String.valueOf(prediction.getStopName()));
     }
 
     public class ViewHolder extends RealmViewHolder{

@@ -17,10 +17,17 @@ import android.view.ViewGroup;
 
 import android.widget.TextView;
 
+import com.robsterthelobster.ucitransit.DaggerUCITransitComponent;
 import com.robsterthelobster.ucitransit.R;
+import com.robsterthelobster.ucitransit.UCITransitComponent;
+import com.robsterthelobster.ucitransit.data.models.Route;
+import com.robsterthelobster.ucitransit.module.RealmModule;
+import com.robsterthelobster.ucitransit.module.RestModule;
+import com.robsterthelobster.ucitransit.utils.Constants;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.realm.RealmResults;
 
 public class DetailActivity extends AppCompatActivity {
 
@@ -30,35 +37,29 @@ public class DetailActivity extends AppCompatActivity {
     @BindView(R.id.detail_toolbar) Toolbar toolbar;
     @BindView(R.id.sliding_tabs) TabLayout tabLayout;
 
+    Route route;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
         ButterKnife.bind(this);
 
+        UCITransitComponent component = DaggerUCITransitComponent.builder()
+                .realmModule(new RealmModule(this))
+                .restModule(new RestModule())
+                .build();
+        component.inject(this);
+
         setSupportActionBar(toolbar);
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
+        Bundle bundle = getIntent().getExtras();
+        int routeId = bundle.getInt(Constants.ROUTE_ID_KEY);
+
         mViewPager.setAdapter(mSectionsPagerAdapter);
         tabLayout.setupWithViewPager(mViewPager);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_detail, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     public static class PlaceholderFragment extends Fragment {
@@ -92,12 +93,19 @@ public class DetailActivity extends AppCompatActivity {
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-        public SectionsPagerAdapter(FragmentManager fm) {
+        SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
         @Override
         public Fragment getItem(int position) {
+            switch(position){
+                case 0:
+                    return PlaceholderFragment.newInstance(position + 1);
+                case 1:
+                    return BusMapFragment.newInstance();
+
+            }
             return PlaceholderFragment.newInstance(position + 1);
         }
 

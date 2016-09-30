@@ -66,4 +66,5 @@ dependencies {
     compile 'pl.charmas.android:android-reactive-location:0.9@aar'
     compile 'com.github.thorbenprimke:realm-recyclerview:0.9.23'
     compile 'com.google.android.gms:play-services-location:9.6.1'
+    compile 'com.google.android.gms:play-services-maps:9.6.1'
 }

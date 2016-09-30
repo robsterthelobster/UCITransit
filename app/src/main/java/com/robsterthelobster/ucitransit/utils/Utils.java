@@ -1,4 +1,4 @@
-package com.robsterthelobster.ucitransit;
+package com.robsterthelobster.ucitransit.utils;
 
 import rx.Subscription;
 

@@ -20,7 +20,6 @@ import com.robsterthelobster.ucitransit.DaggerUCITransitComponent;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitComponent;
 import com.robsterthelobster.ucitransit.module.RealmModule;
-import com.robsterthelobster.ucitransit.module.RestModule;
 import com.robsterthelobster.ucitransit.utils.Utils;
 import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.PredictionAdapter;
@@ -30,8 +29,6 @@ import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.robsterthelobster.ucitransit.utils.Constants;
 import com.tbruyelle.rxpermissions.RxPermissions;
-
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -225,9 +222,9 @@ public class MainActivity extends AppCompatActivity {
     private void fetchArrivals() {
         Observable<Arrivals> concat = null;
         for (Route route : routeResults) {
-            Log.d("predictions", "route name: " + route.getDisplayName());
+            //Log.d("predictions", "route name: " + route.getDisplayName());
             for (Stop stop : route.getStops()) {
-                Log.d("predictions", "      stop name: " + stop.getName());
+                //Log.d("predictions", "      stop name: " + stop.getName());
                 Observable<Arrivals> predictionObservable =
                         apiService.getArrivalTimes(route.getId(), stop.getId());
                 if(concat == null){

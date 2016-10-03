@@ -3,6 +3,7 @@ package com.robsterthelobster.ucitransit.ui;
 import android.Manifest;
 import android.content.Intent;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,6 +16,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.robsterthelobster.ucitransit.DaggerUCITransitComponent;
 import com.robsterthelobster.ucitransit.R;
@@ -29,6 +34,9 @@ import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.robsterthelobster.ucitransit.utils.Constants;
 import com.tbruyelle.rxpermissions.RxPermissions;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -68,6 +76,11 @@ public class MainActivity extends AppCompatActivity {
     Subscription stopRoutes;
     Subscription subscription;
     Observable<Location> locationUpdatesObservable;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +101,6 @@ public class MainActivity extends AppCompatActivity {
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        // Must be done during an initialization phase like onCreate
         RxPermissions.getInstance(this)
                 .request(Manifest.permission.ACCESS_FINE_LOCATION)
                 .subscribe(granted -> {
@@ -109,12 +121,15 @@ public class MainActivity extends AppCompatActivity {
 
         if (realm.isEmpty()) {
             fetchInitialRouteData();
-        }else{
+        } else {
             routeResults = realm.where(Route.class).findAll();
             setUpNavigationView();
             fetchArrivals();
         }
 
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     @Override
@@ -139,7 +154,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onStart() {
-        super.onStart();
+        super.onStart();// ATTENTION: This was auto-generated to implement the App Indexing API.
+// See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
         if (locationUpdatesObservable != null) {
             locationUpdatesObservable
                     .subscribe(new Subscriber<Location>() {
@@ -159,12 +176,20 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
         }
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.start(client, getIndexApiAction());
     }
 
     @Override
     public void onStop() {
-        super.onStop();
+        super.onStop();// ATTENTION: This was auto-generated to implement the App Indexing API.
+// See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
         Utils.unsubscribe(subscription);
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.disconnect();
     }
 
     @Override
@@ -174,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
         Utils.unsubscribe(stopRoutes);
     }
 
-    private void setUpNavigationView(){
+    private void setUpNavigationView() {
         final Intent intent = new Intent(this, DetailActivity.class);
         Observable.from(routeResults).subscribe(route -> {
             intent.putExtra(Constants.ROUTE_ID_KEY, route.getId());
@@ -210,9 +235,9 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onNext(Route route) {
                         final Realm realm = Realm.getDefaultInstance();
-                        try{
+                        try {
                             realm.executeTransaction(r -> r.copyToRealmOrUpdate(route));
-                        }finally {
+                        } finally {
                             realm.close();
                         }
                     }
@@ -220,54 +245,50 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetchArrivals() {
-        Observable<Arrivals> concat = null;
-        for (Route route : routeResults) {
-            //Log.d("predictions", "route name: " + route.getDisplayName());
-            for (Stop stop : route.getStops()) {
-                //Log.d("predictions", "      stop name: " + stop.getName());
-                Observable<Arrivals> predictionObservable =
-                        apiService.getArrivalTimes(route.getId(), stop.getId());
-                if(concat == null){
-                    concat = predictionObservable;
-                }else{
-                    concat = Observable.concat(concat, predictionObservable);
-                }
-            }
-        }
 
-        concat.subscribeOn(Schedulers.io())
+        recyclerView.setRefreshing(true);
+        Observable.defer(() -> {
+            final Realm realm = Realm.getDefaultInstance();
+            RealmResults<Route> routeResults = realm.where(Route.class).findAll();
+            return Observable.from(routeResults);
+        })
+                .flatMap(route -> Observable.from(route.getStops())
+                        .flatMap(stop -> apiService.getArrivalTimes(route.getId(), stop.getId())))
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Arrivals>() {
+
+                    final String TAG = "predictionData";
+
                     @Override
                     public void onCompleted() {
-                        Log.d("predictionData", "completed");
+                        Log.d(TAG, "completed");
                         recyclerView.setRefreshing(false);
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.d("predictionData", e.getMessage());
+                        Log.d(TAG, e.getMessage());
                     }
 
                     @Override
                     public void onNext(Arrivals arrivals) {
                         final Realm realm = Realm.getDefaultInstance();
-                        try{
+                        try {
                             RealmList<Prediction> predictionList = arrivals.getPredictions();
                             int size = predictionList.size();
-                            if(size > 0){
+                            if (size > 0) {
                                 final Prediction prediction = predictionList.get(0);
-                                if(size > 1){
-                                    prediction.setSecondaryMinutes(predictionList.get(1).getSecondaryMinutes());
+                                if (size > 1) {
+                                    prediction.setSecondaryMinutes(
+                                            predictionList.get(1).getSecondaryMinutes());
                                 }
-                                RealmResults<Route> routeResult =
-                                        realm.where(Route.class)
-                                                .equalTo("id", prediction.getRouteId())
-                                                .findAll();
-                                RealmResults<Stop> stopResult =
-                                        realm.where(Stop.class)
-                                                .equalTo("id", prediction.getStopId())
-                                                .findAll();
+                                RealmResults<Route> routeResult = realm.where(Route.class)
+                                        .equalTo("id", prediction.getRouteId())
+                                        .findAll();
+                                RealmResults<Stop> stopResult = realm.where(Stop.class)
+                                        .equalTo("id", prediction.getStopId())
+                                        .findAll();
                                 Route route = routeResult.first();
                                 Stop stop = stopResult.first();
                                 prediction.setId(route.getId() + prediction.getStopId());
@@ -275,8 +296,7 @@ public class MainActivity extends AppCompatActivity {
                                 prediction.setStopName(stop.getName());
                                 realm.executeTransaction(r -> r.copyToRealmOrUpdate(prediction));
                             }
-
-                        }finally {
+                        } finally {
                             realm.close();
                         }
                     }
@@ -291,5 +311,21 @@ public class MainActivity extends AppCompatActivity {
 
         ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(this);
         locationUpdatesObservable = locationProvider.getUpdatedLocation(locationRequest);
+    }
+
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("Main Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
     }
 }

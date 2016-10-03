@@ -13,7 +13,8 @@ public class Prediction extends RealmObject {
     @PrimaryKey
     private int id;
     private String color;
-    private boolean isFavorite;
+    private boolean isFavorite = false;
+    private boolean isCurrent = false;
     private int secondaryMinutes;
     private String stopName;
     @SerializedName("RouteId")
@@ -89,12 +90,20 @@ public class Prediction extends RealmObject {
         this.color = color;
     }
 
-    public boolean isFavorited() {
+    public boolean isFavorite() {
         return isFavorite;
     }
 
-    public void setFavorited(boolean favorited) {
+    public void setFavorite(boolean favorited) {
         isFavorite = favorited;
+    }
+
+    public boolean isCurrent() {
+        return isCurrent;
+    }
+
+    public void setCurrent(boolean current) {
+        isCurrent = current;
     }
 
     public int getRouteId() {

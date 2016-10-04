@@ -19,18 +19,16 @@ import com.google.android.gms.location.LocationRequest;
 import com.robsterthelobster.ucitransit.DaggerUCITransitComponent;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitComponent;
-import com.robsterthelobster.ucitransit.module.RealmModule;
-import com.robsterthelobster.ucitransit.utils.Utils;
 import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.PredictionAdapter;
 import com.robsterthelobster.ucitransit.data.models.Arrivals;
 import com.robsterthelobster.ucitransit.data.models.Prediction;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.Stop;
+import com.robsterthelobster.ucitransit.module.RealmModule;
 import com.robsterthelobster.ucitransit.utils.Constants;
+import com.robsterthelobster.ucitransit.utils.Utils;
 import com.tbruyelle.rxpermissions.RxPermissions;
-
-import java.util.ArrayList;
 
 import javax.inject.Inject;
 
@@ -45,6 +43,7 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
@@ -220,17 +219,24 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    private void fetchArrivals() {
+    private Observable<Arrivals> getArrivalsObservable(){
 
-      Observable.defer(()->{
-          Realm realm = Realm.getDefaultInstance();
-          RealmResults<Route> routeRealmResults = realm.where(Route.class).findAll();
-          return Observable.from(routeRealmResults);
-      })
+        return Observable.defer(() -> {
+            final Realm threadRealm = Realm.getDefaultInstance();
+            RealmResults<Route> routeRealmResults = threadRealm.where(Route.class).findAll();
+            return Observable.from(routeRealmResults)
+                    .doOnCompleted(threadRealm::close);
+        })
                 .flatMap(route -> Observable.from(route.getStops())
                         .flatMap(stop -> apiService.getArrivalTimes(route.getId(), stop.getId())))
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread());
+
+    }
+
+    private void fetchArrivals() {
+
+        getArrivalsObservable()
                 .subscribe(new Subscriber<Arrivals>() {
 
                     final String TAG = "predictionData";
@@ -259,11 +265,11 @@ public class MainActivity extends AppCompatActivity {
                                             predictionList.get(1).getSecondaryMinutes());
                                 }
                                 RealmResults<Route> routeResult = realm.where(Route.class)
-                                                .equalTo("id", prediction.getRouteId())
-                                                .findAll();
+                                        .equalTo("id", prediction.getRouteId())
+                                        .findAll();
                                 RealmResults<Stop> stopResult = realm.where(Stop.class)
-                                                .equalTo("id", prediction.getStopId())
-                                                .findAll();
+                                        .equalTo("id", prediction.getStopId())
+                                        .findAll();
                                 Route route = routeResult.first();
                                 Stop stop = stopResult.first();
                                 prediction.setId(route.getId() + prediction.getStopId());

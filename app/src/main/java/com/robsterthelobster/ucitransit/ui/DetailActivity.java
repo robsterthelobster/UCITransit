@@ -9,28 +9,35 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.robsterthelobster.ucitransit.DaggerUCITransitComponent;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitComponent;
-import com.robsterthelobster.ucitransit.data.models.Route;
+import com.robsterthelobster.ucitransit.data.PredictionAdapter;
+import com.robsterthelobster.ucitransit.data.models.Prediction;
 import com.robsterthelobster.ucitransit.module.RealmModule;
 import com.robsterthelobster.ucitransit.module.RestModule;
 import com.robsterthelobster.ucitransit.utils.Constants;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
+import io.realm.Realm;
+import io.realm.RealmResults;
 
 public class DetailActivity extends AppCompatActivity {
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private final String TAG = DetailActivity.class.getSimpleName();
 
-    @BindView(R.id.container) ViewPager mViewPager;
+    @BindView(R.id.viewpager) ViewPager mViewPager;
     @BindView(R.id.detail_toolbar) Toolbar toolbar;
     @BindView(R.id.sliding_tabs) TabLayout tabLayout;
 
-    int routeId;
+    static String routeName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,13 +51,16 @@ public class DetailActivity extends AppCompatActivity {
                 .build();
         component.inject(this);
 
-        setSupportActionBar(toolbar);
-
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         Bundle bundle = getIntent().getExtras();
-        routeId = bundle.getInt(Constants.ROUTE_ID_KEY);
-        Log.d(TAG, "route: " + routeId);
+        routeName = bundle.getString(Constants.ROUTE_ID_KEY);
+        Log.d(TAG, "route: " + routeName);
+
+        setSupportActionBar(toolbar);
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
+        toolbar.setTitle(routeName);
+        toolbar.setNavigationOnClickListener(view -> onBackPressed());
 
         mViewPager.setAdapter(mSectionsPagerAdapter);
         tabLayout.setupWithViewPager(mViewPager);
@@ -64,13 +74,9 @@ public class DetailActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
-            Bundle bundle = new Bundle();
             switch(position){
                 case 0:
-                    bundle.putInt(Constants.ROUTE_ID_KEY, routeId);
-                    PredictionFragment fragment = new PredictionFragment();
-                    fragment.setArguments(bundle);
-                    return fragment;
+                    return PredictionFragment.newInstance(routeName);
                 case 1:
                     return BusMapFragment.newInstance();
                 default:
@@ -94,5 +100,54 @@ public class DetailActivity extends AppCompatActivity {
             }
             return null;
         }
+    }
+
+    public static class PredictionFragment extends Fragment {
+
+        @BindView(R.id.fragment_recycler_view) RealmRecyclerView recyclerView;
+
+        Realm realm;
+
+        public PredictionFragment() {
+        }
+
+        public static PredictionFragment newInstance(String routeName){
+            PredictionFragment fragment = new PredictionFragment();
+            Bundle bundle = new Bundle();
+            bundle.putString(Constants.ROUTE_ID_KEY, routeName);
+            fragment.setArguments(bundle);
+            return fragment;
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            View view = inflater.inflate(R.layout.fragment_prediction_list, container, false);
+            ButterKnife.bind(this, view);
+
+            Bundle arguments = getArguments();
+            if (arguments != null) {
+                routeName = arguments.getString(Constants.ROUTE_ID_KEY);
+            }
+
+            realm = Realm.getDefaultInstance();
+            RealmResults<Prediction> predictions = realm
+                    .where(Prediction.class)
+                    .equalTo("isCurrent", true)
+                    .equalTo("routeName", routeName)
+                    .findAll();
+
+            PredictionAdapter predictionAdapter = new PredictionAdapter(getContext(), predictions, true, false);
+            recyclerView.setAdapter(predictionAdapter);
+
+            return view;
+        }
+
+        @Override
+        public void onDestroy(){
+            super.onDestroy();
+            realm.close();
+        }
+
     }
 }

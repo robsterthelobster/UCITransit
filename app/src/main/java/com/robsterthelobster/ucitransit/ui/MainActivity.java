@@ -2,9 +2,11 @@ package com.robsterthelobster.ucitransit.ui;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -162,6 +164,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onResume(){
+        super.onResume();
+        drawer.closeDrawer(GravityCompat.START, false);
+    }
+
+    @Override
     public void onStop() {
         super.onStop();
         Utils.unsubscribe(subscription);
@@ -177,8 +185,9 @@ public class MainActivity extends AppCompatActivity {
     private void setUpNavigationView() {
         Observable.from(routeResults).subscribe(route -> {
             final Intent intent = new Intent(this, DetailActivity.class);
-            intent.putExtra(Constants.ROUTE_ID_KEY, route.getId());
-            MenuItem item = navigationView.getMenu().add(route.getDisplayName());
+            String name = route.getName();
+            intent.putExtra(Constants.ROUTE_ID_KEY, name);
+            MenuItem item = navigationView.getMenu().add(name);
             item.setIntent(intent);
         });
     }

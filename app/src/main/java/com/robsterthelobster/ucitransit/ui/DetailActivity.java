@@ -1,19 +1,14 @@
 package com.robsterthelobster.ucitransit.ui;
 
+import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import android.widget.TextView;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 
 import com.robsterthelobster.ucitransit.DaggerUCITransitComponent;
 import com.robsterthelobster.ucitransit.R;
@@ -29,12 +24,13 @@ import butterknife.ButterKnife;
 public class DetailActivity extends AppCompatActivity {
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
+    private final String TAG = DetailActivity.class.getSimpleName();
 
     @BindView(R.id.container) ViewPager mViewPager;
     @BindView(R.id.detail_toolbar) Toolbar toolbar;
     @BindView(R.id.sliding_tabs) TabLayout tabLayout;
 
-    Route route;
+    int routeId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,39 +49,11 @@ public class DetailActivity extends AppCompatActivity {
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         Bundle bundle = getIntent().getExtras();
-        int routeId = bundle.getInt(Constants.ROUTE_ID_KEY);
+        routeId = bundle.getInt(Constants.ROUTE_ID_KEY);
+        Log.d(TAG, "route: " + routeId);
 
         mViewPager.setAdapter(mSectionsPagerAdapter);
         tabLayout.setupWithViewPager(mViewPager);
-    }
-
-    public static class PlaceholderFragment extends Fragment {
-
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
-        @BindView(R.id.section_label) TextView textView;
-
-        public PlaceholderFragment() {
-        }
-
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-
-            ButterKnife.bind(this, rootView);
-
-            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
-            return rootView;
-        }
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
@@ -96,19 +64,23 @@ public class DetailActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
+            Bundle bundle = new Bundle();
             switch(position){
                 case 0:
-                    return PlaceholderFragment.newInstance(position + 1);
+                    bundle.putInt(Constants.ROUTE_ID_KEY, routeId);
+                    PredictionFragment fragment = new PredictionFragment();
+                    fragment.setArguments(bundle);
+                    return fragment;
                 case 1:
                     return BusMapFragment.newInstance();
-
+                default:
+                    Log.e(TAG, "Not a valid position");
+                    return null;
             }
-            return PlaceholderFragment.newInstance(position + 1);
         }
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
             return 2;
         }
 

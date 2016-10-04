@@ -175,8 +175,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setUpNavigationView() {
-        final Intent intent = new Intent(this, DetailActivity.class);
         Observable.from(routeResults).subscribe(route -> {
+            final Intent intent = new Intent(this, DetailActivity.class);
             intent.putExtra(Constants.ROUTE_ID_KEY, route.getId());
             MenuItem item = navigationView.getMenu().add(route.getDisplayName());
             item.setIntent(intent);
@@ -262,7 +262,10 @@ public class MainActivity extends AppCompatActivity {
                                         = realm.where(Prediction.class).equalTo("id", key).findAll();
                                 if(predictions.size() > 0){
                                     final Prediction prediction = predictions.get(0);
-                                    prediction.setCurrent(false);
+                                    realm.executeTransaction(r -> {
+                                        prediction.setCurrent(false);
+                                        r.copyToRealmOrUpdate(prediction);
+                                    });
                                 }
                             }
                         } finally {

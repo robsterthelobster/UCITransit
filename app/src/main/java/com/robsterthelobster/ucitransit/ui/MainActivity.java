@@ -2,11 +2,9 @@ package com.robsterthelobster.ucitransit.ui;
 
 import android.Manifest;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -67,8 +65,9 @@ public class MainActivity extends AppCompatActivity {
     PredictionAdapter predictionAdapter;
 
     Subscription fetchRouteSub;
-    Subscription stopRoutes;
-    Subscription subscription;
+    Subscription fetchArrivalsSub;
+    Subscription permissionSub;
+    Subscription locationSub;
     Observable<Location> locationUpdatesObservable;
 
     @Override
@@ -90,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        RxPermissions.getInstance(this)
+        permissionSub = RxPermissions.getInstance(this)
                 .request(Manifest.permission.ACCESS_FINE_LOCATION)
                 .subscribe(granted -> {
                     if (granted) {
@@ -142,44 +141,29 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        if (locationUpdatesObservable != null) {
-            locationUpdatesObservable
-                    .subscribe(new Subscriber<Location>() {
-                        @Override
-                        public void onCompleted() {
-                            Log.d("Location obs", "Completed");
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            Log.d("Location obs error", e.toString());
-                        }
-
-                        @Override
-                        public void onNext(Location location) {
-                            Log.d("Location", location.toString());
-                        }
-                    });
-        }
-    }
-
-    @Override
-    public void onResume(){
-        super.onResume();
-        drawer.closeDrawer(GravityCompat.START, false);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Utils.unsubscribe(subscription);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         realm.close();
-        Utils.unsubscribe(stopRoutes);
+        Utils.unsubscribe(fetchRouteSub);
+        Utils.unsubscribe(fetchArrivalsSub);
+        Utils.unsubscribe(permissionSub);
+        Utils.unsubscribe(locationSub);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        startLocationSubscription();
+        drawer.closeDrawer(GravityCompat.START, false);
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        Utils.unsubscribe(locationSub);
     }
 
     private void setUpNavigationView() {
@@ -232,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
     private void fetchArrivals() {
 
         recyclerView.setRefreshing(true);
-        getArrivalsObservable()
+        fetchArrivalsSub = getArrivalsObservable()
                 .subscribe(new Subscriber<Arrivals>() {
 
                     final String TAG = "predictionData";
@@ -314,5 +298,29 @@ public class MainActivity extends AppCompatActivity {
 
         ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(this);
         locationUpdatesObservable = locationProvider.getUpdatedLocation(locationRequest);
+    }
+
+    private void startLocationSubscription(){
+        if (locationUpdatesObservable != null) {
+            locationSub = locationUpdatesObservable
+                    .subscribe(new Subscriber<Location>() {
+                        final String TAG = "Location subscription";
+
+                        @Override
+                        public void onCompleted() {
+                            Log.d(TAG, "Completed");
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.d(TAG, e.toString());
+                        }
+
+                        @Override
+                        public void onNext(Location location) {
+                            Log.d(TAG, location.toString());
+                        }
+                    });
+        }
     }
 }

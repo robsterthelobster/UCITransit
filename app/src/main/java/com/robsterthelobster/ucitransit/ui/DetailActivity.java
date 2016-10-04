@@ -51,17 +51,16 @@ public class DetailActivity extends AppCompatActivity {
                 .build();
         component.inject(this);
 
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
         Bundle bundle = getIntent().getExtras();
         routeName = bundle.getString(Constants.ROUTE_ID_KEY);
         Log.d(TAG, "route: " + routeName);
 
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
-        toolbar.setTitle(routeName);
+        getSupportActionBar().setTitle(routeName);
         toolbar.setNavigationOnClickListener(view -> onBackPressed());
 
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mSectionsPagerAdapter);
         tabLayout.setupWithViewPager(mViewPager);
     }
@@ -78,7 +77,7 @@ public class DetailActivity extends AppCompatActivity {
                 case 0:
                     return PredictionFragment.newInstance(routeName);
                 case 1:
-                    return BusMapFragment.newInstance();
+                    return BusMapFragment.newInstance(routeName);
                 default:
                     Log.e(TAG, "Not a valid position");
                     return null;
@@ -100,54 +99,5 @@ public class DetailActivity extends AppCompatActivity {
             }
             return null;
         }
-    }
-
-    public static class PredictionFragment extends Fragment {
-
-        @BindView(R.id.fragment_recycler_view) RealmRecyclerView recyclerView;
-
-        Realm realm;
-
-        public PredictionFragment() {
-        }
-
-        public static PredictionFragment newInstance(String routeName){
-            PredictionFragment fragment = new PredictionFragment();
-            Bundle bundle = new Bundle();
-            bundle.putString(Constants.ROUTE_ID_KEY, routeName);
-            fragment.setArguments(bundle);
-            return fragment;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View view = inflater.inflate(R.layout.fragment_prediction_list, container, false);
-            ButterKnife.bind(this, view);
-
-            Bundle arguments = getArguments();
-            if (arguments != null) {
-                routeName = arguments.getString(Constants.ROUTE_ID_KEY);
-            }
-
-            realm = Realm.getDefaultInstance();
-            RealmResults<Prediction> predictions = realm
-                    .where(Prediction.class)
-                    .equalTo("isCurrent", true)
-                    .equalTo("routeName", routeName)
-                    .findAll();
-
-            PredictionAdapter predictionAdapter = new PredictionAdapter(getContext(), predictions, true, false);
-            recyclerView.setAdapter(predictionAdapter);
-
-            return view;
-        }
-
-        @Override
-        public void onDestroy(){
-            super.onDestroy();
-            realm.close();
-        }
-
     }
 }

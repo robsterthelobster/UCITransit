@@ -12,6 +12,12 @@ import io.realm.RealmObject;
  * Created by robin on 6/20/2016.
  */
 public class Arrivals extends RealmObject{
+
+    int routeId;
+    int stopId;
+    String stopName;
+    String routeColor;
+
     @SerializedName("PredictionTime")
     private String predictionTime;
     @SerializedName("Predictions")
@@ -31,5 +37,38 @@ public class Arrivals extends RealmObject{
 
     public void setPredictions(RealmList<Prediction> predictions) {
         this.predictions = predictions;
+    }
+
+    public int getRouteId() {
+        return routeId;
+    }
+
+    public void setRouteId(int routeId) {
+        this.routeId = routeId;
+    }
+
+    public int getStopId() {
+        return stopId;
+    }
+
+    public void setStopId(int stopId) {
+        this.stopId = stopId;
+    }
+
+
+    public String getStopName() {
+        return stopName;
+    }
+
+    public void setStopName(String stopName) {
+        this.stopName = stopName;
+    }
+
+    public String getRouteColor() {
+        return routeColor;
+    }
+
+    public void setRouteColor(String routeColor) {
+        this.routeColor = routeColor;
     }
 }

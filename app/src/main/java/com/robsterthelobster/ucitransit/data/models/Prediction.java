@@ -11,7 +11,7 @@ import io.realm.annotations.PrimaryKey;
 public class Prediction extends RealmObject {
 
     @PrimaryKey
-    private int id;
+    private String id;
     private String color;
     private boolean isFavorite = false;
     private boolean isCurrent = false;
@@ -54,15 +54,11 @@ public class Prediction extends RealmObject {
     @SerializedName("TripOrder")
     private int tripOrder;
 
-    public Prediction(){
-        id = routeId + stopId;
-    }
-
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

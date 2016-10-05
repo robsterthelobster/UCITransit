@@ -213,16 +213,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetchArrivals() {
-
         recyclerView.setRefreshing(true);
         fetchArrivalsSub = getArrivalsObservable()
                 .subscribe(new Subscriber<Arrivals>() {
-
-                    final String TAG = "predictionData";
-
+                    final String TAG = "ArrivalsSub";
                     @Override
                     public void onCompleted() {
-                        Log.d(TAG, "completed");
+                        Log.d(TAG, "onCompleted");
                         recyclerView.setRefreshing(false);
                     }
 
@@ -233,16 +230,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onNext(Arrivals arrivals) {
-                        final Realm realm = Realm.getDefaultInstance();
-                        try {
-                            Arrivals oldArrivals = realm.where(Arrivals.class).equalTo("id", arrivals.getId()).findFirst();
-                            if (oldArrivals != null) {
-                                arrivals.setFavorite(oldArrivals.isFavorite());
-                            }
-                            realm.executeTransaction(r -> r.copyToRealmOrUpdate(arrivals));
-                        } finally {
-                            realm.close();
-                        }
+                        //Log.d(TAG, "onConNext: " + arrivals.getRouteName());
                     }
                 });
     }
@@ -269,6 +257,16 @@ public class MainActivity extends AppCompatActivity {
                                     arrivals.setRouteName(route.getName());
                                     arrivals.setStopName(stop.getName());
                                     arrivals.setRouteColor(route.getColor());
+                                    final Realm realm = Realm.getDefaultInstance();
+                                    try {
+                                        Arrivals oldArrivals = realm.where(Arrivals.class).equalTo("id", arrivals.getId()).findFirst();
+                                        if (oldArrivals != null) {
+                                            arrivals.setFavorite(oldArrivals.isFavorite());
+                                        }
+                                        realm.executeTransaction(r -> r.copyToRealmOrUpdate(arrivals));
+                                    } finally {
+                                        realm.close();
+                                    }
                                     return arrivals;
                                 })))
                 .subscribeOn(Schedulers.io())

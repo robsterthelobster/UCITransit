@@ -7,7 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.robsterthelobster.ucitransit.R;
-import com.robsterthelobster.ucitransit.data.PredictionAdapter;
+import com.robsterthelobster.ucitransit.data.ArrivalsAdapter;
+import com.robsterthelobster.ucitransit.data.models.Arrivals;
 import com.robsterthelobster.ucitransit.data.models.Prediction;
 import com.robsterthelobster.ucitransit.utils.Constants;
 
@@ -48,14 +49,14 @@ public class PredictionFragment extends Fragment {
         String routeName = arguments.getString(Constants.ROUTE_ID_KEY);
 
         realm = Realm.getDefaultInstance();
-        RealmResults<Prediction> predictions = realm
-                .where(Prediction.class)
+        RealmResults<Arrivals> arrivals = realm
+                .where(Arrivals.class)
                 .equalTo("isCurrent", true)
                 .equalTo("routeName", routeName)
                 .findAll();
 
-        PredictionAdapter predictionAdapter = new PredictionAdapter(getContext(), predictions, true, false);
-        recyclerView.setAdapter(predictionAdapter);
+        ArrivalsAdapter arrivalsAdapter = new ArrivalsAdapter(getContext(), arrivals, true, false);
+        recyclerView.setAdapter(arrivalsAdapter);
 
         return view;
     }

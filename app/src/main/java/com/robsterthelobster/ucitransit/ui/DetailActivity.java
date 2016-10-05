@@ -9,24 +9,16 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.robsterthelobster.ucitransit.DaggerUCITransitComponent;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitComponent;
-import com.robsterthelobster.ucitransit.data.PredictionAdapter;
-import com.robsterthelobster.ucitransit.data.models.Prediction;
 import com.robsterthelobster.ucitransit.module.RealmModule;
 import com.robsterthelobster.ucitransit.module.RestModule;
 import com.robsterthelobster.ucitransit.utils.Constants;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
-import io.realm.Realm;
-import io.realm.RealmResults;
 
 public class DetailActivity extends AppCompatActivity {
 

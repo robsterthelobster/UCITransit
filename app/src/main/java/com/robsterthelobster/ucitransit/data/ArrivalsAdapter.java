@@ -10,11 +10,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.robsterthelobster.ucitransit.R;
+import com.robsterthelobster.ucitransit.data.models.Arrivals;
 import com.robsterthelobster.ucitransit.data.models.Prediction;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.realm.RealmBasedRecyclerViewAdapter;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.RealmViewHolder;
 
@@ -22,10 +24,10 @@ import io.realm.RealmViewHolder;
  * Created by robin on 9/20/2016.
  */
 
-public class PredictionAdapter
-        extends RealmBasedRecyclerViewAdapter<Prediction, PredictionAdapter.ViewHolder>{
+public class ArrivalsAdapter
+        extends RealmBasedRecyclerViewAdapter<Arrivals, ArrivalsAdapter.ViewHolder>{
 
-    public PredictionAdapter(Context context, RealmResults<Prediction> realmResults, boolean automaticUpdate, boolean animateResults) {
+    public ArrivalsAdapter(Context context, RealmResults<Arrivals> realmResults, boolean automaticUpdate, boolean animateResults) {
         super(context, realmResults, automaticUpdate, animateResults);
     }
 
@@ -36,13 +38,22 @@ public class PredictionAdapter
     }
 
     @Override
-    public void onBindRealmViewHolder(PredictionAdapter.ViewHolder viewHolder, int position) {
-        final Prediction prediction = realmResults.get(position);
-        String toDoFormat = prediction.getMinutes() + " min";
-        viewHolder.cardView.setBackgroundColor(Color.parseColor(prediction.getColor()));
-        viewHolder.arrivalText.setText(toDoFormat);
-        viewHolder.routeText.setText(prediction.getRouteName());
-        viewHolder.stopText.setText(String.valueOf(prediction.getStopName()));
+    public void onBindRealmViewHolder(ArrivalsAdapter.ViewHolder viewHolder, int position) {
+        final Arrivals arrivals = realmResults.get(position);
+        RealmList<Prediction> predictionRealmList = arrivals.getPredictions();
+        String minutes = "NA";
+        String secondaryMinutes = "NA";
+        int size = predictionRealmList.size();
+        if(size > 0){
+            minutes = predictionRealmList.get(0).getMinutes() + " min";
+            if(size > 1){
+                secondaryMinutes = predictionRealmList.get(1).getMinutes() + " min";
+            }
+        }
+        viewHolder.cardView.setBackgroundColor(Color.parseColor(arrivals.getColor()));
+        viewHolder.arrivalText.setText(minutes);
+        viewHolder.routeText.setText(arrivals.getRouteName());
+        viewHolder.stopText.setText(String.valueOf(arrivals.getStopName()));
     }
 
     public class ViewHolder extends RealmViewHolder{

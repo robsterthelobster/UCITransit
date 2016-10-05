@@ -7,21 +7,59 @@ import java.util.List;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by robin on 6/20/2016.
  */
 public class Arrivals extends RealmObject{
 
+    @PrimaryKey
+    String id;
     int routeId;
     int stopId;
-    String stopName;
+    String routeName;
     String routeColor;
+    String stopName;
+    boolean isFavorite;
+    boolean isCurrent;
 
     @SerializedName("PredictionTime")
     private String predictionTime;
     @SerializedName("Predictions")
     private RealmList<Prediction> predictions;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getColor() {
+        return routeColor;
+    }
+
+    public void setColor(String color) {
+        this.routeColor = color;
+    }
+
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setFavorite(boolean favorited) {
+        isFavorite = favorited;
+    }
+
+    public boolean isCurrent() {
+        return isCurrent;
+    }
+
+    public void setCurrent(boolean current) {
+        isCurrent = current;
+    }
 
     public String getPredictionTime() {
         return predictionTime;
@@ -55,6 +93,13 @@ public class Arrivals extends RealmObject{
         this.stopId = stopId;
     }
 
+    public String getRouteName() {
+        return routeName;
+    }
+
+    public void setRouteName(String routeName) {
+        this.routeName = routeName;
+    }
 
     public String getStopName() {
         return stopName;

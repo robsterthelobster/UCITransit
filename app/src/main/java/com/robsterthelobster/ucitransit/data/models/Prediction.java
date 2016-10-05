@@ -10,13 +10,6 @@ import io.realm.annotations.PrimaryKey;
  */
 public class Prediction extends RealmObject {
 
-    @PrimaryKey
-    private String id;
-    private String color;
-    private boolean isFavorite = false;
-    private boolean isCurrent = false;
-    private int secondaryMinutes;
-    private String stopName;
     @SerializedName("RouteId")
     private int routeId;
     @SerializedName("RouteName")
@@ -53,54 +46,6 @@ public class Prediction extends RealmObject {
     private String tripId;
     @SerializedName("TripOrder")
     private int tripOrder;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public int getSecondaryMinutes() {
-        return secondaryMinutes;
-    }
-
-    public void setSecondaryMinutes(int secondaryMinutes) {
-        this.secondaryMinutes = secondaryMinutes;
-    }
-
-    public String getStopName() {
-        return stopName;
-    }
-
-    public void setStopName(String stopName) {
-        this.stopName = stopName;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    public boolean isFavorite() {
-        return isFavorite;
-    }
-
-    public void setFavorite(boolean favorited) {
-        isFavorite = favorited;
-    }
-
-    public boolean isCurrent() {
-        return isCurrent;
-    }
-
-    public void setCurrent(boolean current) {
-        isCurrent = current;
-    }
 
     public int getRouteId() {
         return routeId;

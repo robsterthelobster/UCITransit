@@ -19,10 +19,9 @@ import com.google.android.gms.location.LocationRequest;
 import com.robsterthelobster.ucitransit.DaggerUCITransitComponent;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitComponent;
+import com.robsterthelobster.ucitransit.data.ArrivalsAdapter;
 import com.robsterthelobster.ucitransit.data.BusApiService;
-import com.robsterthelobster.ucitransit.data.PredictionAdapter;
 import com.robsterthelobster.ucitransit.data.models.Arrivals;
-import com.robsterthelobster.ucitransit.data.models.Prediction;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.robsterthelobster.ucitransit.module.RealmModule;
@@ -62,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     Realm realm;
 
     RealmResults<Route> routeResults;
-    PredictionAdapter predictionAdapter;
+    ArrivalsAdapter arrivalsAdapter;
 
     Subscription fetchRouteSub;
     Subscription fetchArrivalsSub;
@@ -101,11 +100,11 @@ public class MainActivity extends AppCompatActivity {
                 });
 
         // predictions that are current
-        RealmResults<Prediction> predictions = realm
-                .where(Prediction.class).equalTo("isCurrent", true).findAll();
+        RealmResults<Arrivals> arrivals = realm
+                .where(Arrivals.class).equalTo("isCurrent", true).findAll();
 
-        predictionAdapter = new PredictionAdapter(this, predictions, true, false);
-        recyclerView.setAdapter(predictionAdapter);
+        arrivalsAdapter = new ArrivalsAdapter(this, arrivals, true, false);
+        recyclerView.setAdapter(arrivalsAdapter);
         recyclerView.setOnRefreshListener(() -> fetchArrivals());
 
         if (realm.isEmpty()) {
@@ -154,14 +153,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         startLocationSubscription();
         drawer.closeDrawer(GravityCompat.START, false);
     }
 
     @Override
-    public void onStop(){
+    public void onStop() {
         super.onStop();
         Utils.unsubscribe(locationSub);
     }
@@ -236,31 +235,11 @@ public class MainActivity extends AppCompatActivity {
                     public void onNext(Arrivals arrivals) {
                         final Realm realm = Realm.getDefaultInstance();
                         try {
-                            String key = arrivals.getRouteId() + "" + arrivals.getStopId();
-                            RealmList<Prediction> predictionList = arrivals.getPredictions();
-                            int size = predictionList.size();
-                            if (size > 0) {
-                                final Prediction prediction = predictionList.get(0);
-                                if (size > 1) {
-                                    prediction.setSecondaryMinutes(
-                                            predictionList.get(1).getSecondaryMinutes());
-                                }
-                                prediction.setId(key);
-                                prediction.setColor(arrivals.getRouteColor());
-                                prediction.setStopName(arrivals.getStopName());
-                                prediction.setCurrent(true);
-                                realm.executeTransaction(r -> r.copyToRealmOrUpdate(prediction));
-                            }else{
-                                RealmResults<Prediction> predictions
-                                        = realm.where(Prediction.class).equalTo("id", key).findAll();
-                                if(predictions.size() > 0){
-                                    final Prediction prediction = predictions.get(0);
-                                    realm.executeTransaction(r -> {
-                                        prediction.setCurrent(false);
-                                        r.copyToRealmOrUpdate(prediction);
-                                    });
-                                }
+                            Arrivals oldArrivals = realm.where(Arrivals.class).equalTo("id", arrivals.getId()).findFirst();
+                            if (oldArrivals != null) {
+                                arrivals.setFavorite(oldArrivals.isFavorite());
                             }
+                            realm.executeTransaction(r -> r.copyToRealmOrUpdate(arrivals));
                         } finally {
                             realm.close();
                         }
@@ -279,8 +258,15 @@ public class MainActivity extends AppCompatActivity {
                 .flatMap(route -> Observable.from(route.getStops())
                         .flatMap(stop -> apiService.getArrivalTimes(route.getId(), stop.getId())
                                 .map(arrivals -> {
+                                    if (arrivals.getPredictions().size() > 0) {
+                                        arrivals.setCurrent(true);
+                                    } else {
+                                        arrivals.setCurrent(false);
+                                    }
+                                    arrivals.setId(route.getId() + "" + stop.getId());
                                     arrivals.setRouteId(route.getId());
                                     arrivals.setStopId(stop.getId());
+                                    arrivals.setRouteName(route.getName());
                                     arrivals.setStopName(stop.getName());
                                     arrivals.setRouteColor(route.getColor());
                                     return arrivals;
@@ -300,7 +286,7 @@ public class MainActivity extends AppCompatActivity {
         locationUpdatesObservable = locationProvider.getUpdatedLocation(locationRequest);
     }
 
-    private void startLocationSubscription(){
+    private void startLocationSubscription() {
         if (locationUpdatesObservable != null) {
             locationSub = locationUpdatesObservable
                     .subscribe(new Subscriber<Location>() {

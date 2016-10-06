@@ -38,8 +38,6 @@ public class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail);
         ButterKnife.bind(this);
 
-        UCITransitApp.getComponent(this).inject(this);
-
         Bundle bundle = getIntent().getExtras();
         routeName = bundle.getString(Constants.ROUTE_ID_KEY);
         Log.d(TAG, "route: " + routeName);

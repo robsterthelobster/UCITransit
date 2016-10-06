@@ -1,16 +1,29 @@
 package com.robsterthelobster.ucitransit.ui;
 
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.data.BusApiService;
@@ -18,6 +31,7 @@ import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.robsterthelobster.ucitransit.utils.Constants;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -34,6 +48,9 @@ import rx.schedulers.Schedulers;
  */
 
 public class BusMapFragment extends Fragment implements OnMapReadyCallback {
+
+    final String TAG = BusMapFragment.class.getSimpleName();
+    final int MAP_PADDING = 200;
 
     @Inject
     Realm realm;
@@ -64,43 +81,60 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
         realm = Realm.getDefaultInstance();
 
         route = realm.where(Route.class).equalTo("name", routeName).findFirst();
+        stopMarkers = new ArrayList<>();
 
         ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
 
         return view;
     }
 
-    private void setUpMarkers() {
-        Observable.from(route.getStops())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Stop>() {
-                    @Override
-                    public void onCompleted() {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onNext(Stop stop) {
-
-                    }
-                });
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        realm.close();
+    private void setUpStopMarkers() {
+        Log.d(TAG, "setUpStopMarkers");
+        stopMarkers.clear();
+        for(Stop stop : route.getStops()){
+            LatLng latLng = new LatLng(stop.getLatitude(), stop.getLongitude());
+            stopMarkers.add(map.addMarker(new MarkerOptions()
+                    .icon(getBitmapDescriptor(
+                            R.drawable.ic_directions_bus_black_24dp,
+                            Color.parseColor(route.getColor())))
+                    .position(latLng).title(stop.getName())));
+        }
+        centerMapToStops(MAP_PADDING);
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
-        setUpMarkers();
+        setUpStopMarkers();
+    }
+
+    private BitmapDescriptor getBitmapDescriptor(int id, int color) {
+        Drawable vectorDrawable = ContextCompat.getDrawable(getContext(), id);
+        int h = vectorDrawable.getIntrinsicHeight();
+        int w = vectorDrawable.getIntrinsicWidth();
+        vectorDrawable.setBounds(0, 0, w, h);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (color != -1)
+                vectorDrawable.setTint(color);
+        }
+        Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bm);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bm);
+    }
+
+    // http://stackoverflow.com/questions/14828217/
+    // android-map-v2-zoom-to-show-all-the-markers
+    private void centerMapToStops(int padding){
+        if(stopMarkers.isEmpty()){
+            return;
+        }
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        for (Marker marker : stopMarkers) {
+            builder.include(marker.getPosition());
+        }
+        LatLngBounds bounds = builder.build();
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+        map.moveCamera(cu);
     }
 }

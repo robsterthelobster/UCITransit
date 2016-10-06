@@ -27,4 +27,6 @@ public class UCITransitApp extends Application {
     public static UCITransitComponent getComponent(Context context){
         return ((UCITransitApp) context.getApplicationContext()).component;
     }
+
+
 }

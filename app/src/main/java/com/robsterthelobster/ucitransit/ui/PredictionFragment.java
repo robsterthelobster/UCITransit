@@ -66,10 +66,4 @@ public class PredictionFragment extends Fragment {
 
         return view;
     }
-
-    @Override
-    public void onDestroy(){
-        super.onDestroy();
-        realm.close();
-    }
 }

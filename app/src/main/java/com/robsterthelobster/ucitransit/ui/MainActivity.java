@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
                 .subscribe(new Subscriber<Route>() {
                     @Override
                     public void onCompleted() {
-                        Log.d("fetchRouteSub", "completed");
+                        Log.d("fetchRouteSub", "onCompleted");
                         routeResults = realm.where(Route.class).findAll();
                         setUpNavigationView();
                         fetchArrivals();
@@ -273,7 +273,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void callLocationService() {
-        Log.d("callLocationService", "called");
         LocationRequest locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(1000 * 5); // number of seconds
@@ -290,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
 
                         @Override
                         public void onCompleted() {
-                            Log.d(TAG, "Completed");
+                            Log.d(TAG, "onCompleted");
                         }
 
                         @Override

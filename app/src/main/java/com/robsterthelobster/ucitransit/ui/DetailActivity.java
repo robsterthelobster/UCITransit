@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.robsterthelobster.ucitransit.DaggerUCITransitComponent;
 import com.robsterthelobster.ucitransit.R;
+import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.UCITransitComponent;
 import com.robsterthelobster.ucitransit.module.RealmModule;
 import com.robsterthelobster.ucitransit.module.RestModule;
@@ -37,11 +38,7 @@ public class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail);
         ButterKnife.bind(this);
 
-        UCITransitComponent component = DaggerUCITransitComponent.builder()
-                .realmModule(new RealmModule(this))
-                .restModule(new RestModule())
-                .build();
-        component.inject(this);
+        UCITransitApp.getComponent(this).inject(this);
 
         Bundle bundle = getIntent().getExtras();
         routeName = bundle.getString(Constants.ROUTE_ID_KEY);

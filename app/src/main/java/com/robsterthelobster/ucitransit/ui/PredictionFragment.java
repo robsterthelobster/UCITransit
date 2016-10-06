@@ -1,16 +1,20 @@
 package com.robsterthelobster.ucitransit.ui;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.robsterthelobster.ucitransit.R;
+import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.data.ArrivalsAdapter;
+import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.models.Arrivals;
-import com.robsterthelobster.ucitransit.data.models.Prediction;
 import com.robsterthelobster.ucitransit.utils.Constants;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -26,10 +30,12 @@ public class PredictionFragment extends Fragment {
     @BindView(R.id.fragment_recycler_view)
     RealmRecyclerView recyclerView;
 
+    @Inject
     Realm realm;
+    @Inject
+    BusApiService apiService;
 
-    public PredictionFragment() {
-    }
+    public PredictionFragment() {}
 
     public static PredictionFragment newInstance(String routeName){
         PredictionFragment fragment = new PredictionFragment();
@@ -44,11 +50,11 @@ public class PredictionFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_prediction_list, container, false);
         ButterKnife.bind(this, view);
+        UCITransitApp.getComponent(getContext()).inject(this);
 
         Bundle arguments = getArguments();
         String routeName = arguments.getString(Constants.ROUTE_ID_KEY);
 
-        realm = Realm.getDefaultInstance();
         RealmResults<Arrivals> arrivals = realm
                 .where(Arrivals.class)
                 .equalTo("isCurrent", true)

@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.google.android.gms.location.LocationRequest;
 import com.robsterthelobster.ucitransit.DaggerUCITransitComponent;
 import com.robsterthelobster.ucitransit.R;
+import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.UCITransitComponent;
 import com.robsterthelobster.ucitransit.data.ArrivalsAdapter;
 import com.robsterthelobster.ucitransit.data.BusApiService;
@@ -74,10 +75,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        UCITransitComponent component = DaggerUCITransitComponent.builder()
-                .realmModule(new RealmModule(this))
-                .build();
-        component.inject(this);
+        UCITransitApp.getComponent(this).inject(this);
 
         ButterKnife.bind(this);
 

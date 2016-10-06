@@ -1,6 +1,7 @@
 package com.robsterthelobster.ucitransit.ui;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,16 +12,19 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Marker;
 import com.robsterthelobster.ucitransit.R;
+import com.robsterthelobster.ucitransit.UCITransitApp;
+import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.robsterthelobster.ucitransit.utils.Constants;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import butterknife.ButterKnife;
 import io.realm.Realm;
 import rx.Observable;
-import rx.Scheduler;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -31,10 +35,13 @@ import rx.schedulers.Schedulers;
 
 public class BusMapFragment extends Fragment implements OnMapReadyCallback {
 
+    @Inject
     Realm realm;
+    @Inject
+    BusApiService apiService;
+
     GoogleMap map;
     Route route;
-
     List<Marker> stopMarkers;
 
     public static BusMapFragment newInstance(String routeName) {
@@ -50,6 +57,7 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         ButterKnife.bind(this, view);
+        UCITransitApp.getComponent(getContext()).inject(this);
 
         Bundle arguments = getArguments();
         String routeName = arguments.getString(Constants.ROUTE_ID_KEY);

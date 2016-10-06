@@ -1,5 +1,6 @@
 package com.robsterthelobster.ucitransit.ui;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -29,10 +30,14 @@ import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.Stop;
+import com.robsterthelobster.ucitransit.data.models.Vehicle;
 import com.robsterthelobster.ucitransit.utils.Constants;
+import com.robsterthelobster.ucitransit.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -60,6 +65,7 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
     GoogleMap map;
     Route route;
     List<Marker> stopMarkers;
+    HashMap<String, Marker> vehicleMarkers;
 
     public static BusMapFragment newInstance(String routeName) {
         BusMapFragment fragment = new BusMapFragment();
@@ -82,6 +88,7 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
 
         route = realm.where(Route.class).equalTo("name", routeName).findFirst();
         stopMarkers = new ArrayList<>();
+        vehicleMarkers = new HashMap<>();
 
         ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
 
@@ -90,22 +97,65 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
 
     private void setUpStopMarkers() {
         Log.d(TAG, "setUpStopMarkers");
-        stopMarkers.clear();
         for(Stop stop : route.getStops()){
             LatLng latLng = new LatLng(stop.getLatitude(), stop.getLongitude());
             stopMarkers.add(map.addMarker(new MarkerOptions()
                     .icon(getBitmapDescriptor(
                             R.drawable.ic_directions_bus_black_24dp,
                             Color.parseColor(route.getColor())))
-                    .position(latLng).title(stop.getName())));
+                    .position(latLng)
+                    .title(stop.getName())));
         }
         centerMapToStops(MAP_PADDING);
+    }
+
+    private void fetchVehicleData(){
+        final Context context = getContext();
+        int id = route.getId();
+        Observable.interval(30, TimeUnit.SECONDS)
+                .flatMap(tick -> apiService.getVehicles(id))
+                .flatMap(Observable::from)
+                .distinct()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Vehicle>() {
+                    final String TAG = "fetchVehicleData";
+                    @Override
+                    public void onCompleted() {
+                        Log.d(TAG, "onCompleted");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(TAG, e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(Vehicle vehicle) {
+                        Log.d(TAG, "onNext");
+                        String key = vehicle.getName();
+                        LatLng latLng = new LatLng(vehicle.getLatitude(), vehicle.getLongitude());
+                        if(vehicleMarkers.containsKey(key)){
+                            vehicleMarkers.get(key).setPosition(latLng);
+                        }else{
+                            Marker marker = map.addMarker(new MarkerOptions()
+                                    .icon(getBitmapDescriptor(R.drawable.bus_tracker,
+                                            context.getResources().getColor(R.color.colorPrimary)))
+                                    .position(latLng)
+                                    .rotation(Utils.getRotationFromDirection(vehicle.getHeading()))
+                                    .flat(true)
+                                    .title(vehicle.getName()));
+                            vehicleMarkers.put(key, marker);
+                        }
+                    }
+                });
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
         setUpStopMarkers();
+        fetchVehicleData();
     }
 
     private BitmapDescriptor getBitmapDescriptor(int id, int color) {

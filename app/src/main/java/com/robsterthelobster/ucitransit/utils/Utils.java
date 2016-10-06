@@ -13,5 +13,32 @@ public class Utils {
             subscription.unsubscribe();
         }
     }
+
+    /**
+    * Direction comes in shorthand N,E,S,W and combination
+    * The icon used is already facing right so E = 0
+    */
+    public static float getRotationFromDirection(String direction){
+        switch (direction){
+            case "N":
+                return 270f;
+            case "NW":
+                return 225f;
+            case "NE":
+                return 315f;
+            case "E":
+                return 0f;
+            case "S":
+                return 90f;
+            case "SE":
+                return 45f;
+            case "SW":
+                return 135f;
+            case "W":
+                return 180f;
+            default:
+                return 0f;
+        }
+    }
 }
 

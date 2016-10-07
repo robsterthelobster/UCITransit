@@ -5,6 +5,5 @@ package com.robsterthelobster.ucitransit.utils;
  */
 
 public class Constants {
-
     public final static String ROUTE_ID_KEY = "route key";
 }

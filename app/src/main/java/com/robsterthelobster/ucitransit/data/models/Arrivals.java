@@ -1,10 +1,6 @@
 package com.robsterthelobster.ucitransit.data.models;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.SerializedName;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
@@ -16,7 +12,7 @@ import io.realm.annotations.PrimaryKey;
 public class Arrivals extends RealmObject{
 
     @PrimaryKey
-    String id;
+    String id; // routeId + "" + stopId
     int routeId;
     int stopId;
     String routeName;

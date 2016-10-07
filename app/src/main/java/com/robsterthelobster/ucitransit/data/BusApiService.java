@@ -1,6 +1,9 @@
 package com.robsterthelobster.ucitransit.data;
 
-import com.robsterthelobster.ucitransit.data.models.*;
+import com.robsterthelobster.ucitransit.data.models.Arrivals;
+import com.robsterthelobster.ucitransit.data.models.Route;
+import com.robsterthelobster.ucitransit.data.models.Stop;
+import com.robsterthelobster.ucitransit.data.models.Vehicle;
 
 import java.util.List;
 

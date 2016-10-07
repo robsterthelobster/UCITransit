@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -16,7 +17,6 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.maps.model.LatLng;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.data.ArrivalsAdapter;
@@ -45,6 +45,10 @@ import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final String TAG = MainActivity.class.getSimpleName();
+    private final float DISTANCE_FENCE = 500; // meters
+    private final int LOCATION_REFRESH_RATE = 30; // seconds
+
     @BindView(R.id.drawer_layout)
     DrawerLayout drawer;
     @BindView(R.id.nav_view)
@@ -66,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
     Subscription fetchArrivalsSub;
     Subscription permissionSub;
     Subscription locationSub;
+    Subscription menuItemSub;
     Observable<Location> locationUpdatesObservable;
 
     Location mLocation;
@@ -74,13 +79,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         UCITransitApp.getComponent(this).inject(this);
-
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
-
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -97,7 +99,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-        // predictions that are current
         RealmResults<Arrivals> arrivals = realm
                 .where(Arrivals.class)
                 .equalTo("isCurrent", true)
@@ -106,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
         arrivalsAdapter = new ArrivalsAdapter(this, arrivals, true, false);
         recyclerView.setAdapter(arrivalsAdapter);
-        recyclerView.setOnRefreshListener(() -> fetchArrivals());
+        recyclerView.setOnRefreshListener(this::fetchArrivals);
 
         if (realm.isEmpty()) {
             fetchInitialRouteData();
@@ -133,6 +134,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+            case R.id.action_refresh:
+                Log.i(TAG, "Refresh menu item selected");
+                recyclerView.setRefreshing(true);
+                fetchArrivals();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         realm.close();
@@ -140,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
         Utils.unsubscribe(fetchArrivalsSub);
         Utils.unsubscribe(permissionSub);
         Utils.unsubscribe(locationSub);
+        Utils.unsubscribe(menuItemSub);
     }
 
     @Override
@@ -168,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
     private void callLocationService() {
         LocationRequest locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(1000 * 5); // number of seconds
+                .setInterval(1000 * LOCATION_REFRESH_RATE); // number of seconds
 
         ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(this);
         locationUpdatesObservable = locationProvider.getUpdatedLocation(locationRequest);
@@ -194,6 +208,7 @@ public class MainActivity extends AppCompatActivity {
                         public void onNext(Location location) {
                             Log.d(TAG, location.toString());
                             mLocation = location;
+                            fetchArrivals();
                         }
                     });
         }
@@ -275,16 +290,18 @@ public class MainActivity extends AppCompatActivity {
                                 Location stopLocation = new Location("stop");
                                 stopLocation.setLatitude(stop.getLatitude());
                                 stopLocation.setLongitude(stop.getLongitude());
-                                isNearby = stopLocation.distanceTo(mLocation) <= 500;
+                                isNearby = stopLocation.distanceTo(mLocation) <= DISTANCE_FENCE;
                             }
 
                             final boolean result = isNearby;
                             final Realm realm = Realm.getDefaultInstance();
                             try {
-                                RealmResults<Arrivals> oldArrivals = realm.where(Arrivals.class).equalTo("stopId", stop.getId()).findAll();
+                                RealmResults<Arrivals> oldArrivals =
+                                        realm.where(Arrivals.class).equalTo("stopId", stop.getId()).findAll();
+
                                 for(int i = 0; i < oldArrivals.size(); i++){
+                                    Arrivals arrivals = oldArrivals.get(0);
                                     realm.executeTransaction(r -> {
-                                        Arrivals arrivals = oldArrivals.get(0);
                                         arrivals.setNearby(result);
                                         r.copyToRealmOrUpdate(arrivals);
                                     });
@@ -292,7 +309,6 @@ public class MainActivity extends AppCompatActivity {
                             } finally {
                                 realm.close();
                             }
-
                             return result;
                         })
                         .flatMap(stop -> apiService.getArrivalTimes(route.getId(), stop.getId())

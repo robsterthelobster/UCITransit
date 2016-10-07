@@ -3,7 +3,6 @@ package com.robsterthelobster.ucitransit.data.models;
 import com.google.gson.annotations.SerializedName;
 
 import io.realm.RealmObject;
-import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by robin on 6/20/2016.

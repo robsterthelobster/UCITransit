@@ -21,6 +21,7 @@ import com.robsterthelobster.ucitransit.data.models.Prediction;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.realm.Realm;
 import io.realm.RealmBasedRecyclerViewAdapter;
 import io.realm.RealmList;
@@ -102,54 +103,55 @@ public class ArrivalsAdapter
             this.container = container;
             ButterKnife.bind(this, container);
 
-            cardView.setOnClickListener(view -> {
-                if (originalHeight == 0) {
-                    originalHeight = view.getHeight();
-                    expandingHeight = (int)(originalHeight * .5);
-                }
-
-                ValueAnimator valueAnimator;
-                if (!isViewExpanded) {
-                    secondaryArrivalText.setVisibility(View.VISIBLE);
-                    secondaryArrivalText.setEnabled(true);
-                    isViewExpanded = true;
-                    valueAnimator = ValueAnimator.ofInt(originalHeight,
-                            originalHeight + expandingHeight);
-                } else {
-                    isViewExpanded = false;
-                    valueAnimator = ValueAnimator.ofInt(originalHeight + expandingHeight,
-                            originalHeight);
-
-                    Animation a = new AlphaAnimation(1.00f, 0.00f); // Fade out
-                    a.setDuration(100);
-                    a.setAnimationListener(new Animation.AnimationListener() {
-                        @Override
-                        public void onAnimationStart(Animation animation) {}
-
-                        @Override
-                        public void onAnimationEnd(Animation animation) {
-                            secondaryArrivalText.setVisibility(View.GONE);
-                            secondaryArrivalText.setEnabled(false);
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(Animation animation) {}
-                    });
-                    secondaryArrivalText.startAnimation(a);
-                }
-                valueAnimator.setDuration(100);
-                valueAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
-                valueAnimator.addUpdateListener(animation -> {
-                    view.getLayoutParams().height = (Integer) animation.getAnimatedValue();
-                    view.requestLayout();
-                });
-                valueAnimator.start();
-            });
-
             if (!isViewExpanded) {
                 secondaryArrivalText.setVisibility(View.GONE);
                 secondaryArrivalText.setEnabled(false);
             }
+        }
+
+        @OnClick(R.id.card_view)
+        public void expandCard(View view){
+            if (originalHeight == 0) {
+                originalHeight = view.getHeight();
+                expandingHeight = (int)(originalHeight * .5);
+            }
+
+            ValueAnimator valueAnimator;
+            if (!isViewExpanded) {
+                secondaryArrivalText.setVisibility(View.VISIBLE);
+                secondaryArrivalText.setEnabled(true);
+                isViewExpanded = true;
+                valueAnimator = ValueAnimator.ofInt(originalHeight,
+                        originalHeight + expandingHeight);
+            } else {
+                isViewExpanded = false;
+                valueAnimator = ValueAnimator.ofInt(originalHeight + expandingHeight,
+                        originalHeight);
+
+                Animation a = new AlphaAnimation(1.00f, 0.00f); // Fade out
+                a.setDuration(100);
+                a.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {}
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        secondaryArrivalText.setVisibility(View.GONE);
+                        secondaryArrivalText.setEnabled(false);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {}
+                });
+                secondaryArrivalText.startAnimation(a);
+            }
+            valueAnimator.setDuration(100);
+            valueAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+            valueAnimator.addUpdateListener(animation -> {
+                view.getLayoutParams().height = (Integer) animation.getAnimatedValue();
+                view.requestLayout();
+            });
+            valueAnimator.start();
         }
     }
 }

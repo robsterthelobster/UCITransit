@@ -1,6 +1,8 @@
 package com.robsterthelobster.ucitransit.ui;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -9,12 +11,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -47,6 +51,9 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.realm.Realm;
 import rx.Observable;
 import rx.Subscriber;
@@ -63,6 +70,8 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
     final String TAG = BusMapFragment.class.getSimpleName();
     final int MAP_PADDING = 200;
 
+    @BindView(R.id.map_button_center)
+    Button centerButton;
     @Inject
     Realm realm;
     @Inject
@@ -90,7 +99,7 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
-        //ButterKnife.bind(this, view);
+        ButterKnife.bind(this, view);
         UCITransitApp.getComponent(getContext()).inject(this);
 
         Bundle arguments = getArguments();
@@ -110,7 +119,7 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
 
     private void setUpStopMarkers() {
         Log.d(TAG, "setUpStopMarkers");
-        for(Stop stop : route.getStops()){
+        for (Stop stop : route.getStops()) {
             LatLng latLng = new LatLng(stop.getLatitude(), stop.getLongitude());
             Marker marker = map.addMarker(new MarkerOptions()
                     .icon(getBitmapDescriptor(
@@ -118,13 +127,13 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
                             Color.parseColor(route.getColor())))
                     .position(latLng)
                     .title(stop.getName()));
-            marker.setTag(route.getId()+""+stop.getId());
+            marker.setTag(route.getId() + "" + stop.getId());
             stopMarkers.add(marker);
         }
-        centerMapToStops(MAP_PADDING);
+        centerMapToStops();
     }
 
-    private void fetchVehicleData(){
+    private void fetchVehicleData() {
         final Context context = getContext();
         int id = route.getId();
         vehicleSub = Observable.interval(0, 30, TimeUnit.SECONDS)
@@ -135,6 +144,7 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Vehicle>() {
                     final String TAG = "fetchVehicleData";
+
                     @Override
                     public void onCompleted() {
                         Log.d(TAG, "onCompleted");
@@ -151,11 +161,11 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
                         String key = "Bus " + vehicle.getName();
                         LatLng latLng = new LatLng(vehicle.getLatitude(), vehicle.getLongitude());
                         float rotation = Utils.getRotationFromDirection(vehicle.getHeading());
-                        if(vehicleMarkers.containsKey(key)){
+                        if (vehicleMarkers.containsKey(key)) {
                             Marker marker = vehicleMarkers.get(key);
                             marker.setPosition(latLng);
                             marker.setRotation(rotation);
-                        }else{
+                        } else {
                             Marker marker = map.addMarker(new MarkerOptions()
                                     .icon(getBitmapDescriptor(R.drawable.bus_tracker,
                                             context.getResources().getColor(R.color.colorPrimary)))
@@ -174,21 +184,30 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
         map.setOnMarkerClickListener(marker -> {
-            if(stopMarkers.contains(marker)){
+            if (stopMarkers.contains(marker)) {
                 Arrivals arrivals =
-                        realm.where(Arrivals.class).equalTo("id", (String)marker.getTag()).findFirst();
-                if(!arrivals.getPredictions().isEmpty()){
+                        realm.where(Arrivals.class).equalTo("id", (String) marker.getTag()).findFirst();
+                if (!arrivals.getPredictions().isEmpty()) {
                     Prediction prediction = arrivals.getPredictions().first();
                     showSnackbar("Arrives in " + prediction.getMinutes() + " min");
                 }
             }
-            if(vehicleMarkers.containsKey(marker.getTitle())){
+            if (vehicleMarkers.containsKey(marker.getTitle())) {
                 Vehicle vehicle = (Vehicle) vehicleMarkers.get(marker.getTitle()).getTag();
-                if(vehicle != null)
+                if (vehicle != null)
                     showSnackbar("Bus is " + vehicle.getApcPercentage() + "% full");
             }
             return false;
         });
+        map.setOnMyLocationButtonClickListener(() -> false);
+        map.getUiSettings().setZoomControlsEnabled(true);
+        if (ActivityCompat.checkSelfPermission(getContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(getContext(),
+                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        }else{
+            map.setMyLocationEnabled(true);
+        }
         setUpStopMarkers();
         fetchVehicleData();
     }
@@ -216,7 +235,8 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
 
     // http://stackoverflow.com/questions/14828217/
     // android-map-v2-zoom-to-show-all-the-markers
-    private void centerMapToStops(int padding){
+    @OnClick(R.id.map_button_center)
+    public void centerMapToStops(){
         if(stopMarkers.isEmpty()){
             return;
         }
@@ -225,7 +245,7 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
             builder.include(marker.getPosition());
         }
         LatLngBounds bounds = builder.build();
-        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, MAP_PADDING);
         map.moveCamera(cu);
     }
 

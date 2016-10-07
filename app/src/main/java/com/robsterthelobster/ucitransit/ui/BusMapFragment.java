@@ -45,6 +45,7 @@ import butterknife.ButterKnife;
 import io.realm.Realm;
 import rx.Observable;
 import rx.Subscriber;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -66,6 +67,7 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
     Route route;
     List<Marker> stopMarkers;
     HashMap<String, Marker> vehicleMarkers;
+    Subscription vehicleSub;
 
     public static BusMapFragment newInstance(String routeName) {
         BusMapFragment fragment = new BusMapFragment();
@@ -112,7 +114,7 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
     private void fetchVehicleData(){
         final Context context = getContext();
         int id = route.getId();
-        Observable.interval(30, TimeUnit.SECONDS)
+        vehicleSub = Observable.interval(0, 30, TimeUnit.SECONDS)
                 .flatMap(tick -> apiService.getVehicles(id))
                 .flatMap(Observable::from)
                 .distinct()
@@ -135,14 +137,17 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
                         Log.d(TAG, "onNext");
                         String key = vehicle.getName();
                         LatLng latLng = new LatLng(vehicle.getLatitude(), vehicle.getLongitude());
+                        float rotation = Utils.getRotationFromDirection(vehicle.getHeading());
                         if(vehicleMarkers.containsKey(key)){
-                            vehicleMarkers.get(key).setPosition(latLng);
+                            Marker marker = vehicleMarkers.get(key);
+                            marker.setPosition(latLng);
+                            marker.setRotation(rotation);
                         }else{
                             Marker marker = map.addMarker(new MarkerOptions()
                                     .icon(getBitmapDescriptor(R.drawable.bus_tracker,
                                             context.getResources().getColor(R.color.colorPrimary)))
                                     .position(latLng)
-                                    .rotation(Utils.getRotationFromDirection(vehicle.getHeading()))
+                                    .rotation(rotation)
                                     .flat(true)
                                     .title(vehicle.getName()));
                             vehicleMarkers.put(key, marker);
@@ -156,6 +161,12 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
         this.map = googleMap;
         setUpStopMarkers();
         fetchVehicleData();
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        Utils.unsubscribe(vehicleSub);
     }
 
     private BitmapDescriptor getBitmapDescriptor(int id, int color) {

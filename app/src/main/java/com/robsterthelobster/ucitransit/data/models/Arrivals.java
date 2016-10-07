@@ -1,5 +1,6 @@
 package com.robsterthelobster.ucitransit.data.models;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public class Arrivals extends RealmObject{
     String stopName;
     boolean isFavorite;
     boolean isCurrent;
+    boolean isNearby;
 
     @SerializedName("PredictionTime")
     private String predictionTime;
@@ -59,6 +61,14 @@ public class Arrivals extends RealmObject{
 
     public void setCurrent(boolean current) {
         isCurrent = current;
+    }
+
+    public boolean isNearby() {
+        return isNearby;
+    }
+
+    public void setNearby(boolean nearby) {
+        isNearby = nearby;
     }
 
     public String getPredictionTime() {

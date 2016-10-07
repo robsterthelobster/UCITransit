@@ -16,16 +16,14 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.gms.location.LocationRequest;
-import com.robsterthelobster.ucitransit.DaggerUCITransitComponent;
+import com.google.android.gms.maps.model.LatLng;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitApp;
-import com.robsterthelobster.ucitransit.UCITransitComponent;
 import com.robsterthelobster.ucitransit.data.ArrivalsAdapter;
 import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.models.Arrivals;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.Stop;
-import com.robsterthelobster.ucitransit.module.RealmModule;
 import com.robsterthelobster.ucitransit.utils.Constants;
 import com.robsterthelobster.ucitransit.utils.Utils;
 import com.tbruyelle.rxpermissions.RxPermissions;
@@ -70,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
     Subscription locationSub;
     Observable<Location> locationUpdatesObservable;
 
+    Location mLocation;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,7 +99,10 @@ public class MainActivity extends AppCompatActivity {
 
         // predictions that are current
         RealmResults<Arrivals> arrivals = realm
-                .where(Arrivals.class).equalTo("isCurrent", true).findAll();
+                .where(Arrivals.class)
+                .equalTo("isCurrent", true)
+                .equalTo("isNearby", true)
+                .findAllSorted("isFavorite");
 
         arrivalsAdapter = new ArrivalsAdapter(this, arrivals, true, false);
         recyclerView.setAdapter(arrivalsAdapter);
@@ -112,7 +115,6 @@ public class MainActivity extends AppCompatActivity {
             setUpNavigationView();
             fetchArrivals();
         }
-
     }
 
     @Override
@@ -128,16 +130,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
     }
 
     @Override
@@ -171,6 +163,40 @@ public class MainActivity extends AppCompatActivity {
             MenuItem item = navigationView.getMenu().add(name);
             item.setIntent(intent);
         });
+    }
+
+    private void callLocationService() {
+        LocationRequest locationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(1000 * 5); // number of seconds
+
+        ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(this);
+        locationUpdatesObservable = locationProvider.getUpdatedLocation(locationRequest);
+    }
+
+    private void startLocationSubscription() {
+        if (locationUpdatesObservable != null) {
+            locationSub = locationUpdatesObservable
+                    .subscribe(new Subscriber<Location>() {
+                        final String TAG = "Location subscription";
+
+                        @Override
+                        public void onCompleted() {
+                            Log.d(TAG, "onCompleted");
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.d(TAG, e.toString());
+                        }
+
+                        @Override
+                        public void onNext(Location location) {
+                            Log.d(TAG, location.toString());
+                            mLocation = location;
+                        }
+                    });
+        }
     }
 
     private void fetchInitialRouteData() {
@@ -234,7 +260,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private Observable<Arrivals> getArrivalsObservable() {
-
         return Observable.defer(() -> {
             final Realm threadRealm = Realm.getDefaultInstance();
             RealmResults<Route> routeRealmResults = threadRealm.where(Route.class).findAll();
@@ -242,6 +267,34 @@ public class MainActivity extends AppCompatActivity {
                     .doOnCompleted(threadRealm::close);
         })
                 .flatMap(route -> Observable.from(route.getStops())
+                        .filter(stop -> {
+                            boolean isNearby = false;
+                            if(mLocation == null) {
+                                isNearby = false;
+                            }else{
+                                Location stopLocation = new Location("stop");
+                                stopLocation.setLatitude(stop.getLatitude());
+                                stopLocation.setLongitude(stop.getLongitude());
+                                isNearby = stopLocation.distanceTo(mLocation) <= 500;
+                            }
+
+                            final boolean result = isNearby;
+                            final Realm realm = Realm.getDefaultInstance();
+                            try {
+                                RealmResults<Arrivals> oldArrivals = realm.where(Arrivals.class).equalTo("stopId", stop.getId()).findAll();
+                                for(int i = 0; i < oldArrivals.size(); i++){
+                                    realm.executeTransaction(r -> {
+                                        Arrivals arrivals = oldArrivals.get(0);
+                                        arrivals.setNearby(result);
+                                        r.copyToRealmOrUpdate(arrivals);
+                                    });
+                                }
+                            } finally {
+                                realm.close();
+                            }
+
+                            return result;
+                        })
                         .flatMap(stop -> apiService.getArrivalTimes(route.getId(), stop.getId())
                                 .map(arrivals -> {
                                     if (arrivals.getPredictions().size() > 0) {
@@ -269,39 +322,5 @@ public class MainActivity extends AppCompatActivity {
                                 })))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
-
-    }
-
-    private void callLocationService() {
-        LocationRequest locationRequest = LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(1000 * 5); // number of seconds
-
-        ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(this);
-        locationUpdatesObservable = locationProvider.getUpdatedLocation(locationRequest);
-    }
-
-    private void startLocationSubscription() {
-        if (locationUpdatesObservable != null) {
-            locationSub = locationUpdatesObservable
-                    .subscribe(new Subscriber<Location>() {
-                        final String TAG = "Location subscription";
-
-                        @Override
-                        public void onCompleted() {
-                            Log.d(TAG, "onCompleted");
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            Log.d(TAG, e.toString());
-                        }
-
-                        @Override
-                        public void onNext(Location location) {
-                            Log.d(TAG, location.toString());
-                        }
-                    });
-        }
     }
 }

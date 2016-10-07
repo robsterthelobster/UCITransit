@@ -10,12 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
-import com.robsterthelobster.ucitransit.DaggerUCITransitComponent;
 import com.robsterthelobster.ucitransit.R;
-import com.robsterthelobster.ucitransit.UCITransitApp;
-import com.robsterthelobster.ucitransit.UCITransitComponent;
-import com.robsterthelobster.ucitransit.module.RealmModule;
-import com.robsterthelobster.ucitransit.module.RestModule;
 import com.robsterthelobster.ucitransit.utils.Constants;
 
 import butterknife.BindView;
@@ -30,7 +25,7 @@ public class DetailActivity extends AppCompatActivity {
     @BindView(R.id.detail_toolbar) Toolbar toolbar;
     @BindView(R.id.sliding_tabs) TabLayout tabLayout;
 
-    static String routeName;
+    String routeName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

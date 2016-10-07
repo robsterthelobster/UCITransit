@@ -1,8 +1,10 @@
 package com.robsterthelobster.ucitransit.ui;
 
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,7 @@ import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.data.ArrivalsAdapter;
 import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.models.Arrivals;
+import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.utils.Constants;
 
 import javax.inject.Inject;
@@ -21,6 +24,11 @@ import butterknife.ButterKnife;
 import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
 import io.realm.Realm;
 import io.realm.RealmResults;
+import rx.Observable;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by robin on 10/3/2016.
@@ -35,9 +43,13 @@ public class PredictionFragment extends Fragment {
     @Inject
     BusApiService apiService;
 
-    public PredictionFragment() {}
+    String routeName;
+    Subscription fetchArrivalsSub;
 
-    public static PredictionFragment newInstance(String routeName){
+    public PredictionFragment() {
+    }
+
+    public static PredictionFragment newInstance(String routeName) {
         PredictionFragment fragment = new PredictionFragment();
         Bundle bundle = new Bundle();
         bundle.putString(Constants.ROUTE_ID_KEY, routeName);
@@ -53,7 +65,7 @@ public class PredictionFragment extends Fragment {
         UCITransitApp.getComponent(getContext()).inject(this);
 
         Bundle arguments = getArguments();
-        String routeName = arguments.getString(Constants.ROUTE_ID_KEY);
+        routeName = arguments.getString(Constants.ROUTE_ID_KEY);
 
         RealmResults<Arrivals> arrivals = realm
                 .where(Arrivals.class)
@@ -63,7 +75,70 @@ public class PredictionFragment extends Fragment {
 
         ArrivalsAdapter arrivalsAdapter = new ArrivalsAdapter(getContext(), arrivals, true, false);
         recyclerView.setAdapter(arrivalsAdapter);
+        recyclerView.setOnRefreshListener(this::fetchArrivals);
+        fetchArrivals();
 
         return view;
+    }
+
+    private Observable<Arrivals> getArrivalsObservable() {
+        return Observable.defer(() -> {
+            final Realm threadRealm = Realm.getDefaultInstance();
+            Route route = threadRealm.where(Route.class).equalTo("name", routeName).findFirst();
+            return Observable.just(route)
+                    .doOnCompleted(threadRealm::close);
+        })
+                .flatMap(route -> Observable.from(route.getStops())
+                        .flatMap(stop -> apiService.getArrivalTimes(route.getId(), stop.getId())
+                                .map(arrivals -> {
+                                    if (arrivals.getPredictions().size() > 0) {
+                                        arrivals.setCurrent(true);
+                                    } else {
+                                        arrivals.setCurrent(false);
+                                    }
+                                    arrivals.setId(route.getId() + "" + stop.getId());
+                                    arrivals.setRouteId(route.getId());
+                                    arrivals.setStopId(stop.getId());
+                                    arrivals.setRouteName(route.getName());
+                                    arrivals.setStopName(stop.getName());
+                                    arrivals.setRouteColor(route.getColor());
+                                    final Realm realm = Realm.getDefaultInstance();
+                                    try {
+                                        Arrivals oldArrivals = realm.where(Arrivals.class).equalTo("id", arrivals.getId()).findFirst();
+                                        if (oldArrivals != null) {
+                                            arrivals.setFavorite(oldArrivals.isFavorite());
+                                        }
+                                        realm.executeTransaction(r -> r.copyToRealmOrUpdate(arrivals));
+                                    } finally {
+                                        realm.close();
+                                    }
+                                    return arrivals;
+                                })))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    private void fetchArrivals() {
+        recyclerView.setRefreshing(true);
+        fetchArrivalsSub = getArrivalsObservable()
+                .subscribe(new Subscriber<Arrivals>() {
+                    final String TAG = "DetailArrivalsSub";
+
+                    @Override
+                    public void onCompleted() {
+                        Log.d(TAG, "onCompleted");
+                        recyclerView.setRefreshing(false);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(TAG, e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(Arrivals arrivals) {
+                        //Log.d(TAG, "onConNext: " + arrivals.getRouteName());
+                    }
+                });
     }
 }

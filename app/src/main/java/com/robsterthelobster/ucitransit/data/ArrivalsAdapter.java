@@ -6,6 +6,7 @@ import android.support.v7.widget.CardView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -15,6 +16,7 @@ import com.robsterthelobster.ucitransit.data.models.Prediction;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.realm.Realm;
 import io.realm.RealmBasedRecyclerViewAdapter;
 import io.realm.RealmList;
 import io.realm.RealmResults;
@@ -25,10 +27,13 @@ import io.realm.RealmViewHolder;
  */
 
 public class ArrivalsAdapter
-        extends RealmBasedRecyclerViewAdapter<Arrivals, ArrivalsAdapter.ViewHolder>{
+        extends RealmBasedRecyclerViewAdapter<Arrivals, ArrivalsAdapter.ViewHolder> {
 
-    public ArrivalsAdapter(Context context, RealmResults<Arrivals> realmResults, boolean automaticUpdate, boolean animateResults) {
+    Realm realm;
+
+    public ArrivalsAdapter(Context context, RealmResults<Arrivals> realmResults, boolean automaticUpdate, boolean animateResults, Realm realm) {
         super(context, realmResults, automaticUpdate, animateResults);
+        this.realm = realm;
     }
 
     @Override
@@ -44,9 +49,9 @@ public class ArrivalsAdapter
         String minutes = "NA";
         String secondaryMinutes = "NA";
         int size = predictionRealmList.size();
-        if(size > 0){
+        if (size > 0) {
             minutes = predictionRealmList.get(0).getMinutes() + " min";
-            if(size > 1){
+            if (size > 1) {
                 secondaryMinutes = predictionRealmList.get(1).getMinutes() + " min";
             }
         }
@@ -54,16 +59,32 @@ public class ArrivalsAdapter
         viewHolder.arrivalText.setText(minutes);
         viewHolder.routeText.setText(arrivals.getRouteName());
         viewHolder.stopText.setText(String.valueOf(arrivals.getStopName()));
+        viewHolder.favoriteCheck.setOnCheckedChangeListener(null);
+        viewHolder.favoriteCheck.setChecked(arrivals.isFavorite());
+        viewHolder.favoriteCheck.setOnCheckedChangeListener(
+                (checkBox, checked) -> {
+                    checkBox.setChecked(checked);
+                    realm.executeTransaction(r -> {
+                        arrivals.setFavorite(checked);
+                        r.copyToRealmOrUpdate(arrivals);
+                    });
+                });
+
     }
 
-    public class ViewHolder extends RealmViewHolder{
+    public class ViewHolder extends RealmViewHolder {
 
         LinearLayout container;
-        @BindView(R.id.card_view) CardView cardView;
-        @BindView(R.id.prediction_route_name) TextView routeText;
-        @BindView(R.id.prediction_stop_name) TextView stopText;
-        @BindView(R.id.prediction_favorite_button) CheckBox favoriteCheck;
-        @BindView(R.id.prediction_arrival_time) TextView arrivalText;
+        @BindView(R.id.card_view)
+        CardView cardView;
+        @BindView(R.id.prediction_route_name)
+        TextView routeText;
+        @BindView(R.id.prediction_stop_name)
+        TextView stopText;
+        @BindView(R.id.prediction_favorite_button)
+        CheckBox favoriteCheck;
+        @BindView(R.id.prediction_arrival_time)
+        TextView arrivalText;
 
         public ViewHolder(LinearLayout container) {
             super(container);

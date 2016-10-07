@@ -47,8 +47,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import io.realm.Realm;
 import rx.Observable;
 import rx.Subscriber;

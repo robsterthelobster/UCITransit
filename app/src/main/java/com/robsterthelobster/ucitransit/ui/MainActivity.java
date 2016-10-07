@@ -36,6 +36,7 @@ import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
 import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmResults;
+import io.realm.Sort;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.Observable;
 import rx.Subscriber;
@@ -103,9 +104,9 @@ public class MainActivity extends AppCompatActivity {
                 .where(Arrivals.class)
                 .equalTo("isCurrent", true)
                 .equalTo("isNearby", true)
-                .findAllSorted("isFavorite");
+                .findAllSorted("isFavorite", Sort.DESCENDING);
 
-        arrivalsAdapter = new ArrivalsAdapter(this, arrivals, true, false);
+        arrivalsAdapter = new ArrivalsAdapter(this, arrivals, true, false, realm);
         recyclerView.setAdapter(arrivalsAdapter);
         recyclerView.setOnRefreshListener(this::fetchArrivals);
 

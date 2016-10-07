@@ -71,7 +71,7 @@ public class PredictionFragment extends Fragment {
                 .equalTo("routeName", routeName)
                 .findAll();
 
-        ArrivalsAdapter arrivalsAdapter = new ArrivalsAdapter(getContext(), arrivals, true, false);
+        ArrivalsAdapter arrivalsAdapter = new ArrivalsAdapter(getContext(), arrivals, true, false, realm);
         recyclerView.setAdapter(arrivalsAdapter);
         recyclerView.setOnRefreshListener(this::fetchArrivals);
         fetchArrivals();

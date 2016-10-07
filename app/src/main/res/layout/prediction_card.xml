@@ -53,10 +53,22 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Small.Inverse"
                 android:textColor="@color/white"
                 tools:text="University Center - North (UCI Admin)"
-                android:layout_alignBaseline="@+id/prediction_arrival_time"
+                android:layout_alignBaseline="@+id/prediction_arrival_time_alt"
                 android:layout_alignBottom="@+id/prediction_arrival_time"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true" />
+
+            <TextView
+                android:id="@+id/prediction_arrival_time_alt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="13 min"
+                android:paddingTop="4dp"
+                android:visibility="gone"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium.Inverse"
+                android:layout_below="@+id/prediction_arrival_time"
+                android:layout_alignParentRight="true"
+                android:textColor="@color/white" />
 
         </RelativeLayout>
 

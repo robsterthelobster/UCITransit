@@ -1,10 +1,15 @@
 package com.robsterthelobster.ucitransit.data;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
@@ -59,6 +64,7 @@ public class ArrivalsAdapter
         viewHolder.arrivalText.setText(minutes);
         viewHolder.routeText.setText(arrivals.getRouteName());
         viewHolder.stopText.setText(String.valueOf(arrivals.getStopName()));
+        viewHolder.secondaryArrivalText.setText(secondaryMinutes);
         viewHolder.favoriteCheck.setOnCheckedChangeListener(null);
         viewHolder.favoriteCheck.setChecked(arrivals.isFavorite());
         viewHolder.favoriteCheck.setOnCheckedChangeListener(
@@ -69,7 +75,6 @@ public class ArrivalsAdapter
                         r.copyToRealmOrUpdate(arrivals);
                     });
                 });
-
     }
 
     public class ViewHolder extends RealmViewHolder {
@@ -85,11 +90,66 @@ public class ArrivalsAdapter
         CheckBox favoriteCheck;
         @BindView(R.id.prediction_arrival_time)
         TextView arrivalText;
+        @BindView(R.id.prediction_arrival_time_alt)
+        TextView secondaryArrivalText;
 
-        public ViewHolder(LinearLayout container) {
+        private int originalHeight = 0;
+        private int expandingHeight = 0;
+        private boolean isViewExpanded = false;
+
+        ViewHolder(LinearLayout container) {
             super(container);
             this.container = container;
             ButterKnife.bind(this, container);
+
+            cardView.setOnClickListener(view -> {
+                if (originalHeight == 0) {
+                    originalHeight = view.getHeight();
+                    expandingHeight = (int)(originalHeight * .5);
+                }
+
+                ValueAnimator valueAnimator;
+                if (!isViewExpanded) {
+                    secondaryArrivalText.setVisibility(View.VISIBLE);
+                    secondaryArrivalText.setEnabled(true);
+                    isViewExpanded = true;
+                    valueAnimator = ValueAnimator.ofInt(originalHeight,
+                            originalHeight + expandingHeight);
+                } else {
+                    isViewExpanded = false;
+                    valueAnimator = ValueAnimator.ofInt(originalHeight + expandingHeight,
+                            originalHeight);
+
+                    Animation a = new AlphaAnimation(1.00f, 0.00f); // Fade out
+                    a.setDuration(100);
+                    a.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {}
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            secondaryArrivalText.setVisibility(View.GONE);
+                            secondaryArrivalText.setEnabled(false);
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {}
+                    });
+                    secondaryArrivalText.startAnimation(a);
+                }
+                valueAnimator.setDuration(100);
+                valueAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+                valueAnimator.addUpdateListener(animation -> {
+                    view.getLayoutParams().height = (Integer) animation.getAnimatedValue();
+                    view.requestLayout();
+                });
+                valueAnimator.start();
+            });
+
+            if (!isViewExpanded) {
+                secondaryArrivalText.setVisibility(View.GONE);
+                secondaryArrivalText.setEnabled(false);
+            }
         }
     }
 }

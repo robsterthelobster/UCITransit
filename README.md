@@ -11,8 +11,8 @@ An Android transit app for UC Irvine and Anteater Express.  Users can quickly vi
 https://play.google.com/store/apps/details?id=com.robsterthelobster.ucibustracker&hl=en
 
 ## Screenshots
-![Nearby](/screenshots/device-2016-10-10-153217.png?raw=true "Nearby screen")
-![Navigation](/screenshots/device-2016-10-10-153232.png?raw=true "Navigation Drawer")
+<img src="/screenshots/device-2016-10-10-153217.png" width="400">
+<img src="/screenshots/device-2016-10-10-153232.png" width="400">
 
 ## Data and Endpoints
 The app is actually compatible with a large number of colleges and universities, all using Syncromatics tracking system.  UCI Transit polls the JSON files via Retrofit and parses them for use.  If you wish to use the bus data for another app or bus feed, the endpoints are as such:
@@ -25,15 +25,37 @@ The app is actually compatible with a large number of colleges and universities,
 ## Libraries & Frameworks
 
 * Dagger 2
+  * http://google.github.io/dagger/
+  * Used for dependency injection and learning experience
 * Retrofit & RxJava Adapter
+  * http://square.github.io/retrofit/
+  * Used to pull data from ucishuttles. Adapter used to convert the data into observables.
 * Gson
+  * https://github.com/google/gson
+  * Used for retrofit to convert JSON into Java
 * ButterKnife
+  * http://jakewharton.github.io/butterknife/
+  * Used to make the code prettier/neater. Also makes adding elements pretty easy.
 * RxJava & RxAndroid
+  * https://github.com/ReactiveX/RxJava
+  * https://github.com/ReactiveX/RxAndroid
+  * Used to convert and load data into views.
 * RxPermissions
+  * https://github.com/tbruyelle/RxPermissions
+  * Ask for location permissions
 * ReactiveLocation
+  * https://github.com/mcharmas/Android-ReactiveLocation
+  * Gets location while hiding Google API Client boilerplate code
 * GoogleMaps & LocationServices
+  * https://developers.google.com/maps/
+  * Maps used to display the stops and bus data on a map
+  * Location used to filter out applicable and useful data to the user
 * Realm
+  * https://github.com/realm/realm-java
+  * Alternative to SQLite for database purposes.
 * RealmRecyclerView
+  * https://github.com/thorbenprimke/realm-recyclerview
+  * Automates the loading of Realm data into a recyclerview
 
 ##License:
 

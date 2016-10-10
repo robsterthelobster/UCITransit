@@ -35,6 +35,7 @@ import io.realm.RealmViewHolder;
 public class ArrivalsAdapter
         extends RealmBasedRecyclerViewAdapter<Arrivals, ArrivalsAdapter.ViewHolder> {
 
+    final float EXPAND_CARD_RATIO = 0.33f;
     Realm realm;
 
     public ArrivalsAdapter(Context context, RealmResults<Arrivals> realmResults, boolean automaticUpdate, boolean animateResults, Realm realm) {
@@ -113,7 +114,7 @@ public class ArrivalsAdapter
         public void expandCard(View view){
             if (originalHeight == 0) {
                 originalHeight = view.getHeight();
-                expandingHeight = (int)(originalHeight * .5);
+                expandingHeight = (int)(originalHeight * EXPAND_CARD_RATIO);
             }
 
             ValueAnimator valueAnimator;

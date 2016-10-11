@@ -114,6 +114,7 @@ public class PredictionFragment extends Fragment {
                                     try {
                                         Arrivals oldArrivals = realm.where(Arrivals.class).equalTo("id", arrivals.getId()).findFirst();
                                         if (oldArrivals != null) {
+                                            arrivals.setNearby(oldArrivals.isNearby());
                                             arrivals.setFavorite(oldArrivals.isFavorite());
                                         }
                                         realm.executeTransaction(r -> r.copyToRealmOrUpdate(arrivals));

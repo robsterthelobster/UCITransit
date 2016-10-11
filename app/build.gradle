@@ -11,8 +11,8 @@ android {
         applicationId "com.robsterthelobster.ucibustracker"
         minSdkVersion 16
         targetSdkVersion 24
-        versionCode 5
-        versionName "2.0"
+        versionCode 7
+        versionName "2.2"
         multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }

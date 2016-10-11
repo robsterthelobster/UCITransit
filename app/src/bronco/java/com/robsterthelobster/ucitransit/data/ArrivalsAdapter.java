@@ -62,9 +62,14 @@ public class ArrivalsAdapter
                 secondaryMinutes = predictionRealmList.get(1).getMinutes() + " min";
             }
         }
+        // hot fix -- hardcode the weird name in
+        if(arrivals.getRouteId() == 3164){
+            viewHolder.routeText.setText("A Route A - INNOVATION AND IBW");
+        }else{
+            viewHolder.routeText.setText(arrivals.getRouteName());
+        }
         viewHolder.cardView.setBackgroundColor(Color.parseColor(arrivals.getColor()));
         viewHolder.arrivalText.setText(minutes);
-        viewHolder.routeText.setText(arrivals.getRouteName());
         viewHolder.stopText.setText(String.valueOf(arrivals.getStopName()));
         viewHolder.secondaryArrivalText.setText(secondaryMinutes);
         viewHolder.favoriteCheck.setOnCheckedChangeListener(null);

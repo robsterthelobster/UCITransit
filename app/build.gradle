@@ -22,6 +22,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    productFlavors {
+        uci {
+            applicationId "com.robsterthelobster.ucibustracker"
+            versionName "2.3"
+        }
+        bronco {
+            applicationId "com.robsterthelobster.cpptransit"
+            versionName "2.3"
+        }
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8

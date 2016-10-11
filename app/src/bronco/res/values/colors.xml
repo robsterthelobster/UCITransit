@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#1E4D2B</color>
+    <color name="colorPrimaryDark">#001A00</color>
+    <color name="colorAccent">#C6930A</color>
+    <color name="betweenPoint">#1E4D2B</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="dark_gray">#707070</color>
+
+    <color name="favorite_checked">@color/colorAccent</color>
+    <color name="favorite_unchecked">@color/white</color>
+
+    <color name="map_transparent_white">#DDFFFFFF</color>
+</resources>

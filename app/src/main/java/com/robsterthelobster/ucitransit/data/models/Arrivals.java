@@ -18,9 +18,9 @@ public class Arrivals extends RealmObject{
     String routeName;
     String routeColor;
     String stopName;
-    boolean isFavorite;
-    boolean isCurrent;
-    boolean isNearby;
+    boolean isFavorite = false;
+    boolean isCurrent = false;
+    boolean isNearby = true;
 
     @SerializedName("PredictionTime")
     private String predictionTime;

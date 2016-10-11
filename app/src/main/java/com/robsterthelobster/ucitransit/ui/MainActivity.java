@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
                 .equalTo("isNearby", true)
                 .findAllSorted("isFavorite", Sort.DESCENDING);
 
-        arrivalsAdapter = new ArrivalsAdapter(this, arrivals, true, false, realm);
+        arrivalsAdapter = new ArrivalsAdapter(this, arrivals, true, true, realm);
         recyclerView.setAdapter(arrivalsAdapter);
         recyclerView.setOnRefreshListener(this::fetchArrivals);
 
@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
     private void callLocationService() {
         LocationRequest locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(1000 * LOCATION_REFRESH_RATE); // number of seconds
+                .setInterval(1000 * LOCATION_REFRESH_RATE);
 
         ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(this);
         locationUpdatesObservable = locationProvider.getUpdatedLocation(locationRequest);
@@ -293,15 +293,13 @@ public class MainActivity extends AppCompatActivity {
                                 stopLocation.setLongitude(stop.getLongitude());
                                 isNearby = stopLocation.distanceTo(mLocation) <= DISTANCE_FENCE;
                             }
-
                             final boolean result = isNearby;
                             final Realm realm = Realm.getDefaultInstance();
                             try {
-                                RealmResults<Arrivals> oldArrivals =
-                                        realm.where(Arrivals.class).equalTo("stopId", stop.getId()).findAll();
-
-                                for(int i = 0; i < oldArrivals.size(); i++){
-                                    Arrivals arrivals = oldArrivals.get(0);
+                                String id = route.getId() + "" + stop.getId();
+                                Arrivals arrivals =
+                                        realm.where(Arrivals.class).equalTo("id", id).findFirst();
+                                if(arrivals != null) {
                                     realm.executeTransaction(r -> {
                                         arrivals.setNearby(result);
                                         r.copyToRealmOrUpdate(arrivals);

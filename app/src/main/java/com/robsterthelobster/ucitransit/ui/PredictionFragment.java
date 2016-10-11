@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitApp;
@@ -14,6 +16,7 @@ import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.models.Arrivals;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.utils.Constants;
+import com.robsterthelobster.ucitransit.utils.Utils;
 
 import javax.inject.Inject;
 
@@ -35,6 +38,8 @@ public class PredictionFragment extends Fragment {
 
     @BindView(R.id.fragment_recycler_view)
     RealmRecyclerView recyclerView;
+    @BindView(R.id.empty_text)
+    TextView emptyText;
 
     @Inject
     Realm realm;
@@ -42,6 +47,8 @@ public class PredictionFragment extends Fragment {
     BusApiService apiService;
 
     String routeName;
+    ArrivalsAdapter arrivalsAdapter;
+    ArrivalsAdapter emptyAdapter;
     Subscription fetchArrivalsSub;
 
     public PredictionFragment() {
@@ -71,9 +78,12 @@ public class PredictionFragment extends Fragment {
                 .equalTo("routeName", routeName)
                 .findAll();
 
-        ArrivalsAdapter arrivalsAdapter = new ArrivalsAdapter(getContext(), arrivals, true, false, realm);
+        arrivalsAdapter = new ArrivalsAdapter(getContext(), arrivals, true, false, realm);
+        emptyAdapter = new ArrivalsAdapter(getContext(),
+                realm.where(Arrivals.class).equalTo("id", "noid").findAll(),
+                false, false, realm);
         recyclerView.setAdapter(arrivalsAdapter);
-        recyclerView.setOnRefreshListener(this::fetchArrivals);
+        recyclerView.setOnRefreshListener(this::refreshTask);
         fetchArrivals();
 
         return view;
@@ -116,27 +126,44 @@ public class PredictionFragment extends Fragment {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    private void refreshTask(){
+        Observable.just(0)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(s -> fetchArrivals());
+    }
+
     private void fetchArrivals() {
-        recyclerView.setRefreshing(true);
-        fetchArrivalsSub = getArrivalsObservable()
-                .subscribe(new Subscriber<Arrivals>() {
-                    final String TAG = "DetailArrivalsSub";
+        if(!Utils.isNetworkConnected(getContext())){
+            Toast.makeText(getContext(), "Network is not available", Toast.LENGTH_SHORT)
+                    .show();
+            emptyText.setText(R.string.empty_network_message);
+            recyclerView.setAdapter(emptyAdapter);
+            recyclerView.setRefreshing(false);
+        }else{
+            recyclerView.setRefreshing(true);
+            recyclerView.setAdapter(arrivalsAdapter);
+            emptyText.setText(R.string.empty_server_message);
+            fetchArrivalsSub = getArrivalsObservable()
+                    .subscribe(new Subscriber<Arrivals>() {
+                        final String TAG = "DetailArrivalsSub";
 
-                    @Override
-                    public void onCompleted() {
-                        Log.d(TAG, "onCompleted");
-                        recyclerView.setRefreshing(false);
-                    }
+                        @Override
+                        public void onCompleted() {
+                            Log.d(TAG, "onCompleted");
+                            recyclerView.setRefreshing(false);
+                        }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.d(TAG, e.getMessage());
-                    }
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.d(TAG, e.getMessage());
+                            this.onNext(null);
+                        }
 
-                    @Override
-                    public void onNext(Arrivals arrivals) {
-                        //Log.d(TAG, "onConNext: " + arrivals.getRouteName());
-                    }
-                });
+                        @Override
+                        public void onNext(Arrivals arrivals) {
+                            //Log.d(TAG, "onConNext: " + arrivals.getRouteName());
+                        }
+                    });
+        }
     }
 }

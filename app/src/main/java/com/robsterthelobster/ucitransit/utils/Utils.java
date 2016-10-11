@@ -1,5 +1,9 @@
 package com.robsterthelobster.ucitransit.utils;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import rx.Subscription;
 
 /**
@@ -14,10 +18,6 @@ public class Utils {
         }
     }
 
-    /**
-    * Direction comes in shorthand N,E,S,W and combination
-    * The icon used is already facing right so E = 0
-    */
     public static float getRotationFromDirection(String direction){
         switch (direction){
             case "N":
@@ -39,6 +39,13 @@ public class Utils {
             default:
                 return 0f;
         }
+    }
+
+    public static boolean isNetworkConnected(Context context){
+        ConnectivityManager cm =
+                (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnected();
     }
 }
 

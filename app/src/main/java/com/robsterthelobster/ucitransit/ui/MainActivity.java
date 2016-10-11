@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -14,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.LocationRequest;
@@ -37,6 +37,7 @@ import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.Sort;
+import io.realm.internal.Util;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.Observable;
 import rx.Subscriber;
@@ -46,9 +47,9 @@ import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final String TAG = MainActivity.class.getSimpleName();
-    private final float DISTANCE_FENCE = 500; // meters
-    private final int LOCATION_REFRESH_RATE = 30; // seconds
+    final String TAG = MainActivity.class.getSimpleName();
+    final float DISTANCE_FENCE = 500; // meters
+    final int LOCATION_REFRESH_RATE = 30; // seconds
 
     @BindView(R.id.drawer_layout)
     DrawerLayout drawer;
@@ -58,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
     Toolbar toolbar;
     @BindView(R.id.realm_recycler_view)
     RealmRecyclerView recyclerView;
+    @BindView(R.id.empty_text)
+    TextView emptyText;
 
     @Inject
     BusApiService apiService;
@@ -66,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
     RealmResults<Route> routeResults;
     ArrivalsAdapter arrivalsAdapter;
+    ArrivalsAdapter emptyAdapter;
 
     Subscription fetchRouteSub;
     Subscription fetchArrivalsSub;
@@ -107,8 +111,11 @@ public class MainActivity extends AppCompatActivity {
                 .findAllSorted("isFavorite", Sort.DESCENDING);
 
         arrivalsAdapter = new ArrivalsAdapter(this, arrivals, true, true, realm);
+        emptyAdapter = new ArrivalsAdapter(this,
+                realm.where(Arrivals.class).equalTo("id", "noid").findAll(),
+                false, false, realm);
         recyclerView.setAdapter(arrivalsAdapter);
-        recyclerView.setOnRefreshListener(this::fetchArrivals);
+        recyclerView.setOnRefreshListener(this::refreshTask);
 
         if (realm.isEmpty()) {
             fetchInitialRouteData();
@@ -216,6 +223,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetchInitialRouteData() {
+        if(!Utils.isNetworkConnected(this)){
+            setEmptyView();
+        }
         fetchRouteSub = apiService.getRoutes()
                 .flatMap(Observable::from).map(route -> {
                     RealmList<Stop> stops = new RealmList<>();
@@ -252,27 +262,48 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    private void fetchArrivals() {
-        recyclerView.setRefreshing(true);
-        fetchArrivalsSub = getArrivalsObservable()
-                .subscribe(new Subscriber<Arrivals>() {
-                    final String TAG = "ArrivalsSub";
-                    @Override
-                    public void onCompleted() {
-                        Log.d(TAG, "onCompleted");
-                        recyclerView.setRefreshing(false);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.d(TAG, e.getMessage());
-                    }
-
-                    @Override
-                    public void onNext(Arrivals arrivals) {
-                        //Log.d(TAG, "onConNext: " + arrivals.getRouteName());
+    private void refreshTask(){
+        Observable.just(0)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(s -> {
+                    if(realm.isEmpty()){
+                        fetchInitialRouteData();
+                    }else {
+                        fetchArrivals();
                     }
                 });
+    }
+
+    private void fetchArrivals() {
+        if(!Utils.isNetworkConnected(this)){
+            setEmptyView();
+        } else if(mLocation == null){
+            emptyText.setText(R.string.empty_location_message);
+            recyclerView.setRefreshing(false);
+        } else {
+            recyclerView.setAdapter(arrivalsAdapter);
+            recyclerView.setRefreshing(true);
+            emptyText.setText(R.string.empty_default_message);
+            fetchArrivalsSub = getArrivalsObservable()
+                    .subscribe(new Subscriber<Arrivals>() {
+                        final String TAG = "ArrivalsSub";
+                        @Override
+                        public void onCompleted() {
+                            Log.d(TAG, "onCompleted");
+                            recyclerView.setRefreshing(false);
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.d(TAG, e.getMessage());
+                        }
+
+                        @Override
+                        public void onNext(Arrivals arrivals) {
+                            //Log.d(TAG, "onConNext: " + arrivals.getRouteName());
+                        }
+                    });
+        }
     }
 
     private Observable<Arrivals> getArrivalsObservable() {
@@ -337,5 +368,12 @@ public class MainActivity extends AppCompatActivity {
                                 })))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    private void setEmptyView(){
+        Toast.makeText(this, "Network is not available", Toast.LENGTH_SHORT).show();
+        recyclerView.setRefreshing(false);
+        recyclerView.setAdapter(emptyAdapter);
+        emptyText.setText(R.string.empty_network_message);
     }
 }

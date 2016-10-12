@@ -1,18 +1,4 @@
 <resources>
     <string name="app_name">Bronco Transit</string>
-    <string name="title_activity_maps">Map</string>
-    <string name="title_activity_detail">Route Details</string>
-    <string name="action_refresh">Refresh</string>
-    <string name="title_activity_main">Nearby</string>
-
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-
-    <string name="empty_network_message">You are not connected to the internet!</string>
-    <string name="empty_location_message">Location not found!</string>
-    <string name="empty_default_message">No stops are nearby!</string>
-    <string name="empty_server_message">No shuttle data is available.</string>
-
-    <string name="snackbar_dismiss">Dismiss</string>
-    <string name="button_center_string">Center</string>
+    <string name="root_url">https://www.broncoshuttle.com/</string>
 </resources>

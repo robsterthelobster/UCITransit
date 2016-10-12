@@ -20,7 +20,7 @@ public class UCITransitApp extends Application {
         component = DaggerUCITransitComponent
                 .builder()
                 .realmModule(new RealmModule(this))
-                .restModule(new RestModule())
+                .restModule(new RestModule(this))
                 .build();
     }
 

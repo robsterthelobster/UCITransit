@@ -1,5 +1,8 @@
 package com.robsterthelobster.ucitransit.module;
 
+import android.content.Context;
+
+import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.data.BusApiService;
 
 import javax.inject.Singleton;
@@ -16,13 +19,17 @@ import retrofit2.converter.gson.GsonConverterFactory;
 @Module
 public class RestModule {
 
-    private final String BASE_URL = "https://www.ucishuttles.com/";
+    private final Context context;
+
+    public RestModule(Context context) {
+        this.context = context;
+    }
 
     @Provides
     @Singleton
     BusApiService provideApiService(){
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(context.getString(R.string.root_url))
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();

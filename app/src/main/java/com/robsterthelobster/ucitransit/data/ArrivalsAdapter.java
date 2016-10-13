@@ -23,7 +23,6 @@ import com.robsterthelobster.ucitransit.data.models.Prediction;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import io.realm.Realm;
 import io.realm.RealmBasedRecyclerViewAdapter;
 import io.realm.RealmList;
@@ -95,6 +94,14 @@ public class ArrivalsAdapter
     public ViewHolder onCreateFooterViewHolder(ViewGroup viewGroup) {
         View v = inflater.inflate(R.layout.ad_view, viewGroup, false);
         return new ViewHolder((FrameLayout) v);
+    }
+
+    public void setFooter() {
+        if(realmResults.size() > 0){
+            addFooter();
+        }else{
+            removeFooter();
+        }
     }
 
     class ViewHolder extends RealmViewHolder {

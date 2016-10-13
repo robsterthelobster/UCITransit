@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
     Subscription menuItemSub;
     Observable<Location> locationUpdatesObservable;
 
+    ReactiveLocationProvider locationProvider;
     Location mLocation;
 
     @Override
@@ -87,13 +88,19 @@ public class MainActivity extends AppCompatActivity {
         UCITransitApp.getComponent(this).inject(this);
         ButterKnife.bind(this);
 
-        MobileAds.initialize(getApplicationContext(), "ca-app-pub-3940256099942544~3347511713");
+        MobileAds.initialize(getApplicationContext(), getString(R.string.app_id));
 
         setSupportActionBar(toolbar);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
+        locationProvider = new ReactiveLocationProvider(this);
+        locationProvider.getLastKnownLocation()
+                .subscribe(location -> {
+                    mLocation = location;
+                });
 
         permissionSub = RxPermissions.getInstance(this)
                 .request(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -113,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
                 .findAllSorted("isFavorite", Sort.DESCENDING);
 
         arrivalsAdapter = new ArrivalsAdapter(this, arrivals, true, true, realm);
-        arrivalsAdapter.addFooter();
+        arrivalsAdapter.addFooter(); // footer is where the ad is
         emptyAdapter = new ArrivalsAdapter(this,
                 realm.where(Arrivals.class).equalTo("id", "noid").findAll(),
                 false, false, realm);
@@ -195,7 +202,6 @@ public class MainActivity extends AppCompatActivity {
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(1000 * LOCATION_REFRESH_RATE);
 
-        ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(this);
         locationUpdatesObservable = locationProvider.getUpdatedLocation(locationRequest);
     }
 
@@ -280,13 +286,14 @@ public class MainActivity extends AppCompatActivity {
     private void fetchArrivals() {
         if(!Utils.isNetworkConnected(this)){
             setEmptyView();
-        } else if(mLocation == null){
-            emptyText.setText(R.string.empty_location_message);
-            recyclerView.setRefreshing(false);
         } else {
-            recyclerView.setAdapter(arrivalsAdapter);
-            recyclerView.setRefreshing(true);
-            emptyText.setText(R.string.empty_default_message);
+            if(mLocation == null){
+                emptyText.setText(R.string.empty_location_message);
+            } else {
+                recyclerView.setAdapter(arrivalsAdapter);
+                emptyText.setText(R.string.empty_default_message);
+                recyclerView.setRefreshing(true);
+            }
             fetchArrivalsSub = getArrivalsObservable()
                     .subscribe(new Subscriber<Arrivals>() {
                         final String TAG = "ArrivalsSub";
@@ -294,6 +301,7 @@ public class MainActivity extends AppCompatActivity {
                         public void onCompleted() {
                             Log.d(TAG, "onCompleted");
                             recyclerView.setRefreshing(false);
+                            arrivalsAdapter.setFooter();
                         }
 
                         @Override

@@ -79,6 +79,7 @@ public class PredictionFragment extends Fragment {
                 .findAll();
 
         arrivalsAdapter = new ArrivalsAdapter(getContext(), arrivals, true, false, realm);
+        arrivalsAdapter.addFooter();
         emptyAdapter = new ArrivalsAdapter(getContext(),
                 realm.where(Arrivals.class).equalTo("id", "noid").findAll(),
                 false, false, realm);
@@ -117,6 +118,7 @@ public class PredictionFragment extends Fragment {
                                             arrivals.setNearby(oldArrivals.isNearby());
                                             arrivals.setFavorite(oldArrivals.isFavorite());
                                         }
+                                        arrivals.setNearby(false);
                                         realm.executeTransaction(r -> r.copyToRealmOrUpdate(arrivals));
                                     } finally {
                                         realm.close();
@@ -152,6 +154,7 @@ public class PredictionFragment extends Fragment {
                         public void onCompleted() {
                             Log.d(TAG, "onCompleted");
                             recyclerView.setRefreshing(false);
+                            arrivalsAdapter.setFooter();
                         }
 
                         @Override

@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">UCI Transit</string>
     <string name="root_url">https://www.ucishuttles.com/</string>
+
+    <string name="app_id">ca-app-pub-4741697647575429~8155480998</string>
+    <string name="banner_ad_unit_id">ca-app-pub-4741697647575429/7669299792</string>
 </resources>

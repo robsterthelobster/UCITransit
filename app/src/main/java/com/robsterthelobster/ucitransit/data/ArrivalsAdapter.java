@@ -3,18 +3,20 @@ package com.robsterthelobster.ucitransit.data;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.CardView;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.data.models.Arrivals;
 import com.robsterthelobster.ucitransit.data.models.Prediction;
@@ -35,8 +37,7 @@ import io.realm.RealmViewHolder;
 public class ArrivalsAdapter
         extends RealmBasedRecyclerViewAdapter<Arrivals, ArrivalsAdapter.ViewHolder> {
 
-    final float EXPAND_CARD_RATIO = 0.33f;
-    Realm realm;
+    private Realm realm;
 
     public ArrivalsAdapter(Context context, RealmResults<Arrivals> realmResults, boolean automaticUpdate, boolean animateResults, Realm realm) {
         super(context, realmResults, automaticUpdate, animateResults);
@@ -84,7 +85,20 @@ public class ArrivalsAdapter
                 });
     }
 
-    public class ViewHolder extends RealmViewHolder {
+    @Override
+    public void onBindFooterViewHolder(ViewHolder holder, int position) {
+        AdRequest adRequest = new AdRequest.Builder().build();
+        holder.adView.loadAd(adRequest);
+    }
+
+    @Override
+    public ViewHolder onCreateFooterViewHolder(ViewGroup viewGroup) {
+        View v = inflater.inflate(R.layout.ad_view, viewGroup, false);
+        return new ViewHolder((FrameLayout) v);
+    }
+
+    class ViewHolder extends RealmViewHolder {
+        private float EXPAND_CARD_RATIO = 0.33f;
 
         LinearLayout container;
         @BindView(R.id.card_view)
@@ -100,23 +114,32 @@ public class ArrivalsAdapter
         @BindView(R.id.prediction_arrival_time_alt)
         TextView secondaryArrivalText;
 
+        @Nullable
+        AdView adView;
+
         private int originalHeight = 0;
         private int expandingHeight = 0;
         private boolean isViewExpanded = false;
+
+
+        ViewHolder(FrameLayout container) {
+            super(container);
+            adView = (AdView) container.findViewById(R.id.adView);
+        }
 
         ViewHolder(LinearLayout container) {
             super(container);
             this.container = container;
             ButterKnife.bind(this, container);
 
+            cardView.setOnClickListener(this::expandCard);
             if (!isViewExpanded) {
                 secondaryArrivalText.setVisibility(View.GONE);
                 secondaryArrivalText.setEnabled(false);
             }
         }
 
-        @OnClick(R.id.card_view)
-        public void expandCard(View view){
+        void expandCard(View view){
             if (originalHeight == 0) {
                 originalHeight = view.getHeight();
                 expandingHeight = (int)(originalHeight * EXPAND_CARD_RATIO);

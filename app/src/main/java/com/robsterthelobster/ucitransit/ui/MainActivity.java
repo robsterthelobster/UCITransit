@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.location.LocationRequest;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitApp;
@@ -86,6 +87,8 @@ public class MainActivity extends AppCompatActivity {
         UCITransitApp.getComponent(this).inject(this);
         ButterKnife.bind(this);
 
+        MobileAds.initialize(getApplicationContext(), "ca-app-pub-3940256099942544~3347511713");
+
         setSupportActionBar(toolbar);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -110,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
                 .findAllSorted("isFavorite", Sort.DESCENDING);
 
         arrivalsAdapter = new ArrivalsAdapter(this, arrivals, true, true, realm);
+        arrivalsAdapter.addFooter();
         emptyAdapter = new ArrivalsAdapter(this,
                 realm.where(Arrivals.class).equalTo("id", "noid").findAll(),
                 false, false, realm);

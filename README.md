@@ -56,7 +56,10 @@ The app is actually compatible with a large number of colleges and universities,
 * RealmRecyclerView
   * https://github.com/thorbenprimke/realm-recyclerview
   * Automates the loading of Realm data into a recyclerview
-
+* RealmFieldNamesHelper
+  * https://github.com/cmelchior/realmfieldnameshelper
+  * Automatically generates name fields for Realm Objects
+  
 ##License:
 
 UCI Transit is released under the <a href="https://github.com/tripleducke/UCITransit/blob/master/LICENSE">MIT License</a>.

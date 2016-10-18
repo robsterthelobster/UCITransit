@@ -1,0 +1,32 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/title_appearance">
+
+        <ListPreference
+            android:key="pref_theme"
+            android:title="@string/title_theme"
+            android:dialogTitle="@string/title_theme"
+            android:entries="@array/entries_pref_themes"
+            android:entryValues="@array/entries_pref_themes" />
+
+        <CheckBoxPreference
+            android:key="checkbox_preference"
+            android:title="@string/title_checkbox_ad"
+            android:defaultValue="@string/title_checkbox_ad"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/title_about">
+
+        <Preference
+            android:title="@string/title_review">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://play.google.com/store/apps/details?id=com.robsterthelobster.ucibustracker"
+                android:launchMode="singleInstance"/>
+        </Preference>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

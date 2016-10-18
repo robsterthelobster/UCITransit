@@ -36,8 +36,10 @@ import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.models.Arrivals;
+import com.robsterthelobster.ucitransit.data.models.ArrivalsFields;
 import com.robsterthelobster.ucitransit.data.models.Prediction;
 import com.robsterthelobster.ucitransit.data.models.Route;
+import com.robsterthelobster.ucitransit.data.models.RouteFields;
 import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.robsterthelobster.ucitransit.data.models.Vehicle;
 import com.robsterthelobster.ucitransit.utils.Constants;
@@ -106,7 +108,7 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
         String routeName = arguments.getString(Constants.ROUTE_ID_KEY);
         realm = Realm.getDefaultInstance();
 
-        route = realm.where(Route.class).equalTo("name", routeName).findFirst();
+        route = realm.where(Route.class).equalTo(RouteFields.NAME, routeName).findFirst();
         stopMarkers = new ArrayList<>();
         vehicleMarkers = new HashMap<>();
 
@@ -186,7 +188,7 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
         map.setOnMarkerClickListener(marker -> {
             if (stopMarkers.contains(marker)) {
                 Arrivals arrivals =
-                        realm.where(Arrivals.class).equalTo("id", (String) marker.getTag()).findFirst();
+                        realm.where(Arrivals.class).equalTo(ArrivalsFields.ID, (String) marker.getTag()).findFirst();
                 if (!arrivals.getPredictions().isEmpty()) {
                     Prediction prediction = arrivals.getPredictions().first();
                     showSnackbar("Arrives in " + prediction.getMinutes() + " min");

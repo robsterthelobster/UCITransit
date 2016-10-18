@@ -23,6 +23,7 @@ import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.data.ArrivalsAdapter;
 import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.models.Arrivals;
+import com.robsterthelobster.ucitransit.data.models.ArrivalsFields;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.robsterthelobster.ucitransit.utils.Constants;
@@ -120,9 +121,8 @@ public class MainActivity extends AppCompatActivity {
                 .findAllSorted("isFavorite", Sort.DESCENDING);
 
         arrivalsAdapter = new ArrivalsAdapter(this, arrivals, true, true, realm);
-        arrivalsAdapter.addFooter(); // footer is where the ad is
         emptyAdapter = new ArrivalsAdapter(this,
-                realm.where(Arrivals.class).equalTo("id", "noid").findAll(),
+                realm.where(Arrivals.class).equalTo(ArrivalsFields.ID, "").findAll(),
                 false, false, realm);
         recyclerView.setAdapter(arrivalsAdapter);
         recyclerView.setOnRefreshListener(this::refreshTask);
@@ -340,7 +340,7 @@ public class MainActivity extends AppCompatActivity {
                             try {
                                 String id = route.getId() + "" + stop.getId();
                                 Arrivals arrivals =
-                                        realm.where(Arrivals.class).equalTo("id", id).findFirst();
+                                        realm.where(Arrivals.class).equalTo(ArrivalsFields.ID, id).findFirst();
                                 if(arrivals != null) {
                                     realm.executeTransaction(r -> {
                                         arrivals.setNearby(result);
@@ -367,7 +367,7 @@ public class MainActivity extends AppCompatActivity {
                                     arrivals.setRouteColor(route.getColor());
                                     final Realm realm = Realm.getDefaultInstance();
                                     try {
-                                        Arrivals oldArrivals = realm.where(Arrivals.class).equalTo("id", arrivals.getId()).findFirst();
+                                        Arrivals oldArrivals = realm.where(Arrivals.class).equalTo(ArrivalsFields.ID, arrivals.getId()).findFirst();
                                         if (oldArrivals != null) {
                                             arrivals.setFavorite(oldArrivals.isFavorite());
                                         }

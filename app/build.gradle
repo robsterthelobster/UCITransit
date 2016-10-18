@@ -64,15 +64,16 @@ dependencies {
 
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'io.reactivex:rxjava:1.1.6'
+    compile 'com.tbruyelle.rxpermissions:rxpermissions:0.7.0@aar'
+    compile 'pl.charmas.android:android-reactive-location:0.9@aar'
 
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.squareup.retrofit2:adapter-rxjava:2.1.0'
     compile 'com.google.code.gson:gson:2.7'
 
-    compile 'com.tbruyelle.rxpermissions:rxpermissions:0.7.0@aar'
-    compile 'pl.charmas.android:android-reactive-location:0.9@aar'
     compile 'com.github.thorbenprimke:realm-recyclerview:0.9.23'
+    apt 'dk.ilios:realmfieldnameshelper:1.1.0'
 
     compile 'com.google.android.gms:play-services-location:9.6.1'
     compile 'com.google.android.gms:play-services-maps:9.6.1'

@@ -16,13 +16,13 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.location.LocationRequest;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.data.ArrivalsAdapter;
 import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.models.Arrivals;
-import com.robsterthelobster.ucitransit.data.models.ArrivalsFields;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.robsterthelobster.ucitransit.utils.Constants;
@@ -88,6 +88,8 @@ public class MainActivity extends AppCompatActivity {
         UCITransitApp.getComponent(this).inject(this);
         ButterKnife.bind(this);
 
+        MobileAds.initialize(getApplicationContext(), getString(R.string.app_id));
+
         setSupportActionBar(toolbar);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -120,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
         arrivalsAdapter = new ArrivalsAdapter(this, arrivals, true, true, realm);
         arrivalsAdapter.addFooter(); // footer is where the ad is
         emptyAdapter = new ArrivalsAdapter(this,
-                realm.where(Arrivals.class).equalTo(ArrivalsFields.ID, "").findAll(),
+                realm.where(Arrivals.class).equalTo("id", "noid").findAll(),
                 false, false, realm);
         recyclerView.setAdapter(arrivalsAdapter);
         recyclerView.setOnRefreshListener(this::refreshTask);
@@ -338,7 +340,7 @@ public class MainActivity extends AppCompatActivity {
                             try {
                                 String id = route.getId() + "" + stop.getId();
                                 Arrivals arrivals =
-                                        realm.where(Arrivals.class).equalTo(ArrivalsFields.ID, id).findFirst();
+                                        realm.where(Arrivals.class).equalTo("id", id).findFirst();
                                 if(arrivals != null) {
                                     realm.executeTransaction(r -> {
                                         arrivals.setNearby(result);
@@ -365,7 +367,7 @@ public class MainActivity extends AppCompatActivity {
                                     arrivals.setRouteColor(route.getColor());
                                     final Realm realm = Realm.getDefaultInstance();
                                     try {
-                                        Arrivals oldArrivals = realm.where(Arrivals.class).equalTo(ArrivalsFields.ID, arrivals.getId()).findFirst();
+                                        Arrivals oldArrivals = realm.where(Arrivals.class).equalTo("id", arrivals.getId()).findFirst();
                                         if (oldArrivals != null) {
                                             arrivals.setFavorite(oldArrivals.isFavorite());
                                         }

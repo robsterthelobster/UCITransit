@@ -14,9 +14,7 @@ import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.data.ArrivalsAdapter;
 import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.models.Arrivals;
-import com.robsterthelobster.ucitransit.data.models.ArrivalsFields;
 import com.robsterthelobster.ucitransit.data.models.Route;
-import com.robsterthelobster.ucitransit.data.models.RouteFields;
 import com.robsterthelobster.ucitransit.utils.Constants;
 import com.robsterthelobster.ucitransit.utils.Utils;
 
@@ -76,13 +74,14 @@ public class PredictionFragment extends Fragment {
 
         RealmResults<Arrivals> arrivals = realm
                 .where(Arrivals.class)
-                .equalTo(ArrivalsFields.IS_CURRENT, true)
-                .equalTo(ArrivalsFields.ROUTE_NAME, routeName)
+                .equalTo("isCurrent", true)
+                .equalTo("routeName", routeName)
                 .findAll();
 
         arrivalsAdapter = new ArrivalsAdapter(getContext(), arrivals, true, false, realm);
+        arrivalsAdapter.addFooter();
         emptyAdapter = new ArrivalsAdapter(getContext(),
-                realm.where(Arrivals.class).equalTo(ArrivalsFields.ID, "").findAll(),
+                realm.where(Arrivals.class).equalTo("id", "noid").findAll(),
                 false, false, realm);
         recyclerView.setAdapter(arrivalsAdapter);
         recyclerView.setOnRefreshListener(this::refreshTask);
@@ -94,7 +93,7 @@ public class PredictionFragment extends Fragment {
     private Observable<Arrivals> getArrivalsObservable() {
         return Observable.defer(() -> {
             final Realm threadRealm = Realm.getDefaultInstance();
-            Route route = threadRealm.where(Route.class).equalTo(RouteFields.NAME, routeName).findFirst();
+            Route route = threadRealm.where(Route.class).equalTo("name", routeName).findFirst();
             return Observable.just(route)
                     .doOnCompleted(threadRealm::close);
         })
@@ -114,7 +113,7 @@ public class PredictionFragment extends Fragment {
                                     arrivals.setRouteColor(route.getColor());
                                     final Realm realm = Realm.getDefaultInstance();
                                     try {
-                                        Arrivals oldArrivals = realm.where(Arrivals.class).equalTo(ArrivalsFields.ID, arrivals.getId()).findFirst();
+                                        Arrivals oldArrivals = realm.where(Arrivals.class).equalTo("id", arrivals.getId()).findFirst();
                                         if (oldArrivals != null) {
                                             arrivals.setNearby(oldArrivals.isNearby());
                                             arrivals.setFavorite(oldArrivals.isFavorite());
@@ -170,17 +169,5 @@ public class PredictionFragment extends Fragment {
                         }
                     });
         }
-    }
-
-    @Override
-    public void onPause(){
-        super.onPause();
-        arrivalsAdapter.removeFooter();
-    }
-
-    @Override
-    public void onResume(){
-        super.onResume();
-        arrivalsAdapter.setFooter();
     }
 }

@@ -15,7 +15,8 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.mopub.mobileads.MoPubView;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.data.models.Arrivals;
 import com.robsterthelobster.ucitransit.data.models.Prediction;
@@ -36,7 +37,6 @@ public class ArrivalsAdapter
         extends RealmBasedRecyclerViewAdapter<Arrivals, ArrivalsAdapter.ViewHolder> {
 
     private Realm realm;
-    private MoPubView moPubView;
 
     public ArrivalsAdapter(Context context, RealmResults<Arrivals> realmResults, boolean automaticUpdate, boolean animateResults, Realm realm) {
         super(context, realmResults, automaticUpdate, animateResults);
@@ -86,9 +86,8 @@ public class ArrivalsAdapter
 
     @Override
     public void onBindFooterViewHolder(ViewHolder holder, int position) {
-        moPubView = holder.adView;
-        moPubView.setAdUnitId("28c19710fae84164a04f24a24dc3bb7e");
-        moPubView.loadAd();
+        AdRequest adRequest = new AdRequest.Builder().build();
+        holder.adView.loadAd(adRequest);
     }
 
     @Override
@@ -102,14 +101,6 @@ public class ArrivalsAdapter
             addFooter();
         }else{
             removeFooter();
-        }
-    }
-
-    @Override
-    public void removeFooter(){
-        super.removeFooter();
-        if(moPubView != null) {
-            moPubView.destroy();
         }
     }
 
@@ -131,7 +122,7 @@ public class ArrivalsAdapter
         TextView secondaryArrivalText;
 
         @Nullable
-        MoPubView adView;
+        AdView adView;
 
         private int originalHeight = 0;
         private int expandingHeight = 0;
@@ -140,7 +131,7 @@ public class ArrivalsAdapter
 
         ViewHolder(FrameLayout container) {
             super(container);
-            adView = (MoPubView) container.findViewById(R.id.adView);
+            adView = (AdView) container.findViewById(R.id.adView);
         }
 
         ViewHolder(LinearLayout container) {

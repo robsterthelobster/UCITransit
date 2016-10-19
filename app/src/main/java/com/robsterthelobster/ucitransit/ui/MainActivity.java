@@ -2,8 +2,10 @@ package com.robsterthelobster.ucitransit.ui;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -84,6 +86,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        String themePref = sharedPref.getString(getString(R.string.key_theme_pref), "");
+        if(themePref.equals("DARK")){
+            setTheme(R.style.AppTheme_Dark);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         UCITransitApp.getComponent(this).inject(this);
@@ -192,11 +201,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setUpNavigationView() {
+        Menu subMenu = navigationView.getMenu().addSubMenu("Routes");
         Observable.from(routeResults).subscribe(route -> {
             final Intent intent = new Intent(this, DetailActivity.class);
             String name = route.getName();
             intent.putExtra(Constants.ROUTE_ID_KEY, name);
-            MenuItem item = navigationView.getMenu().add(name);
+            MenuItem item = subMenu.add(name);
             item.setIntent(intent);
         });
     }

@@ -2,7 +2,13 @@
 <resources>
     <string-array name="entries_pref_themes">
         <item>@string/title_theme_original</item>
-        <item>@string/title_theme_black</item>
-        <item>@string/title_theme_white</item>
+        <item>@string/title_theme_dark</item>
+        <item>@string/title_theme_light</item>
+    </string-array>
+
+    <string-array name="values_pref_themes">
+        <item>OG</item>
+        <item>DARK</item>
+        <item>LIGHT</item>
     </string-array>
 </resources>

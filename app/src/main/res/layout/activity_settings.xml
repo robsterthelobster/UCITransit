@@ -29,7 +29,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:id="@+id/fragment_settings"
-        android:name="com.robsterthelobster.ucitransit.ui.SettingsFragment"/>
+        android:name="com.robsterthelobster.ucitransit.ui.SettingsActivity$SettingsFragment"
+        android:id="@+id/fragment_settings" />
 
 </android.support.design.widget.CoordinatorLayout>

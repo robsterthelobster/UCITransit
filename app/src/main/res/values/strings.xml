@@ -19,6 +19,7 @@
     <string name="title_appearance">Appearance</string>
     <string name="title_checkbox_ad">Toggle Ads</string>
     <string name="title_theme">Theme</string>
+    <string name="theme_dialog_title">Select app theme:</string>
     <string name="subtitle_checkbox_ad">Check to disable ads. Leave unchecked to feed the lobster. Just kidding, do what you want. :)</string>
     <string name="title_about">About</string>
     <string name="title_settings">Settings</string>
@@ -27,7 +28,10 @@
     <string name="title_review">Rate this app!</string>
     <string name="subtitle_review">It\'s okay. I can handle your honesty.</string>
 
-    <string name="title_theme_black">Black</string>
-    <string name="title_theme_white">White</string>
+    <string name="title_theme_dark">Dark</string>
+    <string name="title_theme_light">Light</string>
+
+    <string name="key_theme_pref">pref_theme</string>
+    <string name="key_ad_pref">pref_ad</string>
 
 </resources>

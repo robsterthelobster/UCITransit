@@ -6,4 +6,12 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
+
+    <style name="AppTheme.Dark" parent="@android:style/ThemeOverlay.Material.Dark.ActionBar">
+        <item name="colorPrimary">@color/darker_gray</item>
+        <item name="colorPrimaryDark">@android:color/black</item>
+    </style>
+
+    <style name="AppTheme.Light" parent="@android:style/ThemeOverlay.Material.Light">
+    </style>
 </resources>

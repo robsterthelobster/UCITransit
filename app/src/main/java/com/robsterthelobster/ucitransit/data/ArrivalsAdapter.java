@@ -128,7 +128,6 @@ public class ArrivalsAdapter
         private int expandingHeight = 0;
         private boolean isViewExpanded = false;
 
-
         ViewHolder(FrameLayout container) {
             super(container);
             adView = (AdView) container.findViewById(R.id.adView);

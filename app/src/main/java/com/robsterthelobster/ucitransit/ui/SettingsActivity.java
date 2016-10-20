@@ -14,7 +14,6 @@ import com.robsterthelobster.ucitransit.utils.Utils;
 public class SettingsActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Utils.setTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         getFragmentManager().beginTransaction()

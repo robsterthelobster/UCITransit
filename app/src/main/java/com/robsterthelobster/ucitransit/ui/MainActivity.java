@@ -86,13 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        String themePref = sharedPref.getString(getString(R.string.key_theme_pref), "");
-        if(themePref.equals("DARK")){
-            setTheme(R.style.AppTheme_Dark);
-        }
-
+        Utils.setTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         UCITransitApp.getComponent(this).inject(this);

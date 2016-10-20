@@ -1,8 +1,12 @@
 package com.robsterthelobster.ucitransit.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.preference.PreferenceManager;
+
+import com.robsterthelobster.ucitransit.R;
 
 import rx.Subscription;
 
@@ -46,6 +50,22 @@ public class Utils {
                 (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         return activeNetwork != null && activeNetwork.isConnected();
+    }
+
+    public static void setTheme(Context context){
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        String themePref = sharedPref.getString(context.getString(R.string.key_theme_pref), "");
+        switch(themePref){
+            case Constants.THEME_DARK:
+                context.setTheme(R.style.AppTheme_Dark);
+                break;
+            case Constants.THEME_LIGHT:
+                context.setTheme(R.style.AppTheme_Light);
+                break;
+            default:
+                context.setTheme(R.style.AppTheme);
+
+        }
     }
 }
 

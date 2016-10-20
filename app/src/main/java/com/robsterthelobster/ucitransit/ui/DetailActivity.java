@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.utils.Constants;
+import com.robsterthelobster.ucitransit.utils.Utils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,6 +30,7 @@ public class DetailActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Utils.setTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
         ButterKnife.bind(this);

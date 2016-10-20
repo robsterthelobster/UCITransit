@@ -31,7 +31,6 @@
     <string name="title_theme_dark">Dark</string>
     <string name="title_theme_light">Light</string>
 
-    <string name="key_theme_pref">pref_theme</string>
-    <string name="key_ad_pref">pref_ad</string>
-
+    <string name="key_theme_pref" translatable="false">pref_theme</string>
+    <string name="key_ad_pref" translatable="false">pref_ad</string>
 </resources>

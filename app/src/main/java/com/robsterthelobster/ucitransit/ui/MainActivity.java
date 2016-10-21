@@ -168,9 +168,9 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
             case R.id.action_settings:
-                //Intent intent = new Intent(this, SettingsActivity.class);
-                //startActivityForResult(intent, Constants.RC_CHANGE_THEME);
-                startActivityForResult(ScoopSettingsActivity.createIntent(this), Constants.RC_CHANGE_THEME);
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivityForResult(intent, Constants.RC_CHANGE_THEME);
+                //startActivityForResult(ScoopSettingsActivity.createIntent(this), Constants.RC_CHANGE_THEME);
                 break;
             case R.id.action_refresh:
                 Log.i(TAG, "Refresh menu item selected");

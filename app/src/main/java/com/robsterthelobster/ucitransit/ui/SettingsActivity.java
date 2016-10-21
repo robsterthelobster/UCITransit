@@ -37,14 +37,14 @@ public class SettingsActivity extends AppCompatActivity{
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
         toolbar.setNavigationOnClickListener(view -> onBackPressed());
+        setResult(RESULT_OK);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == RESULT_OK && requestCode == Constants.RC_CHANGE_THEME){
-            Log.d("settings", "recreate");
-            recreate();
+
         }
     }
 
@@ -60,6 +60,14 @@ public class SettingsActivity extends AppCompatActivity{
                         Constants.RC_CHANGE_THEME);
                 return true;
             });
+        }
+
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            super.onActivityResult(requestCode, resultCode, data);
+            if(resultCode == RESULT_OK && requestCode == Constants.RC_CHANGE_THEME){
+                getActivity().recreate();
+            }
         }
     }
 }

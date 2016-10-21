@@ -9,4 +9,5 @@ public class Constants {
 
     public final static String THEME_DARK = "Dark";
     public final static String THEME_LIGHT = "Light";
+    public static final int RC_CHANGE_THEME = 0;
 }

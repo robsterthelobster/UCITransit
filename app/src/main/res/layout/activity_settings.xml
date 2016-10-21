@@ -20,16 +20,16 @@
             app:title="@string/title_settings"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay">
+            android:theme="?attr/toolbarTheme"
+            app:popupTheme="?attr/toolbarPopupTheme">
         </android.support.v7.widget.Toolbar>
 
     </android.support.design.widget.AppBarLayout>
 
-    <fragment
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:name="com.robsterthelobster.ucitransit.ui.SettingsActivity$SettingsFragment"
         android:id="@+id/fragment_settings" />
 
 </android.support.design.widget.CoordinatorLayout>

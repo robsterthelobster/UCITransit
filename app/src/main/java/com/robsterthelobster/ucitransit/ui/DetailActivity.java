@@ -1,5 +1,6 @@
 package com.robsterthelobster.ucitransit.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -10,9 +11,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
+import com.ftinc.scoop.Scoop;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.utils.Constants;
-import com.robsterthelobster.ucitransit.utils.Utils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -31,6 +32,7 @@ public class DetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Scoop.getInstance().apply(this);
         setContentView(R.layout.activity_detail);
         ButterKnife.bind(this);
 
@@ -46,6 +48,14 @@ public class DetailActivity extends AppCompatActivity {
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mSectionsPagerAdapter);
         tabLayout.setupWithViewPager(mViewPager);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == RESULT_OK && requestCode == Constants.RC_CHANGE_THEME){
+            recreate();
+        }
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {

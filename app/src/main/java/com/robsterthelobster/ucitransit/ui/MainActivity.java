@@ -16,6 +16,8 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ftinc.scoop.Scoop;
+import com.ftinc.scoop.ui.ScoopSettingsActivity;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.location.LocationRequest;
 import com.robsterthelobster.ucitransit.R;
@@ -85,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Scoop.getInstance().apply(this);
         setContentView(R.layout.activity_main);
         UCITransitApp.getComponent(this).inject(this);
         ButterKnife.bind(this);
@@ -113,6 +116,10 @@ public class MainActivity extends AppCompatActivity {
                                 .show();
                     }
                 });
+
+        if(realm.isClosed()){
+            realm = Realm.getDefaultInstance();
+        }
 
         RealmResults<Arrivals> arrivals = realm
                 .where(Arrivals.class)
@@ -152,11 +159,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        Scoop.getInstance().apply(this, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
             case R.id.action_settings:
-                Intent intent = new Intent(this, SettingsActivity.class);
-                startActivity(intent);
+                //Intent intent = new Intent(this, SettingsActivity.class);
+                //startActivityForResult(intent, Constants.RC_CHANGE_THEME);
+                startActivityForResult(ScoopSettingsActivity.createIntent(this), Constants.RC_CHANGE_THEME);
                 break;
             case R.id.action_refresh:
                 Log.i(TAG, "Refresh menu item selected");
@@ -189,6 +203,15 @@ public class MainActivity extends AppCompatActivity {
     public void onStop() {
         super.onStop();
         Utils.unsubscribe(locationSub);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == RESULT_OK && requestCode == Constants.RC_CHANGE_THEME){
+            Log.d(TAG, "recreate");
+            recreate();
+        }
     }
 
     private void setUpNavigationView() {

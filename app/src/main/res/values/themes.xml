@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Default  -->
+    <style name="Theme.Default" parent="Theme.Light">
+
+    </style>
+
+    <style name="Theme.Default.Dark" parent="Theme.Dark">
+
+    </style>
+
+    <!-- Light -->
+    <style name="Theme.Light" parent="Theme.AppCompat.Light.NoActionBar">
+
+        <!-- Palatte -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlHighlight">@color/colorControlHighlight</item>
+
+        <!-- Theming Elements -->
+        <item name="toolbarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
+        <item name="toolbarPopupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="toolbarItemTint">#fff</item>
+
+    </style>
+
+    <!-- Dark -->
+    <style name="Theme.Dark" parent="ThemeOverlay.AppCompat.Dark">
+
+        <!-- Palatte -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlHighlight">@color/colorControlHighlight</item>
+
+        <!-- Theming Elements -->
+        <item name="toolbarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
+        <item name="toolbarPopupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="toolbarItemTint">#fff</item>
+
+    </style>
+</resources>

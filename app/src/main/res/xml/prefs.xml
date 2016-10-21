@@ -3,18 +3,15 @@
     <PreferenceCategory
         android:title="@string/title_appearance">
 
-        <ListPreference
+        <Preference
             android:key="@string/key_theme_pref"
-            android:title="@string/title_theme"
-            android:dialogTitle="@string/theme_dialog_title"
-            android:entries="@array/entries_pref_themes"
-            android:entryValues="@array/values_pref_themes" />
+            android:title="@string/title_theme" />
 
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="checkbox_preference"
             android:title="@string/title_checkbox_ad"
             android:summary="@string/subtitle_checkbox_ad"
-            android:defaultValue="false"/>
+            android:defaultValue="true"/>
 
     </PreferenceCategory>
 

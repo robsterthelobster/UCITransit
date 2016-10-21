@@ -2,7 +2,10 @@ package com.robsterthelobster.ucitransit;
 
 import android.app.Application;
 import android.content.Context;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
 
+import com.ftinc.scoop.Scoop;
 import com.robsterthelobster.ucitransit.module.RealmModule;
 import com.robsterthelobster.ucitransit.module.RestModule;
 
@@ -22,6 +25,14 @@ public class UCITransitApp extends Application {
                 .realmModule(new RealmModule(this))
                 .restModule(new RestModule(this))
                 .build();
+
+        Scoop.waffleCone()
+                .addFlavor("Light with Route Colors", R.style.Theme_Default)
+                .addFlavor("Dark with Route Colors", R.style.Theme_Default_Dark)
+                .addFlavor("Light", R.style.Theme_Light)
+                .addFlavor("Dark", R.style.Theme_Dark)
+                .setSharedPreferences(PreferenceManager.getDefaultSharedPreferences(this))
+                .initialize();
     }
 
     public static UCITransitComponent getComponent(Context context){

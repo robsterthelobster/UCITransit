@@ -74,6 +74,10 @@ public class PredictionFragment extends Fragment {
         Bundle arguments = getArguments();
         routeName = arguments.getString(Constants.ROUTE_ID_KEY);
 
+        if(realm.isClosed()){
+            realm = Realm.getDefaultInstance();
+        }
+
         RealmResults<Arrivals> arrivals = realm
                 .where(Arrivals.class)
                 .equalTo("isCurrent", true)

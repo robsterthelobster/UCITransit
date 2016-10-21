@@ -1,6 +1,5 @@
 package com.robsterthelobster.ucitransit.ui;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -20,7 +19,7 @@ import butterknife.ButterKnife;
 
 public class DetailActivity extends AppCompatActivity {
 
-    private SectionsPagerAdapter mSectionsPagerAdapter;
+    SectionsPagerAdapter mSectionsPagerAdapter;
     private final String TAG = DetailActivity.class.getSimpleName();
 
     @BindView(R.id.viewpager) ViewPager mViewPager;
@@ -48,14 +47,6 @@ public class DetailActivity extends AppCompatActivity {
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mSectionsPagerAdapter);
         tabLayout.setupWithViewPager(mViewPager);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode == RESULT_OK && requestCode == Constants.RC_CHANGE_THEME){
-            recreate();
-        }
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {

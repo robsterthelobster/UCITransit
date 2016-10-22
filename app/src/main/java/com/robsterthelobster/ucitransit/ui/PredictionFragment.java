@@ -1,6 +1,8 @@
 package com.robsterthelobster.ucitransit.ui;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -52,6 +54,7 @@ public class PredictionFragment extends Fragment {
     ArrivalsAdapter arrivalsAdapter;
     ArrivalsAdapter emptyAdapter;
     Subscription fetchArrivalsSub;
+    SharedPreferences prefs;
 
     public PredictionFragment() {
     }
@@ -73,6 +76,7 @@ public class PredictionFragment extends Fragment {
 
         Bundle arguments = getArguments();
         routeName = arguments.getString(Constants.ROUTE_ID_KEY);
+        prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
 
         if(realm.isClosed()){
             realm = Realm.getDefaultInstance();
@@ -134,13 +138,14 @@ public class PredictionFragment extends Fragment {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    private void refreshTask(){
+    public void refreshTask(){
         Observable.just(0)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(s -> fetchArrivals());
     }
 
     private void fetchArrivals() {
+        boolean showAd = prefs.getBoolean(getString(R.string.key_ad_pref), true);
         if(!Utils.isNetworkConnected(getContext())){
             Toast.makeText(getContext(), "Network is not available", Toast.LENGTH_SHORT)
                     .show();
@@ -159,7 +164,7 @@ public class PredictionFragment extends Fragment {
                         public void onCompleted() {
                             Log.d(TAG, "onCompleted");
                             recyclerView.setRefreshing(false);
-                            arrivalsAdapter.setFooter();
+                            arrivalsAdapter.setFooter(showAd);
                         }
 
                         @Override

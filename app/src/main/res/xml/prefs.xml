@@ -8,7 +8,7 @@
             android:title="@string/title_theme" />
 
         <SwitchPreference
-            android:key="checkbox_preference"
+            android:key="@string/key_ad_pref"
             android:title="@string/title_checkbox_ad"
             android:summary="@string/subtitle_checkbox_ad"
             android:defaultValue="true"/>

@@ -9,6 +9,8 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.ftinc.scoop.Scoop;
 import com.robsterthelobster.ucitransit.R;
@@ -21,6 +23,7 @@ public class DetailActivity extends AppCompatActivity {
 
     SectionsPagerAdapter mSectionsPagerAdapter;
     private final String TAG = DetailActivity.class.getSimpleName();
+    PredictionFragment predictionFragment;
 
     @BindView(R.id.viewpager) ViewPager mViewPager;
     @BindView(R.id.detail_toolbar) Toolbar toolbar;
@@ -49,6 +52,32 @@ public class DetailActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(mViewPager);
     }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.detail, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        Scoop.getInstance().apply(this, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+            case R.id.action_refresh:
+                Log.i(TAG, "Refresh menu item selected");
+                if(predictionFragment != null){
+                    predictionFragment.refreshTask();
+                }
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
         SectionsPagerAdapter(FragmentManager fm) {
@@ -59,7 +88,8 @@ public class DetailActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch(position){
                 case 0:
-                    return PredictionFragment.newInstance(routeName);
+                    predictionFragment = PredictionFragment.newInstance(routeName);
+                    return predictionFragment;
                 case 1:
                     return BusMapFragment.newInstance(routeName);
                 default:

@@ -27,11 +27,10 @@ public class UCITransitApp extends Application {
                 .build();
 
         Scoop.waffleCone()
-                .addFlavor("Light with Route Colors", R.style.AppTheme_Light)
+                .addFlavor("Light with Route Colors", R.style.AppTheme_Light, true)
                 .addFlavor("Dark with Route Colors", R.style.AppTheme_Dark)
                 .addFlavor("Light", R.style.Theme_Scoop_Light)
                 .addFlavor("Dark", R.style.AppTheme_Dark)
-                .addFlavor("Android Default", R.style.AppTheme_Default, true)
                 .addFlavor("Alternate 1", R.style.Theme_Scoop_Alt1)
                 .addFlavor("Alternate 2", R.style.Theme_Scoop_Alt2)
                 .setSharedPreferences(PreferenceManager.getDefaultSharedPreferences(this))

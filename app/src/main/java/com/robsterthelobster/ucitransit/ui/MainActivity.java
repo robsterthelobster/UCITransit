@@ -2,8 +2,11 @@ package com.robsterthelobster.ucitransit.ui;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -17,7 +20,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ftinc.scoop.Scoop;
-import com.ftinc.scoop.ui.ScoopSettingsActivity;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.location.LocationRequest;
 import com.robsterthelobster.ucitransit.R;
@@ -84,6 +86,8 @@ public class MainActivity extends AppCompatActivity {
     ReactiveLocationProvider locationProvider;
     Location mLocation;
 
+    SharedPreferences prefs;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         MobileAds.initialize(getApplicationContext(), getString(R.string.app_id));
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         setSupportActionBar(toolbar);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -311,6 +316,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetchArrivals() {
+        boolean showAd = prefs.getBoolean(getString(R.string.key_ad_pref), true);
         if(!Utils.isNetworkConnected(this)){
             setEmptyView();
         } else {
@@ -328,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
                         public void onCompleted() {
                             Log.d(TAG, "onCompleted");
                             recyclerView.setRefreshing(false);
-                            arrivalsAdapter.setFooter();
+                            arrivalsAdapter.setFooter(showAd);
                         }
 
                         @Override

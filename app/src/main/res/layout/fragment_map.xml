@@ -8,6 +8,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/map_button_center"
         android:text="@string/button_center_string"
+        android:textColor="@color/darker_gray"
         android:background="@color/map_transparent_white"
         android:layout_margin="@dimen/item_vertical_margin" />
 

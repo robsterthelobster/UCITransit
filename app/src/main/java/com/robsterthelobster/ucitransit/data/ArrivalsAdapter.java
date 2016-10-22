@@ -93,7 +93,9 @@ public class ArrivalsAdapter
 
     @Override
     public void onBindFooterViewHolder(ViewHolder holder, int position) {
-        AdRequest adRequest = new AdRequest.Builder().build();
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice("D29968901604B90992E8590DBB4904C7")
+                .build();
         holder.adView.loadAd(adRequest);
     }
 
@@ -103,8 +105,8 @@ public class ArrivalsAdapter
         return new ViewHolder((FrameLayout) v);
     }
 
-    public void setFooter() {
-        if(realmResults.size() > 0){
+    public void setFooter(boolean showAd) {
+        if(showAd && realmResults.size() > 0){
             addFooter();
         }else{
             removeFooter();

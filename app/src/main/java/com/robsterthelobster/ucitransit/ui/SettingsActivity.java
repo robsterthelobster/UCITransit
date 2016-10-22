@@ -6,7 +6,6 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 
 import com.ftinc.scoop.Scoop;
 import com.ftinc.scoop.ui.ScoopSettingsActivity;

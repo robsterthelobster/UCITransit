@@ -2,7 +2,6 @@ package com.robsterthelobster.ucitransit;
 
 import android.app.Application;
 import android.content.Context;
-import android.preference.Preference;
 import android.preference.PreferenceManager;
 
 import com.ftinc.scoop.Scoop;
@@ -27,10 +26,10 @@ public class UCITransitApp extends Application {
                 .build();
 
         Scoop.waffleCone()
-                .addFlavor("Light with Route Colors", R.style.AppTheme_Light, true)
-                .addFlavor("Dark with Route Colors", R.style.AppTheme_Dark)
-                .addFlavor("Light", R.style.Theme_Scoop_Light)
-                .addFlavor("Dark", R.style.AppTheme_Dark)
+                .addFlavor(getString(R.string.title_og_light), R.style.AppTheme_Light, true)
+                .addFlavor(getString(R.string.title_og_dark), R.style.AppTheme_Dark)
+                .addFlavor(getString(R.string.title_theme_light), R.style.Theme_Scoop_Light)
+                .addFlavor(getString(R.string.title_theme_dark), R.style.AppTheme_Dark)
                 .addFlavor("Alternate 1", R.style.Theme_Scoop_Alt1)
                 .addFlavor("Alternate 2", R.style.Theme_Scoop_Alt2)
                 .setSharedPreferences(PreferenceManager.getDefaultSharedPreferences(this))

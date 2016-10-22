@@ -4,8 +4,9 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
-import android.preference.Preference;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -215,7 +216,8 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == RESULT_OK && requestCode == Constants.RC_CHANGE_THEME){
             Log.d(TAG, "recreate");
-            recreate();
+            Handler handler = new Handler();
+            handler.postDelayed(this::recreate, 0);
         }
     }
 

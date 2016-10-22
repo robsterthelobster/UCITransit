@@ -20,13 +20,13 @@
     <string name="title_checkbox_ad">Toggle Ads</string>
     <string name="title_theme">Theme</string>
     <string name="theme_dialog_title">Select app theme:</string>
-    <string name="subtitle_checkbox_ad">Switch off to disable ads. Leave on to feed the lobster. Just kidding, do what you want. (•◡•) \nBut for realsies, invite your friends to install if you think the app is useful!</string>
+    <string name="subtitle_checkbox_ad">Switch off to disable ads. Leave on to feed the lobster. Just kidding, do what you want. (•◡•)</string>
     <string name="title_about">About</string>
     <string name="title_settings">Settings</string>
     <string name="title_libraries">Libraries Used</string>
     <string name="title_license">License</string>
     <string name="title_review">Rate this app!</string>
-    <string name="subtitle_review">It\'s okay. I can handle your honesty.</string>
+    <string name="subtitle_review">It\'s okay. I can handle your honesty. Invite your friends to install if you think the app is useful!</string>
 
     <string name="title_og_light">Light with Route Colors</string>
     <string name="title_og_dark">Dark with Route Colors</string>

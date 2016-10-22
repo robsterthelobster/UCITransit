@@ -3,6 +3,7 @@ package com.robsterthelobster.ucitransit.data;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.CardView;
 import android.view.View;
@@ -83,7 +84,11 @@ public class ArrivalsAdapter
         viewHolder.favoriteCheck.setChecked(arrivals.isFavorite());
         viewHolder.favoriteCheck.setOnCheckedChangeListener(
                 (checkBox, checked) -> {
-                    checkBox.setChecked(checked);
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP && checked) {
+                        checkBox.setButtonDrawable(R.drawable.ic_star_yellow);
+                    }else{
+                        checkBox.setChecked(checked);
+                    }
                     realm.executeTransaction(r -> {
                         arrivals.setFavorite(checked);
                         r.copyToRealmOrUpdate(arrivals);

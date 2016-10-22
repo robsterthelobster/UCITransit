@@ -7,6 +7,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/map_button_center"
+        android:visibility="gone"
         android:text="@string/button_center_string"
         android:textColor="@color/darker_gray"
         android:background="@color/map_transparent_white"

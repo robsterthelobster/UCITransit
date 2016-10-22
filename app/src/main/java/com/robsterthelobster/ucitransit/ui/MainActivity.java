@@ -49,6 +49,7 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
@@ -108,8 +109,23 @@ public class MainActivity extends AppCompatActivity {
 
         locationProvider = new ReactiveLocationProvider(this);
         locationProvider.getLastKnownLocation()
-                .subscribe(location -> {
-                    mLocation = location;
+                .subscribe(new Subscriber<Location>() {
+                    final String TAG = "lastKnownLocationSub";
+                    @Override
+                    public void onCompleted() {
+                        Log.d(TAG, "onCompleted");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(TAG, e.getMessage());
+                        showToast("Google Play Services not compatible.", Toast.LENGTH_SHORT);
+                    }
+
+                    @Override
+                    public void onNext(Location location) {
+                        mLocation = location;
+                    }
                 });
 
         permissionSub = RxPermissions.getInstance(this)
@@ -222,11 +238,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setUpNavigationView() {
+        Menu menu = navigationView.getMenu();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            menu = menu.addSubMenu("Routes");
+        }
+        final Menu navMenu = menu;
         Observable.from(routeResults).subscribe(route -> {
             final Intent intent = new Intent(this, DetailActivity.class);
             String name = route.getName();
             intent.putExtra(Constants.ROUTE_ID_KEY, name);
-            MenuItem item = navigationView.getMenu().add(name);
+            MenuItem item = navMenu.add(name);
             item.setIntent(intent);
         });
     }
@@ -417,9 +438,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setEmptyView(){
-        Toast.makeText(this, "Network is not available", Toast.LENGTH_SHORT).show();
+        showToast("Network is not available", Toast.LENGTH_SHORT);
         recyclerView.setRefreshing(false);
         recyclerView.setAdapter(emptyAdapter);
         emptyText.setText(R.string.empty_network_message);
+    }
+
+    private void showToast(String message, int length){
+        Toast.makeText(this, message, length).show();
     }
 }

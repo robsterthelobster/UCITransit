@@ -22,15 +22,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="C - Camino del Sol"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium.Inverse"/>
+                android:textColor="?attr/editTextColor"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
 
             <TextView
                 android:id="@+id/prediction_arrival_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium.Inverse"
-                android:textColor="@color/white"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 tools:text="10 min"
+                android:textColor="?attr/editTextColor"
                 android:layout_below="@+id/prediction_favorite_button"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true" />
@@ -48,8 +49,8 @@
                 android:id="@+id/prediction_stop_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.AppCompat.Small.Inverse"
-                android:textColor="@color/white"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:textColor="?attr/editTextColor"
                 tools:text="University Center - North (UCI Admin)"
                 android:layout_alignBaseline="@+id/prediction_arrival_time_alt"
                 android:layout_alignBottom="@+id/prediction_arrival_time"
@@ -63,10 +64,11 @@
                 tools:text="13 min"
                 android:paddingTop="4dp"
                 android:visibility="gone"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium.Inverse"
+                android:textColor="?attr/editTextColor"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:layout_below="@+id/prediction_arrival_time"
                 android:layout_alignParentRight="true"
-                android:textColor="@color/white" />
+                android:layout_alignParentEnd="true" />
 
         </RelativeLayout>
 

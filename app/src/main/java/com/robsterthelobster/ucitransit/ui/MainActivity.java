@@ -215,12 +215,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setUpNavigationView() {
-        Menu subMenu = navigationView.getMenu().addSubMenu("Routes");
         Observable.from(routeResults).subscribe(route -> {
             final Intent intent = new Intent(this, DetailActivity.class);
             String name = route.getName();
             intent.putExtra(Constants.ROUTE_ID_KEY, name);
-            MenuItem item = subMenu.add(name);
+            MenuItem item = navigationView.getMenu().add(name);
             item.setIntent(intent);
         });
     }

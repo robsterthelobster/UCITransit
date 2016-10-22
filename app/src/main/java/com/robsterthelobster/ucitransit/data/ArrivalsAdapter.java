@@ -2,13 +2,9 @@ package com.robsterthelobster.ucitransit.data;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.preference.Preference;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.CardView;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -19,7 +15,6 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.ftinc.scoop.Flavor;
 import com.ftinc.scoop.Scoop;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -43,18 +38,13 @@ public class ArrivalsAdapter
         extends RealmBasedRecyclerViewAdapter<Arrivals, ArrivalsAdapter.ViewHolder> {
 
     private Realm realm;
-    private boolean routeColorOn;
+    private boolean routeColorOn = false;
 
     public ArrivalsAdapter(Context context, RealmResults<Arrivals> realmResults, boolean automaticUpdate, boolean animateResults, Realm realm) {
         super(context, realmResults, automaticUpdate, animateResults);
         this.realm = realm;
-        switch(Scoop.getInstance().getCurrentFlavor().getName()) {
-            case "Dark":
-            case "Light":
-                routeColorOn = false;
-                break;
-            default:
-                routeColorOn = true;
+        if(Scoop.getInstance().getCurrentFlavor().getName().contains("Route")){
+            routeColorOn = true;
         }
     }
 

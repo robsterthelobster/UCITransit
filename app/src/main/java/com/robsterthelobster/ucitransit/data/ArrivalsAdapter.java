@@ -83,14 +83,6 @@ public class ArrivalsAdapter
         viewHolder.secondaryArrivalText.setText(secondaryMinutes);
         viewHolder.favoriteCheck.setOnCheckedChangeListener(null);
         viewHolder.favoriteCheck.setChecked(arrivals.isFavorite());
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            int[][] states = new int[][]{new int[]{-android.R.attr.state_checked}, new int[]{android.R.attr.state_checked}};
-            int[] colors = new int[]{
-                    getContext().getResources().getColor(android.R.color.primary_text_light),
-                    getContext().getResources().getColor(R.color.colorAccent)
-            };
-            viewHolder.favoriteCheck.setSupportButtonTintList(new ColorStateList(states, colors));
-        }
         viewHolder.favoriteCheck.setOnCheckedChangeListener(
                 (checkBox, checked) -> {
                     checkBox.setChecked(checked);
@@ -98,6 +90,7 @@ public class ArrivalsAdapter
                         arrivals.setFavorite(checked);
                         r.copyToRealmOrUpdate(arrivals);
                     });
+                    this.updateRealmResults(realmResults);
                 });
     }
 
@@ -156,6 +149,17 @@ public class ArrivalsAdapter
             super(container);
             this.container = container;
             ButterKnife.bind(this, container);
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                int[][] states = new int[][]{
+                        new int[]{-android.R.attr.state_checked},
+                        new int[]{android.R.attr.state_checked}};
+                int[] colors = new int[]{
+                        getContext().getResources().getColor(android.R.color.primary_text_light),
+                        getContext().getResources().getColor(R.color.colorAccent)
+                };
+                favoriteCheck.setSupportButtonTintList(new ColorStateList(states, colors));
+            }
 
             cardView.setOnClickListener(this::expandCard);
             if (!isViewExpanded) {

@@ -4,13 +4,13 @@ apply plugin: 'realm-android'
 apply plugin: 'me.tatarka.retrolambda'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.0"
+    compileSdkVersion 24
+    buildToolsVersion "24.0.2"
 
     defaultConfig {
         applicationId "com.robsterthelobster.ucibustracker"
         minSdkVersion 16
-        targetSdkVersion 25
+        targetSdkVersion 24
         versionCode 7
         versionName "2.2"
         multiDexEnabled true
@@ -49,14 +49,14 @@ dependencies {
     androidTestCompile 'junit:junit:4.12'
     androidTestCompile 'com.android.support.test:runner:0.5'
     androidTestCompile 'com.android.support.test:rules:0.5'
-    androidTestCompile 'com.android.support:support-annotations:25.0.0'
+    androidTestCompile 'com.android.support:support-annotations:24.2.1'
 
-    compile "com.android.support:support-core-utils:25.0.0"
-    compile 'com.android.support:appcompat-v7:25.0.0'
-    compile 'com.android.support:design:25.0.0'
-    compile 'com.android.support:cardview-v7:25.0.0'
-    compile 'com.android.support:support-v4:25.0.0'
-    compile 'com.android.support:recyclerview-v7:25.0.0'
+    compile "com.android.support:support-core-utils:24.2.1"
+    compile 'com.android.support:appcompat-v7:24.2.1'
+    compile 'com.android.support:design:24.2.1'
+    compile 'com.android.support:cardview-v7:24.2.1'
+    compile 'com.android.support:support-v4:24.2.1'
+    compile 'com.android.support:recyclerview-v7:24.2.1'
 
     compile 'com.google.dagger:dagger:2.6.1'
     apt 'com.google.dagger:dagger-compiler:2.6.1'
@@ -76,9 +76,9 @@ dependencies {
     compile 'com.github.thorbenprimke:realm-recyclerview:0.9.23'
     apt 'dk.ilios:realmfieldnameshelper:1.1.0'
 
-    compile 'com.google.android.gms:play-services-location:9.8.00'
-    compile 'com.google.android.gms:play-services-maps:9.8.00'
-    compile 'com.google.android.gms:play-services-ads:9.8.00'
+    compile 'com.google.android.gms:play-services-location:9.6.1'
+    compile 'com.google.android.gms:play-services-maps:9.6.1'
+    compile 'com.google.android.gms:play-services-ads:9.6.1'
 
     compile 'com.52inc:scoops:1.0.0'
 }

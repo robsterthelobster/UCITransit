@@ -8,7 +8,7 @@ A recreation of my <a href="https://github.com/tripleducke/Capstone-Project">Uda
 An Android transit app for UC Irvine and Anteater Express.  Users can quickly view nearby stops for arrival times, or click into an individual route for additional info on stops.  Each route also has a dedicated route map, with updated bus and stop markers.
 
 ## Play Store Link
-https://play.google.com/store/apps/details?id=com.robsterthelobster.ucibustracker&hl=en
+[![Get it on Google Play](https://play.google.com/intl/en_us/badges/images/badge_new.png)](https://play.google.com/store/apps/details?id=com.robsterthelobster.ucibustracker&hl=en)
 
 ## Screenshots
 <img src="/screenshots/device-2016-10-10-153217.png" width="400">
@@ -59,6 +59,10 @@ The app is actually compatible with a large number of colleges and universities,
 * RealmFieldNamesHelper
   * https://github.com/cmelchior/realmfieldnameshelper
   * Automatically generates name fields for Realm Objects
+* Scoops
+  * https://github.com/52inc/Scoops
+  * Themer with some built-in themes and theme selection activity
+  * Makes swapping themes pretty easy
   
 ##License:
 

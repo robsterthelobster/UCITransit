@@ -201,6 +201,7 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
             }
             return false;
         });
+        centerButton.setVisibility(View.VISIBLE);
         map.setOnMyLocationButtonClickListener(() -> false);
         map.getUiSettings().setZoomControlsEnabled(true);
         if (ActivityCompat.checkSelfPermission(getContext(),

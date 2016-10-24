@@ -2,16 +2,17 @@ package com.robsterthelobster.ucitransit.data;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.CardView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -82,13 +83,17 @@ public class ArrivalsAdapter
         viewHolder.secondaryArrivalText.setText(secondaryMinutes);
         viewHolder.favoriteCheck.setOnCheckedChangeListener(null);
         viewHolder.favoriteCheck.setChecked(arrivals.isFavorite());
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            int[][] states = new int[][]{new int[]{-android.R.attr.state_checked}, new int[]{android.R.attr.state_checked}};
+            int[] colors = new int[]{
+                    getContext().getResources().getColor(android.R.color.primary_text_light),
+                    getContext().getResources().getColor(R.color.colorAccent)
+            };
+            viewHolder.favoriteCheck.setSupportButtonTintList(new ColorStateList(states, colors));
+        }
         viewHolder.favoriteCheck.setOnCheckedChangeListener(
                 (checkBox, checked) -> {
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP && checked) {
-                        checkBox.setButtonDrawable(R.drawable.ic_star_yellow);
-                    }else{
-                        checkBox.setChecked(checked);
-                    }
+                    checkBox.setChecked(checked);
                     realm.executeTransaction(r -> {
                         arrivals.setFavorite(checked);
                         r.copyToRealmOrUpdate(arrivals);
@@ -129,7 +134,7 @@ public class ArrivalsAdapter
         @BindView(R.id.prediction_stop_name)
         TextView stopText;
         @BindView(R.id.prediction_favorite_button)
-        CheckBox favoriteCheck;
+        AppCompatCheckBox favoriteCheck;
         @BindView(R.id.prediction_arrival_time)
         TextView arrivalText;
         @BindView(R.id.prediction_arrival_time_alt)

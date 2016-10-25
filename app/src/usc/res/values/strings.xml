@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">USC Transit</string>
+    <string name="root_url" translatable="false">https://www.uscbuses.com/</string>
+
+
+    <string name="app_id" translatable="false">ca-app-pub-4741697647575429~1688851395</string>
+    <string name="banner_ad_unit_id" translatable="false">ca-app-pub-4741697647575429/3165584598</string>
+</resources>

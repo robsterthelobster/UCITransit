@@ -5,5 +5,5 @@
     <color name="colorPrimaryDark">#1B3D6D</color>
     <color name="colorAccent">#FFD200</color>
     <color name="betweenPoint">#0E5089</color>
-
+    <color name="colorControlHighlight">#6aa2b8</color>
 </resources>

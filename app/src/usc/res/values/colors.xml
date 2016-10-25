@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- UCI color palette from guidelines -->
+    <color name="colorPrimary">#990000</color>
+    <color name="colorPrimaryDark">#600000</color>
+    <color name="colorAccent">#FFCC00</color>
+    <color name="betweenPoint">#7D0000</color>
+    <color name="colorControlHighlight">#FFCC00</color>
+</resources>

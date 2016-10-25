@@ -18,7 +18,7 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -31,12 +31,16 @@ android {
             applicationId "com.robsterthelobster.cpptransit"
             versionName "2.5"
         }
-        ucsf{
-            applicationId "com.robsterthelobster.ucsftransit"
+        upenn{
+            applicationId "com.robsterthelobster.upenntransit"
             versionName "2.5"
         }
         ucsd {
             applicationId "com.robsterthelobster.ucsdtransit"
+            versionName "2.5"
+        }
+        usc {
+            applicationId "com.robsterthelobster.usctransit"
             versionName "2.5"
         }
     }

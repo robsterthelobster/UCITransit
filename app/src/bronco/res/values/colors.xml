@@ -4,4 +4,5 @@
     <color name="colorPrimaryDark">#001A00</color>
     <color name="colorAccent">#C6930A</color>
     <color name="betweenPoint">#1E4D2B</color>
+    <color name="colorControlHighlight">#679000</color>
 </resources>

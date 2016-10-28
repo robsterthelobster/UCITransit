@@ -22,7 +22,7 @@
             android:title="@string/title_review"
             android:summary="@string/subtitle_review">
             <intent android:action="android.intent.action.VIEW"
-                android:data="https://play.google.com/store/apps/details?id=com.robsterthelobster.ucibustracker"
+                android:data="@string/play_store_link"
                 android:launchMode="singleInstance"/>
         </Preference>
 

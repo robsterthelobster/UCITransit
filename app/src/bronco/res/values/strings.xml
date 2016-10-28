@@ -4,6 +4,5 @@
 
     <string name="app_id">ca-app-pub-4741697647575429~6052965798</string>
     <string name="banner_ad_unit_id">ca-app-pub-4741697647575429/7529698999</string>
-
-    <string name="title_theme_original">Broncos</string>
+    <string name="play_store_link" translatable="false">https://play.google.com/store/apps/details?id=com.robsterthelobster.cpptransit</string>
 </resources>

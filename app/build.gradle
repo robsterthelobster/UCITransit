@@ -11,37 +11,32 @@ android {
         applicationId "com.robsterthelobster.ucibustracker"
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 7
-        versionName "2.2"
+        versionCode 10
+        versionName "2.6"
         multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
     productFlavors {
         uci {
             applicationId "com.robsterthelobster.ucibustracker"
-            versionName "2.5"
         }
         bronco {
             applicationId "com.robsterthelobster.cpptransit"
-            versionName "2.5"
         }
         upenn{
             applicationId "com.robsterthelobster.upenntransit"
-            versionName "2.5"
         }
         ucsd {
             applicationId "com.robsterthelobster.ucsdtransit"
-            versionName "2.5"
         }
         usc {
             applicationId "com.robsterthelobster.usctransit"
-            versionName "2.5"
         }
     }
     compileOptions {

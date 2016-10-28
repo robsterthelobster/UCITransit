@@ -2,7 +2,7 @@
     <string name="app_name">UPenn Transit</string>
     <string name="root_url" translatable="false">https://www.pennrides.com/</string>
 
-
     <string name="app_id" translatable="false">ca-app-pub-4741697647575429~9851246594</string>
     <string name="banner_ad_unit_id" translatable="false">ca-app-pub-4741697647575429/2327979795</string>
+    <string name="play_store_link" translatable="false">https://play.google.com/store/apps/details?id=com.robsterthelobster.upenntransit</string>
 </resources>

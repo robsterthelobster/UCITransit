@@ -64,7 +64,7 @@ The app is actually compatible with a large number of colleges and universities,
   * Themer with some built-in themes and theme selection activity
   * Makes swapping themes pretty easy
   
-##License:
+## License:
 
 UCI Transit is released under the <a href="https://github.com/tripleducke/UCITransit/blob/master/LICENSE">Apache 2.0 License</a>.
 

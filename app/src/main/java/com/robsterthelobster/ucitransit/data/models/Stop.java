@@ -31,7 +31,7 @@ public class Stop extends RealmObject{
     @SerializedName("stop_id")
     public int stopId;
     @SerializedName("routes")
-    public RealmList<RealmString> routes = null;
+    public RealmList<RealmInteger> routes = null;
     @SerializedName("name")
     public String name;
 
@@ -107,11 +107,11 @@ public class Stop extends RealmObject{
         this.stopId = stopId;
     }
 
-    public RealmList<RealmString> getRoutes() {
+    public RealmList<RealmInteger> getRoutes() {
         return routes;
     }
 
-    public void setRoutes(RealmList<RealmString> routes) {
+    public void setRoutes(RealmList<RealmInteger> routes) {
         this.routes = routes;
     }
 

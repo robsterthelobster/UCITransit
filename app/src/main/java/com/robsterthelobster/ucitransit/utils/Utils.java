@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 
 import com.robsterthelobster.ucitransit.R;
 
@@ -50,6 +51,10 @@ public class Utils {
                 (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         return activeNetwork != null && activeNetwork.isConnected();
+    }
+
+    public void showToast(Context context, String message, int length){
+        Toast.makeText(context, message, length).show();
     }
 }
 

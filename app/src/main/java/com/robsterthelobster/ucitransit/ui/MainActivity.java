@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -23,18 +22,15 @@ import android.widget.Toast;
 import com.ftinc.scoop.Scoop;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.location.LocationRequest;
-import com.robsterthelobster.ucitransit.BuildConfig;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.RouteData;
-import com.robsterthelobster.ucitransit.data.models.RouteList;
 import com.robsterthelobster.ucitransit.utils.Constants;
 import com.robsterthelobster.ucitransit.utils.Utils;
 import com.tbruyelle.rxpermissions.RxPermissions;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -44,21 +40,12 @@ import butterknife.ButterKnife;
 import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
 import io.realm.Realm;
 import io.realm.RealmList;
-import io.realm.RealmResults;
-import io.realm.Sort;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
@@ -87,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
     //ArrivalsAdapter arrivalsAdapter;
     //ArrivalsAdapter emptyAdapter;
 
-    Subscription fetchRouteSub;
+    Subscription fetchInitialDataSub;
     Subscription fetchArrivalsSub;
     Subscription permissionSub;
     Subscription locationSub;
@@ -152,31 +139,31 @@ public class MainActivity extends AppCompatActivity {
             realm = Realm.getDefaultInstance();
         }
 
-
-        Call<RouteData> test = apiService.getRoutes(1039);
-
-        test.enqueue(new Callback<RouteData>() {
-            @Override
-            public void onResponse(Call<RouteData> call, Response<RouteData> response) {
-                if(response.body() != null) {
-                    System.out.println(response.raw().request().url());
-                    RouteData data = response.body();
-
-
-                    List<Route> routes = data.getData().getRoutes();
-
-                    for(Route route : routes){
-                        System.out.println("Line " + route.getShortName());
+        fetchInitialDataSub = apiService.getRoutes(Constants.AGENCY_ID)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<RouteData>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.d("fetchInitialDataSub", "onCompleted");
                     }
-                }
-            }
 
-            @Override
-            public void onFailure(Call<RouteData> call, Throwable t) {
-                System.out.println("test failed");
-                System.out.println(call.request().url());
-            }
-        });
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("fetchInitialDataSub", e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(RouteData routeData) {
+                        Log.d("fetchInitialDataSub", "onNext");
+
+                        List<Route> routes = routeData.getData().getRoutes();
+                        for(Route route : routes){
+                            System.out.println(route.getLongName() + " " + route.getShortName());
+                        }
+                    }
+                });
+        
 
 //        RealmResults<Arrivals> arrivals = realm
 //                .where(Arrivals.class)
@@ -193,7 +180,8 @@ public class MainActivity extends AppCompatActivity {
 //
 //        if (realm.isEmpty()) {
 //            fetchInitialRouteData();
-//        } else {
+//        }
+//          else {
 //            routeResults = realm.where(Route.class).findAll();
 //            setUpNavigationView();
 //            fetchArrivals();
@@ -242,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
         realm.close();
-        Utils.unsubscribe(fetchRouteSub);
+        Utils.unsubscribe(fetchInitialDataSub);
         Utils.unsubscribe(fetchArrivalsSub);
         Utils.unsubscribe(permissionSub);
         Utils.unsubscribe(locationSub);
@@ -325,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
 //        if(!Utils.isNetworkConnected(this)){
 //            setEmptyView();
 //        }
-//        fetchRouteSub = apiService.getRoutes()
+//        fetchInitialDataSub = apiService.getRoutes()
 //                .flatMap(Observable::from).map(route -> {
 //                    RealmList<Stop> stops = new RealmList<>();
 //                    apiService.getStops(route.getId())
@@ -338,7 +326,7 @@ public class MainActivity extends AppCompatActivity {
 //                .subscribe(new Subscriber<Route>() {
 //                    @Override
 //                    public void onCompleted() {
-//                        Log.d("fetchRouteSub", "onCompleted");
+//                        Log.d("fetchInitialDataSub", "onCompleted");
 //                        routeResults = realm.where(Route.class).findAll();
 //                        setUpNavigationView();
 //                        fetchArrivals();
@@ -346,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
 //
 //                    @Override
 //                    public void onError(Throwable e) {
-//                        Log.d("fetchRouteSub", e.getMessage());
+//                        Log.d("fetchInitialDataSub", e.getMessage());
 //                    }
 //
 //                    @Override
@@ -472,12 +460,12 @@ public class MainActivity extends AppCompatActivity {
 //                .observeOn(AndroidSchedulers.mainThread());
 //    }
 
-//    private void setEmptyView(){
-//        showToast("Network is not available", Toast.LENGTH_SHORT);
-//        recyclerView.setRefreshing(false);
-//        recyclerView.setAdapter(emptyAdapter);
-//        emptyText.setText(R.string.empty_network_message);
-//    }
+    private void setEmptyView(){
+        showToast("Network is not available", Toast.LENGTH_SHORT);
+        recyclerView.setRefreshing(false);
+       // recyclerView.setAdapter(emptyAdapter);
+        emptyText.setText(R.string.empty_network_message);
+    }
 
     private void showToast(String message, int length){
         Toast.makeText(this, message, length).show();

@@ -53,7 +53,7 @@ public class RestModule {
                 .baseUrl(context.getString(R.string.root_url))
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
-                //.addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
 
         return retrofit.create(BusApiService.class);

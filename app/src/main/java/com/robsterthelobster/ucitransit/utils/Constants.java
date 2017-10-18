@@ -7,5 +7,7 @@ package com.robsterthelobster.ucitransit.utils;
 public class Constants {
     public final static String ROUTE_ID_KEY = "route key";
 
-    public static final int RC_CHANGE_THEME = 0;
+    public final static int RC_CHANGE_THEME = 0;
+
+    public final static int AGENCY_ID = 1039;
 }

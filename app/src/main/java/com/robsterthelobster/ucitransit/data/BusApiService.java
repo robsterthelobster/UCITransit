@@ -5,6 +5,7 @@ import com.robsterthelobster.ucitransit.BuildConfig;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.RouteData;
 import com.robsterthelobster.ucitransit.data.models.Stop;
+import com.robsterthelobster.ucitransit.data.models.StopData;
 
 import java.util.List;
 
@@ -23,6 +24,9 @@ import rx.Observable;
 public interface BusApiService {
 
     @GET("routes.json")
-    Call<RouteData> getRoutes(@Query("agencies") int agency);
+    Observable<RouteData> getRoutes(@Query("agencies") int agency);
+
+    @GET
+    Observable<StopData> getStops(@Query("agencies") int agency);
 
 }

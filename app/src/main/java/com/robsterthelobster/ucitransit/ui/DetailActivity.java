@@ -71,7 +71,7 @@ public class DetailActivity extends AppCompatActivity {
             case R.id.action_refresh:
                 Log.i(TAG, "Refresh menu item selected");
                 if(predictionFragment != null){
-                    predictionFragment.refreshTask();
+                    //predictionFragment.refreshTask();
                 }
                 break;
         }

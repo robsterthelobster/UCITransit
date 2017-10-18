@@ -25,3 +25,10 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+def getMyApiKey(String property){
+    Properties properties = new Properties()
+    properties.load(new FileInputStream("open_api_key"))
+    return "\"" + properties.getProperty(property) +"\""
+}
+

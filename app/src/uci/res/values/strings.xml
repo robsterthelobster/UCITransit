@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">UCI Transit</string>
-    <string name="root_url" translatable="false">https://www.ucishuttles.com/</string>
+    <string name="root_url" translatable="false">https://transloc-api-1-2.p.mashape.com/</string>
 
     <string name="app_id" translatable="false">ca-app-pub-4741697647575429~8155480998</string>
     <string name="banner_ad_unit_id" translatable="false">ca-app-pub-4741697647575429/7669299792</string>

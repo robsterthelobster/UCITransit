@@ -2,63 +2,117 @@ package com.robsterthelobster.ucitransit.data.models;
 
 import com.google.gson.annotations.SerializedName;
 
+import io.realm.Realm;
+import io.realm.RealmList;
 import io.realm.RealmObject;
-import io.realm.annotations.PrimaryKey;
 
 /**
- * Created by robin on 6/20/2016.
+ * Created by robin on 10/16/2017.
  */
-public class Stop extends RealmObject {
-    @SerializedName("ID")
-    @PrimaryKey
-    private int id;
-    @SerializedName("Image")
-    private String image;
-    @SerializedName("Latitude")
-    private double latitude;
-    @SerializedName("Longitude")
-    private double longitude;
-    @SerializedName("Name")
-    private String name;
-    @SerializedName("RtpiNumber")
-    private int rtpiNumber;
-    @SerializedName("ShowLabel")
-    private boolean showLabel;
-    @SerializedName("ShowStopRtpiNumberLabel")
-    private boolean showStopRtpiNumberLabel;
-    @SerializedName("ShowVehicleName")
-    private boolean showVehicleName;
 
-    public int getId() {
-        return id;
+public class Stop extends RealmObject{
+
+    @SerializedName("code")
+    public String code;
+    @SerializedName("description")
+    public String description;
+    @SerializedName("url")
+    public String url;
+    @SerializedName("parent_station_id")
+    public int parentStationId;
+    @SerializedName("agency_ids")
+    public RealmList<RealmInteger> agencyIds = null;
+    @SerializedName("station_id")
+    public int stationId;
+    @SerializedName("location_type")
+    public String locationType;
+    @SerializedName("location")
+    public Coordinate location;
+    @SerializedName("stop_id")
+    public int stopId;
+    @SerializedName("routes")
+    public RealmList<RealmString> routes = null;
+    @SerializedName("name")
+    public String name;
+
+    public String getCode() {
+        return code;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setCode(String code) {
+        this.code = code;
     }
 
-    public String getImage() {
-        return image;
+    public String getDescription() {
+        return description;
     }
 
-    public void setImage(String image) {
-        this.image = image;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public double getLatitude() {
-        return latitude;
+    public String getUrl() {
+        return url;
     }
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
-    public double getLongitude() {
-        return longitude;
+    public int getParentStationId() {
+        return parentStationId;
     }
 
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
+    public void setParentStationId(int parentStationId) {
+        this.parentStationId = parentStationId;
+    }
+
+    public RealmList<RealmInteger> getAgencyIds() {
+        return agencyIds;
+    }
+
+    public void setAgencyIds(RealmList<RealmInteger> agencyIds) {
+        this.agencyIds = agencyIds;
+    }
+
+    public int getStationId() {
+        return stationId;
+    }
+
+    public void setStationId(int stationId) {
+        this.stationId = stationId;
+    }
+
+    public String getLocationType() {
+        return locationType;
+    }
+
+    public void setLocationType(String locationType) {
+        this.locationType = locationType;
+    }
+
+    public Coordinate getLocation() {
+        return location;
+    }
+
+    public void setLocation(Coordinate location) {
+        this.location = location;
+    }
+
+    public int getStopId() {
+        return stopId;
+    }
+
+    public void setStopId(int stopId) {
+        this.stopId = stopId;
+    }
+
+    public RealmList<RealmString> getRoutes() {
+        return routes;
+    }
+
+    public void setRoutes(RealmList<RealmString> routes) {
+        this.routes = routes;
     }
 
     public String getName() {
@@ -68,36 +122,4 @@ public class Stop extends RealmObject {
     public void setName(String name) {
         this.name = name;
     }
-
-    public int getRtpiNumber() {
-        return rtpiNumber;
-    }
-
-    public void setRtpiNumber(int rtpiNumber) {
-        this.rtpiNumber = rtpiNumber;
-    }
-
-    public boolean isShowLabel() {
-        return showLabel;
-    }
-
-    public void setShowLabel(boolean showLabel) {
-        this.showLabel = showLabel;
-    }
-
-    public boolean isShowStopRtpiNumberLabel() {
-        return showStopRtpiNumberLabel;
-    }
-
-    public void setShowStopRtpiNumberLabel(boolean showStopRtpiNumberLabel) {
-        this.showStopRtpiNumberLabel = showStopRtpiNumberLabel;
-    }
-
-    public boolean isShowVehicleName() {
-        return showVehicleName;
-    }
-
-    public void setShowVehicleName(boolean showVehicleName) {
-        this.showVehicleName = showVehicleName;
-    }
- }
+}

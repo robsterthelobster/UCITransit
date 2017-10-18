@@ -35,13 +35,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.data.BusApiService;
-import com.robsterthelobster.ucitransit.data.models.Arrivals;
-import com.robsterthelobster.ucitransit.data.models.ArrivalsFields;
-import com.robsterthelobster.ucitransit.data.models.Prediction;
-import com.robsterthelobster.ucitransit.data.models.Route;
-import com.robsterthelobster.ucitransit.data.models.RouteFields;
-import com.robsterthelobster.ucitransit.data.models.Stop;
-import com.robsterthelobster.ucitransit.data.models.Vehicle;
 import com.robsterthelobster.ucitransit.utils.Constants;
 import com.robsterthelobster.ucitransit.utils.SnackbarManager;
 import com.robsterthelobster.ucitransit.utils.Utils;
@@ -67,7 +60,7 @@ import rx.schedulers.Schedulers;
  * Created by robin on 9/29/2016.
  */
 
-public class BusMapFragment extends Fragment implements OnMapReadyCallback {
+public class BusMapFragment extends Fragment{
 
     final String TAG = BusMapFragment.class.getSimpleName();
     final int MAP_PADDING = 200;
@@ -80,7 +73,7 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
     BusApiService apiService;
 
     GoogleMap map;
-    Route route;
+    //Route route;
     Snackbar snackbar;
     SnackbarManager snackbarManager;
     CoordinatorLayout snackbarLayout;
@@ -108,112 +101,112 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
         String routeName = arguments.getString(Constants.ROUTE_ID_KEY);
         realm = Realm.getDefaultInstance();
 
-        route = realm.where(Route.class).equalTo(RouteFields.NAME, routeName).findFirst();
+       // route = realm.where(Route.class).equalTo(RouteFields.NAME, routeName).findFirst();
         stopMarkers = new ArrayList<>();
         vehicleMarkers = new HashMap<>();
 
-        snackbarLayout =
-                (CoordinatorLayout) container.getRootView().findViewById(R.id.detail_content);
-        ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
+//        snackbarLayout =
+//                (CoordinatorLayout) container.getRootView().findViewById(R.id.detail_content);
+//        ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
 
         return view;
     }
 
-    private void setUpStopMarkers() {
-        Log.d(TAG, "setUpStopMarkers");
-        for (Stop stop : route.getStops()) {
-            LatLng latLng = new LatLng(stop.getLatitude(), stop.getLongitude());
-            Marker marker = map.addMarker(new MarkerOptions()
-                    .icon(getBitmapDescriptor(
-                            R.drawable.ic_directions_bus_black_24dp,
-                            Color.parseColor(route.getColor())))
-                    .position(latLng)
-                    .title(stop.getName()));
-            marker.setTag(route.getId() + "" + stop.getId());
-            stopMarkers.add(marker);
-        }
-        centerMapToStops();
-    }
+//    private void setUpStopMarkers() {
+//        Log.d(TAG, "setUpStopMarkers");
+//        for (Stop stop : route.getStops()) {
+//            LatLng latLng = new LatLng(stop.getLatitude(), stop.getLongitude());
+//            Marker marker = map.addMarker(new MarkerOptions()
+//                    .icon(getBitmapDescriptor(
+//                            R.drawable.ic_directions_bus_black_24dp,
+//                            Color.parseColor(route.getColor())))
+//                    .position(latLng)
+//                    .title(stop.getName()));
+//            marker.setTag(route.getId() + "" + stop.getId());
+//            stopMarkers.add(marker);
+//        }
+//        centerMapToStops();
+//    }
 
-    private void fetchVehicleData() {
-        final Context context = getContext();
-        int id = route.getId();
-        vehicleSub = Observable.interval(0, 30, TimeUnit.SECONDS)
-                .flatMap(tick -> apiService.getVehicles(id))
-                .flatMap(Observable::from)
-                .distinct()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Vehicle>() {
-                    final String TAG = "fetchVehicleData";
+//    private void fetchVehicleData() {
+//        final Context context = getContext();
+//        int id = route.getId();
+//        vehicleSub = Observable.interval(0, 30, TimeUnit.SECONDS)
+//                .flatMap(tick -> apiService.getVehicles(id))
+//                .flatMap(Observable::from)
+//                .distinct()
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Subscriber<Vehicle>() {
+//                    final String TAG = "fetchVehicleData";
+//
+//                    @Override
+//                    public void onCompleted() {
+//                        Log.d(TAG, "onCompleted");
+//                    }
+//
+//                    @Override
+//                    public void onError(Throwable e) {
+//                        Log.d(TAG, e.getMessage());
+//                    }
+//
+//                    @Override
+//                    public void onNext(Vehicle vehicle) {
+//                        Log.d(TAG, "onNext");
+//                        String key = "Bus " + vehicle.getName();
+//                        LatLng latLng = new LatLng(vehicle.getLatitude(), vehicle.getLongitude());
+//                        float rotation = Utils.getRotationFromDirection(vehicle.getHeading());
+//                        if (vehicleMarkers.containsKey(key)) {
+//                            Marker marker = vehicleMarkers.get(key);
+//                            marker.setPosition(latLng);
+//                            marker.setRotation(rotation);
+//                        } else {
+//                            Marker marker = map.addMarker(new MarkerOptions()
+//                                    .icon(getBitmapDescriptor(R.drawable.bus_tracker,
+//                                            context.getResources().getColor(R.color.colorPrimary)))
+//                                    .position(latLng)
+//                                    .rotation(rotation)
+//                                    .flat(true)
+//                                    .title(key));
+//                            marker.setTag(vehicle);
+//                            vehicleMarkers.put(key, marker);
+//                        }
+//                    }
+//                });
+//    }
 
-                    @Override
-                    public void onCompleted() {
-                        Log.d(TAG, "onCompleted");
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.d(TAG, e.getMessage());
-                    }
-
-                    @Override
-                    public void onNext(Vehicle vehicle) {
-                        Log.d(TAG, "onNext");
-                        String key = "Bus " + vehicle.getName();
-                        LatLng latLng = new LatLng(vehicle.getLatitude(), vehicle.getLongitude());
-                        float rotation = Utils.getRotationFromDirection(vehicle.getHeading());
-                        if (vehicleMarkers.containsKey(key)) {
-                            Marker marker = vehicleMarkers.get(key);
-                            marker.setPosition(latLng);
-                            marker.setRotation(rotation);
-                        } else {
-                            Marker marker = map.addMarker(new MarkerOptions()
-                                    .icon(getBitmapDescriptor(R.drawable.bus_tracker,
-                                            context.getResources().getColor(R.color.colorPrimary)))
-                                    .position(latLng)
-                                    .rotation(rotation)
-                                    .flat(true)
-                                    .title(key));
-                            marker.setTag(vehicle);
-                            vehicleMarkers.put(key, marker);
-                        }
-                    }
-                });
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        this.map = googleMap;
-        map.setOnMarkerClickListener(marker -> {
-            if (stopMarkers.contains(marker)) {
-                Arrivals arrivals =
-                        realm.where(Arrivals.class).equalTo(ArrivalsFields.ID, (String) marker.getTag()).findFirst();
-                if (!arrivals.getPredictions().isEmpty()) {
-                    Prediction prediction = arrivals.getPredictions().first();
-                    showSnackbar("Arrives in " + prediction.getMinutes() + " min");
-                }
-            }
-            if (vehicleMarkers.containsKey(marker.getTitle())) {
-                Vehicle vehicle = (Vehicle) vehicleMarkers.get(marker.getTitle()).getTag();
-                if (vehicle != null)
-                    showSnackbar("Bus is " + vehicle.getApcPercentage() + "% full");
-            }
-            return false;
-        });
-        centerButton.setVisibility(View.VISIBLE);
-        map.setOnMyLocationButtonClickListener(() -> false);
-        map.getUiSettings().setZoomControlsEnabled(true);
-        if (ActivityCompat.checkSelfPermission(getContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(getContext(),
-                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-        }else{
-            map.setMyLocationEnabled(true);
-        }
-        setUpStopMarkers();
-        fetchVehicleData();
-    }
+//    @Override
+//    public void onMapReady(GoogleMap googleMap) {
+//        this.map = googleMap;
+//        map.setOnMarkerClickListener(marker -> {
+//            if (stopMarkers.contains(marker)) {
+//                Arrivals arrivals =
+//                        realm.where(Arrivals.class).equalTo(ArrivalsFields.ID, (String) marker.getTag()).findFirst();
+//                if (!arrivals.getPredictions().isEmpty()) {
+//                    Prediction prediction = arrivals.getPredictions().first();
+//                    showSnackbar("Arrives in " + prediction.getMinutes() + " min");
+//                }
+//            }
+//            if (vehicleMarkers.containsKey(marker.getTitle())) {
+//                Vehicle vehicle = (Vehicle) vehicleMarkers.get(marker.getTitle()).getTag();
+//                if (vehicle != null)
+//                    showSnackbar("Bus is " + vehicle.getApcPercentage() + "% full");
+//            }
+//            return false;
+//        });
+//        centerButton.setVisibility(View.VISIBLE);
+//        map.setOnMyLocationButtonClickListener(() -> false);
+//        map.getUiSettings().setZoomControlsEnabled(true);
+//        if (ActivityCompat.checkSelfPermission(getContext(),
+//                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+//                ActivityCompat.checkSelfPermission(getContext(),
+//                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//        }else{
+//            map.setMyLocationEnabled(true);
+//        }
+//        setUpStopMarkers();
+//        fetchVehicleData();
+//    }
 
     @Override
     public void onDestroy(){

@@ -8,9 +8,9 @@ import io.realm.RealmObject;
  * Created by robin on 6/20/2016.
  */
 public class Coordinate extends RealmObject {
-    @SerializedName("Latitude")
+    @SerializedName("lat")
     private double latitude;
-    @SerializedName("Longitude")
+    @SerializedName("lng")
     private double longitude;
 
     public double getLatitude() {

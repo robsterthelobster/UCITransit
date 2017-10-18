@@ -1,14 +1,19 @@
 package com.robsterthelobster.ucitransit.data;
 
-import com.robsterthelobster.ucitransit.data.models.Arrivals;
+
+import com.robsterthelobster.ucitransit.BuildConfig;
 import com.robsterthelobster.ucitransit.data.models.Route;
+import com.robsterthelobster.ucitransit.data.models.RouteData;
 import com.robsterthelobster.ucitransit.data.models.Stop;
-import com.robsterthelobster.ucitransit.data.models.Vehicle;
 
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.Headers;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 import rx.Observable;
 
 /**
@@ -16,15 +21,8 @@ import rx.Observable;
  * Retrofit interface
  */
 public interface BusApiService {
-    @GET("Region/0/Routes")
-    Observable<List<Route>> getRoutes();
 
-    @GET("Route/{route}/Direction/0/Stops")
-    Observable<List<Stop>> getStops(@Path("route") int route);
+    @GET("routes.json")
+    Call<RouteData> getRoutes(@Query("agencies") int agency);
 
-    @GET("Route/{route}/Stop/{stop}/Arrivals")
-    Observable<Arrivals> getArrivalTimes(@Path("route") int route, @Path("stop") int stop);
-
-    @GET("Route/{route}/Vehicles")
-    Observable<List<Vehicle>> getVehicles(@Path("route") int route);
 }

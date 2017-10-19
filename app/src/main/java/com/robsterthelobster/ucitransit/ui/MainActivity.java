@@ -27,6 +27,8 @@ import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.RouteData;
+import com.robsterthelobster.ucitransit.data.models.Stop;
+import com.robsterthelobster.ucitransit.data.models.StopData;
 import com.robsterthelobster.ucitransit.utils.Constants;
 import com.robsterthelobster.ucitransit.utils.Utils;
 import com.tbruyelle.rxpermissions.RxPermissions;
@@ -39,13 +41,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
 import io.realm.Realm;
-import io.realm.RealmList;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
@@ -74,7 +74,8 @@ public class MainActivity extends AppCompatActivity {
     //ArrivalsAdapter arrivalsAdapter;
     //ArrivalsAdapter emptyAdapter;
 
-    Subscription fetchInitialDataSub;
+    Subscription fetchInitialRouteSub;
+    Subscription fetchInitialStopSub;
     Subscription fetchArrivalsSub;
     Subscription permissionSub;
     Subscription locationSub;
@@ -139,23 +140,23 @@ public class MainActivity extends AppCompatActivity {
             realm = Realm.getDefaultInstance();
         }
 
-        fetchInitialDataSub = apiService.getRoutes(Constants.AGENCY_ID)
+        fetchInitialRouteSub = apiService.getRoutes(Constants.AGENCY_ID)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<RouteData>() {
                     @Override
                     public void onCompleted() {
-                        Log.d("fetchInitialDataSub", "onCompleted");
+                        Log.d("fetchInitialRouteSub", "onCompleted");
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.d("fetchInitialDataSub", e.getMessage());
+                        Log.d("fetchInitialRouteSub", e.getMessage());
                     }
 
                     @Override
                     public void onNext(RouteData routeData) {
-                        Log.d("fetchInitialDataSub", "onNext");
+                        Log.d("fetchInitialRouteSub", "onNext");
 
                         List<Route> routes = routeData.getData().getRoutes();
                         for(Route route : routes){
@@ -163,6 +164,34 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+
+        fetchInitialStopSub = apiService.getStops(Constants.AGENCY_ID)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<StopData>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.d("fetchInitialStopSub", "onCompleted");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("fetchInitialStopSub", "onError");
+                        Log.d("fetchInitialStopSub", e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(StopData stopData) {
+                        Log.d("fetchInitialStopSub", "onNext");
+
+                        List<Stop> stops = stopData.getData();
+                        for(Stop stop : stops){
+                            System.out.println("Stop: " + stop.getName());
+                        }
+                    }
+                });
+
+
         
 
 //        RealmResults<Arrivals> arrivals = realm
@@ -230,11 +259,12 @@ public class MainActivity extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
         realm.close();
-        Utils.unsubscribe(fetchInitialDataSub);
+        Utils.unsubscribe(fetchInitialRouteSub);
         Utils.unsubscribe(fetchArrivalsSub);
         Utils.unsubscribe(permissionSub);
         Utils.unsubscribe(locationSub);
         Utils.unsubscribe(menuItemSub);
+        Utils.unsubscribe(fetchInitialStopSub);
     }
 
     @Override
@@ -313,7 +343,7 @@ public class MainActivity extends AppCompatActivity {
 //        if(!Utils.isNetworkConnected(this)){
 //            setEmptyView();
 //        }
-//        fetchInitialDataSub = apiService.getRoutes()
+//        fetchInitialRouteSub = apiService.getRoutes()
 //                .flatMap(Observable::from).map(route -> {
 //                    RealmList<Stop> stops = new RealmList<>();
 //                    apiService.getStops(route.getId())
@@ -326,7 +356,7 @@ public class MainActivity extends AppCompatActivity {
 //                .subscribe(new Subscriber<Route>() {
 //                    @Override
 //                    public void onCompleted() {
-//                        Log.d("fetchInitialDataSub", "onCompleted");
+//                        Log.d("fetchInitialRouteSub", "onCompleted");
 //                        routeResults = realm.where(Route.class).findAll();
 //                        setUpNavigationView();
 //                        fetchArrivals();
@@ -334,7 +364,7 @@ public class MainActivity extends AppCompatActivity {
 //
 //                    @Override
 //                    public void onError(Throwable e) {
-//                        Log.d("fetchInitialDataSub", e.getMessage());
+//                        Log.d("fetchInitialRouteSub", e.getMessage());
 //                    }
 //
 //                    @Override

@@ -14,9 +14,9 @@ import io.realm.RealmObject;
 public class StopData {
 
     @SerializedName("rate_limit")
-    public int rateLimit;
+    public Integer rateLimit;
     @SerializedName("expires_in")
-    public int expiresIn;
+    public Integer expiresIn;
     @SerializedName("api_latest_version")
     public String apiLatestVersion;
     @SerializedName("generated_on")
@@ -24,6 +24,53 @@ public class StopData {
     @SerializedName("data")
     public List<Stop> data = null;
     @SerializedName("api_version")
-    public int apiVersion;
+    public String apiVersion;
 
+    public Integer getRateLimit() {
+        return rateLimit;
+    }
+
+    public void setRateLimit(Integer rateLimit) {
+        this.rateLimit = rateLimit;
+    }
+
+    public Integer getExpiresIn() {
+        return expiresIn;
+    }
+
+    public void setExpiresIn(Integer expiresIn) {
+        this.expiresIn = expiresIn;
+    }
+
+    public String getApiLatestVersion() {
+        return apiLatestVersion;
+    }
+
+    public void setApiLatestVersion(String apiLatestVersion) {
+        this.apiLatestVersion = apiLatestVersion;
+    }
+
+    public String getGeneratedOn() {
+        return generatedOn;
+    }
+
+    public void setGeneratedOn(String generatedOn) {
+        this.generatedOn = generatedOn;
+    }
+
+    public List<Stop> getData() {
+        return data;
+    }
+
+    public void setData(List<Stop> data) {
+        this.data = data;
+    }
+
+    public String getApiVersion() {
+        return apiVersion;
+    }
+
+    public void setApiVersion(String apiVersion) {
+        this.apiVersion = apiVersion;
+    }
 }

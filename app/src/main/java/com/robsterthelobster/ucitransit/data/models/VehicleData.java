@@ -13,9 +13,9 @@ import io.realm.RealmObject;
 
 public class VehicleData{
     @SerializedName("rate_limit")
-    public int rateLimit;
+    public Integer rateLimit;
     @SerializedName("expires_in")
-    public int expiresIn;
+    public Integer expiresIn;
     @SerializedName("api_latest_version")
     public String apiLatestVersion;
     @SerializedName("generated_on")
@@ -25,19 +25,19 @@ public class VehicleData{
     @SerializedName("api_version")
     public String apiVersion;
 
-    public int getRateLimit() {
+    public Integer getRateLimit() {
         return rateLimit;
     }
 
-    public void setRateLimit(int rateLimit) {
+    public void setRateLimit(Integer rateLimit) {
         this.rateLimit = rateLimit;
     }
 
-    public int getExpiresIn() {
+    public Integer getExpiresIn() {
         return expiresIn;
     }
 
-    public void setExpiresIn(int expiresIn) {
+    public void setExpiresIn(Integer expiresIn) {
         this.expiresIn = expiresIn;
     }
 

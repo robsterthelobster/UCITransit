@@ -7,5 +7,5 @@ import io.realm.RealmObject;
  */
 
 public class RealmInteger extends RealmObject{
-    public int myInteger;
+    public Integer myInteger;
 }

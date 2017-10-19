@@ -2,6 +2,8 @@ package com.robsterthelobster.ucitransit.data.models;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmObject;
@@ -10,7 +12,7 @@ import io.realm.RealmObject;
  * Created by robin on 10/16/2017.
  */
 
-public class Stop extends RealmObject{
+public class Stop {
 
     @SerializedName("code")
     public String code;
@@ -19,19 +21,19 @@ public class Stop extends RealmObject{
     @SerializedName("url")
     public String url;
     @SerializedName("parent_station_id")
-    public int parentStationId;
+    public Integer parentStationId;
     @SerializedName("agency_ids")
-    public RealmList<RealmInteger> agencyIds = null;
+    public List<String> agencyIds = null;
     @SerializedName("station_id")
-    public int stationId;
+    public Integer stationId;
     @SerializedName("location_type")
     public String locationType;
     @SerializedName("location")
     public Coordinate location;
     @SerializedName("stop_id")
-    public int stopId;
+    public Integer stopId;
     @SerializedName("routes")
-    public RealmList<RealmInteger> routes = null;
+    public List<String> routes = null;
     @SerializedName("name")
     public String name;
 
@@ -59,27 +61,27 @@ public class Stop extends RealmObject{
         this.url = url;
     }
 
-    public int getParentStationId() {
+    public Integer getParentStationId() {
         return parentStationId;
     }
 
-    public void setParentStationId(int parentStationId) {
+    public void setParentStationId(Integer parentStationId) {
         this.parentStationId = parentStationId;
     }
 
-    public RealmList<RealmInteger> getAgencyIds() {
+    public List<String> getAgencyIds() {
         return agencyIds;
     }
 
-    public void setAgencyIds(RealmList<RealmInteger> agencyIds) {
+    public void setAgencyIds(List<String> agencyIds) {
         this.agencyIds = agencyIds;
     }
 
-    public int getStationId() {
+    public Integer getStationId() {
         return stationId;
     }
 
-    public void setStationId(int stationId) {
+    public void setStationId(Integer stationId) {
         this.stationId = stationId;
     }
 
@@ -99,19 +101,19 @@ public class Stop extends RealmObject{
         this.location = location;
     }
 
-    public int getStopId() {
+    public Integer getStopId() {
         return stopId;
     }
 
-    public void setStopId(int stopId) {
+    public void setStopId(Integer stopId) {
         this.stopId = stopId;
     }
 
-    public RealmList<RealmInteger> getRoutes() {
+    public List<String> getRoutes() {
         return routes;
     }
 
-    public void setRoutes(RealmList<RealmInteger> routes) {
+    public void setRoutes(List<String> routes) {
         this.routes = routes;
     }
 

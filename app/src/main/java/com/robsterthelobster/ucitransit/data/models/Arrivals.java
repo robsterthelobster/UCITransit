@@ -15,9 +15,9 @@ public class Arrivals extends RealmObject{
     @SerializedName("arrivals")
     public RealmList<Arrival> arrivals = null;
     @SerializedName("agency_id")
-    public int agencyId;
+    public Integer agencyId;
     @SerializedName("stop_id")
-    public int stopId;
+    public Integer stopId;
 
     public RealmList<Arrival> getArrivals() {
         return arrivals;
@@ -27,19 +27,19 @@ public class Arrivals extends RealmObject{
         this.arrivals = arrivals;
     }
 
-    public int getAgencyId() {
+    public Integer getAgencyId() {
         return agencyId;
     }
 
-    public void setAgencyId(int agencyId) {
+    public void setAgencyId(Integer agencyId) {
         this.agencyId = agencyId;
     }
 
-    public int getStopId() {
+    public Integer getStopId() {
         return stopId;
     }
 
-    public void setStopId(int stopId) {
+    public void setStopId(Integer stopId) {
         this.stopId = stopId;
     }
 }

@@ -18,7 +18,7 @@ public class Route {
     @SerializedName("short_name")
     public String shortName;
     @SerializedName("route_id")
-    public int routeId;
+    public Integer routeId;
     @SerializedName("url")
     public String url;
     @SerializedName("segments")
@@ -56,11 +56,11 @@ public class Route {
         this.shortName = shortName;
     }
 
-    public int getRouteId() {
+    public Integer getRouteId() {
         return routeId;
     }
 
-    public void setRouteId(int routeId) {
+    public void setRouteId(Integer routeId) {
         this.routeId = routeId;
     }
 
@@ -88,11 +88,11 @@ public class Route {
         isActive = active;
     }
 
-    public int getAgencyId() {
+    public Integer getAgencyId() {
         return agencyId;
     }
 
-    public void setAgencyId(int agencyId) {
+    public void setAgencyId(Integer agencyId) {
         this.agencyId = agencyId;
     }
 

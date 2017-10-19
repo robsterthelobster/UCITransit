@@ -11,27 +11,27 @@ import io.realm.RealmObject;
 public class Arrival extends RealmObject {
 
     @SerializedName("route_id")
-    public int routeId;
+    public Integer routeId;
     @SerializedName("vehicle_id")
-    public int vehicleId;
+    public Integer vehicleId;
     @SerializedName("arrival_at")
     public String arrivalAt;
     @SerializedName("type")
     public String type;
 
-    public int getRouteId() {
+    public Integer getRouteId() {
         return routeId;
     }
 
-    public void setRouteId(int routeId) {
+    public void setRouteId(Integer routeId) {
         this.routeId = routeId;
     }
 
-    public int getVehicleId() {
+    public Integer getVehicleId() {
         return vehicleId;
     }
 
-    public void setVehicleId(int vehicleId) {
+    public void setVehicleId(Integer vehicleId) {
         this.vehicleId = vehicleId;
     }
 

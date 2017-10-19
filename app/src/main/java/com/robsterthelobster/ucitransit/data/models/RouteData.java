@@ -9,9 +9,9 @@ import com.google.gson.annotations.SerializedName;
 public class RouteData {
 
     @SerializedName("rate_limit")
-    private int rateLimit;
+    private Integer rateLimit;
     @SerializedName("expires_in")
-    private int expiresIn;
+    private Integer expiresIn;
     @SerializedName("api_latest_version")
     private String apiLatestVersion;
     @SerializedName("generated_on")
@@ -21,19 +21,19 @@ public class RouteData {
     @SerializedName("api_version")
     private String apiVersion;
 
-    public int getRateLimit() {
+    public Integer getRateLimit() {
         return rateLimit;
     }
 
-    public void setRateLimit(int rateLimit) {
+    public void setRateLimit(Integer rateLimit) {
         this.rateLimit = rateLimit;
     }
 
-    public int getExpiresIn() {
+    public Integer getExpiresIn() {
         return expiresIn;
     }
 
-    public void setExpiresIn(int expiresIn) {
+    public void setExpiresIn(Integer expiresIn) {
         this.expiresIn = expiresIn;
     }
 

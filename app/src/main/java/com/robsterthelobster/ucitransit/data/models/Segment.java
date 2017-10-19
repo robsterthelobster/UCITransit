@@ -8,6 +8,6 @@ import io.realm.RealmObject;
 
 public class Segment extends RealmObject{
 
-    public int routeID;
+    public Integer routeID;
     public String direction;
 }

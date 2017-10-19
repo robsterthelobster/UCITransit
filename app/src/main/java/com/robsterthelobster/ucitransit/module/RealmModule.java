@@ -24,11 +24,13 @@ public class RealmModule {
     @Provides
     @Singleton
     Realm provideRealmInstance(){
+        Realm.init(context);
         RealmConfiguration realmConfig = new RealmConfiguration
-                .Builder(context)
+                .Builder()
                 .deleteRealmIfMigrationNeeded()
                 .build();
         Realm.setDefaultConfiguration(realmConfig);
+
         return Realm.getDefaultInstance();
     }
 }

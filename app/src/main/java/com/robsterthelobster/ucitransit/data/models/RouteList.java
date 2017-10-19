@@ -1,6 +1,7 @@
 package com.robsterthelobster.ucitransit.data.models;
 
 import com.google.gson.annotations.SerializedName;
+import com.robsterthelobster.ucitransit.utils.Constants;
 
 import java.util.List;
 
@@ -12,6 +13,10 @@ import io.realm.RealmObject;
  */
 
 public class RouteList extends RealmObject{
+
+    @SerializedName(Constants.AGENCY_ID)
+    RealmList<Route> routes;
+
     public RealmList<Route> getRoutes() {
         return routes;
     }
@@ -19,7 +24,4 @@ public class RouteList extends RealmObject{
     public void setRoutes(RealmList<Route> routes) {
         this.routes = routes;
     }
-
-    @SerializedName("1039")
-    RealmList<Route> routes;
 }

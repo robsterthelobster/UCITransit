@@ -9,5 +9,5 @@ public class Constants {
 
     public final static int RC_CHANGE_THEME = 0;
 
-    public final static int AGENCY_ID = 1039;
+    public final static String AGENCY_ID = "1039";
 }

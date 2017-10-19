@@ -24,9 +24,9 @@ import rx.Observable;
 public interface BusApiService {
 
     @GET("routes.json")
-    Observable<RouteData> getRoutes(@Query("agencies") int agency);
+    Observable<RouteData> getRoutes(@Query("agencies") String agency);
 
     @GET("stops.json")
-    Observable<StopData> getStops(@Query("agencies") int agency);
+    Observable<StopData> getStops(@Query("agencies") String agency);
 
 }

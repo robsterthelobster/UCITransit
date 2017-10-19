@@ -1,11 +1,9 @@
 package com.robsterthelobster.ucitransit.data.models;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
-
 import io.realm.RealmList;
-import io.realm.RealmModel;
 import io.realm.RealmObject;
 
 /**
@@ -24,7 +22,7 @@ public class Route extends RealmObject {
     @SerializedName("url")
     public String url;
     @SerializedName("segments")
-    public RealmString segments = null;
+    transient String segments = "";
     @SerializedName("is_active")
     public Boolean isActive;
     @SerializedName("agency_id")
@@ -34,7 +32,7 @@ public class Route extends RealmObject {
     @SerializedName("long_name")
     public String longName;
     @SerializedName("stops")
-    public RealmString stops = null;
+    public RealmList<String> stops = null;
     @SerializedName("is_hidden")
     public Boolean isHidden;
     @SerializedName("type")
@@ -74,14 +72,6 @@ public class Route extends RealmObject {
         this.url = url;
     }
 
-    public RealmString getSegments() {
-        return segments;
-    }
-
-    public void setSegments(RealmString segments) {
-        this.segments = segments;
-    }
-
     public Boolean getActive() {
         return isActive;
     }
@@ -114,11 +104,11 @@ public class Route extends RealmObject {
         this.longName = longName;
     }
 
-    public RealmString getStops() {
+    public RealmList<String>  getStops() {
         return stops;
     }
 
-    public void setStops(RealmString stops) {
+    public void setStops(RealmList<String> stops) {
         this.stops = stops;
     }
 

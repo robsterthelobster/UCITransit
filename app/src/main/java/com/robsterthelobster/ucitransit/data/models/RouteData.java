@@ -2,11 +2,13 @@ package com.robsterthelobster.ucitransit.data.models;
 
 import com.google.gson.annotations.SerializedName;
 
+import io.realm.RealmObject;
+
 /**
  * Created by robin on 10/16/2017.
  */
 
-public class RouteData {
+public class RouteData extends RealmObject{
 
     @SerializedName("rate_limit")
     private Integer rateLimit;

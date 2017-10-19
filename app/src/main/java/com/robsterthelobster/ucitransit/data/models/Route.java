@@ -5,12 +5,14 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 import io.realm.RealmList;
+import io.realm.RealmModel;
+import io.realm.RealmObject;
 
 /**
  * Created by robin on 10/16/2017.
  */
 
-public class Route {
+public class Route extends RealmObject {
 
 
     @SerializedName("description")
@@ -22,7 +24,7 @@ public class Route {
     @SerializedName("url")
     public String url;
     @SerializedName("segments")
-    public List<List<String>> segments = null;
+    public RealmString segments = null;
     @SerializedName("is_active")
     public Boolean isActive;
     @SerializedName("agency_id")
@@ -32,7 +34,7 @@ public class Route {
     @SerializedName("long_name")
     public String longName;
     @SerializedName("stops")
-    public List<String> stops = null;
+    public RealmString stops = null;
     @SerializedName("is_hidden")
     public Boolean isHidden;
     @SerializedName("type")
@@ -72,11 +74,11 @@ public class Route {
         this.url = url;
     }
 
-    public List<List<String>> getSegments() {
+    public RealmString getSegments() {
         return segments;
     }
 
-    public void setSegments(List<List<String>> segments) {
+    public void setSegments(RealmString segments) {
         this.segments = segments;
     }
 
@@ -112,11 +114,11 @@ public class Route {
         this.longName = longName;
     }
 
-    public List<String> getStops() {
+    public RealmString getStops() {
         return stops;
     }
 
-    public void setStops(List<String> stops) {
+    public void setStops(RealmString stops) {
         this.stops = stops;
     }
 

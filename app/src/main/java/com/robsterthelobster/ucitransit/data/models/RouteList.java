@@ -4,19 +4,22 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
+import io.realm.RealmList;
+import io.realm.RealmObject;
+
 /**
  * Created by robin on 10/17/2017.
  */
 
-public class RouteList {
-    public List<Route> getRoutes() {
+public class RouteList extends RealmObject{
+    public RealmList<Route> getRoutes() {
         return routes;
     }
 
-    public void setRoutes(List<Route> routes) {
+    public void setRoutes(RealmList<Route> routes) {
         this.routes = routes;
     }
 
     @SerializedName("1039")
-    List<Route> routes;
+    RealmList<Route> routes;
 }

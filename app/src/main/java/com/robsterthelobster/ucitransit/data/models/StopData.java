@@ -11,7 +11,7 @@ import io.realm.RealmObject;
  * Created by robin on 10/16/2017.
  */
 
-public class StopData {
+public class StopData extends RealmObject{
 
     @SerializedName("rate_limit")
     public Integer rateLimit;
@@ -22,7 +22,7 @@ public class StopData {
     @SerializedName("generated_on")
     public String generatedOn;
     @SerializedName("data")
-    public List<Stop> data = null;
+    public RealmList<Stop> data = null;
     @SerializedName("api_version")
     public String apiVersion;
 
@@ -58,11 +58,11 @@ public class StopData {
         this.generatedOn = generatedOn;
     }
 
-    public List<Stop> getData() {
+    public RealmList<Stop> getData() {
         return data;
     }
 
-    public void setData(List<Stop> data) {
+    public void setData(RealmList<Stop> data) {
         this.data = data;
     }
 

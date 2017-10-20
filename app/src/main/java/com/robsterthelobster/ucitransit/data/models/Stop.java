@@ -2,9 +2,6 @@ package com.robsterthelobster.ucitransit.data.models;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
-
-import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmObject;
 
@@ -12,7 +9,7 @@ import io.realm.RealmObject;
  * Created by robin on 10/16/2017.
  */
 
-public class Stop {
+public class Stop extends RealmObject{
 
     @SerializedName("code")
     public String code;
@@ -23,7 +20,7 @@ public class Stop {
     @SerializedName("parent_station_id")
     public Integer parentStationId;
     @SerializedName("agency_ids")
-    public List<String> agencyIds = null;
+    public RealmList<String> agencyIds = null;
     @SerializedName("station_id")
     public Integer stationId;
     @SerializedName("location_type")
@@ -33,7 +30,7 @@ public class Stop {
     @SerializedName("stop_id")
     public Integer stopId;
     @SerializedName("routes")
-    public List<String> routes = null;
+    public RealmList<String> routes = null;
     @SerializedName("name")
     public String name;
 
@@ -69,11 +66,11 @@ public class Stop {
         this.parentStationId = parentStationId;
     }
 
-    public List<String> getAgencyIds() {
+    public RealmList<String> getAgencyIds() {
         return agencyIds;
     }
 
-    public void setAgencyIds(List<String> agencyIds) {
+    public void setAgencyIds(RealmList<String> agencyIds) {
         this.agencyIds = agencyIds;
     }
 
@@ -109,11 +106,11 @@ public class Stop {
         this.stopId = stopId;
     }
 
-    public List<String> getRoutes() {
+    public RealmList<String> getRoutes() {
         return routes;
     }
 
-    public void setRoutes(List<String> routes) {
+    public void setRoutes(RealmList<String> routes) {
         this.routes = routes;
     }
 

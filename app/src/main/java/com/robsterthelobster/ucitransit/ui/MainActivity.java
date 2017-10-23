@@ -25,10 +25,15 @@ import com.google.android.gms.location.LocationRequest;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.data.BusApiService;
+import com.robsterthelobster.ucitransit.data.models.Arrival;
+import com.robsterthelobster.ucitransit.data.models.ArrivalData;
+import com.robsterthelobster.ucitransit.data.models.Arrivals;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.RouteData;
 import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.robsterthelobster.ucitransit.data.models.StopData;
+import com.robsterthelobster.ucitransit.data.models.Vehicle;
+import com.robsterthelobster.ucitransit.data.models.VehicleData;
 import com.robsterthelobster.ucitransit.utils.Constants;
 import com.robsterthelobster.ucitransit.utils.Utils;
 import com.tbruyelle.rxpermissions.RxPermissions;
@@ -140,10 +145,13 @@ public class MainActivity extends AppCompatActivity {
             realm = Realm.getDefaultInstance();
         }
 
-        fetchInitialRouteSub = apiService.getRoutes(Constants.AGENCY_ID)
+        // SAMPLE ROUTE ID ==== 8004734
+        // SAMPLE STOP ID ==== 8197552
+
+        fetchInitialRouteSub = apiService.getArrivals(Constants.AGENCY_ID, 8004734, 8197552)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<RouteData>() {
+                .subscribe(new Subscriber<ArrivalData>() {
                     @Override
                     public void onCompleted() {
                         Log.d("fetchInitialRouteSub", "onCompleted");
@@ -155,44 +163,25 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onNext(RouteData routeData) {
+                    public void onNext(ArrivalData routeData) {
                         Log.d("fetchInitialRouteSub", "onNext");
 
-                        List<Route> routes = routeData.getData().getRoutes();
-                        for(Route route : routes){
-                            System.out.println(route.getLongName() + " " + route.getShortName());
+                        System.out.println(routeData.getGeneratedOn());
+
+                        List<Arrivals> arrivals = routeData.getData();
+
+
+                        List<Arrival> routes = null;
+                        if (!arrivals.isEmpty()){
+                            routes = arrivals.get(0).getArrivals();
+                        }
+                        if(routes != null) {
+                            for (Arrival route : routes) {
+                                System.out.println(route.getRouteId() + " " + route.getArrivalAt());
+                            }
                         }
                     }
                 });
-
-        fetchInitialStopSub = apiService.getStops(Constants.AGENCY_ID)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<StopData>() {
-                    @Override
-                    public void onCompleted() {
-                        Log.d("fetchInitialStopSub", "onCompleted");
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.d("fetchInitialStopSub", "onError");
-                        Log.d("fetchInitialStopSub", e.getMessage());
-                    }
-
-                    @Override
-                    public void onNext(StopData stopData) {
-                        Log.d("fetchInitialStopSub", "onNext");
-
-                        List<Stop> stops = stopData.getData();
-                        for(Stop stop : stops){
-                            System.out.println("Stop: " + stop.getName());
-                        }
-                    }
-                });
-
-
-        
 
 //        RealmResults<Arrivals> arrivals = realm
 //                .where(Arrivals.class)

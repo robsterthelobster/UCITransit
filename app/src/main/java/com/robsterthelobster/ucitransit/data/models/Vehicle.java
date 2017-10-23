@@ -24,13 +24,13 @@ public class Vehicle extends RealmObject{
     @SerializedName("speed")
     public double speed;
     @SerializedName("vehicle_id")
-    public int vehicleId;
+    public Integer vehicleId;
     @SerializedName("segment_id")
-    public int segmentId;
+    public Integer segmentId;
     @SerializedName("passenger_load")
     public String passengerLoad;
     @SerializedName("route_id")
-    public int routeId;
+    public Integer routeId;
     @SerializedName("arrival_estimates")
     public RealmList<Arrival> arrivalEstimates = null;
     @SerializedName("tracking_status")
@@ -38,7 +38,7 @@ public class Vehicle extends RealmObject{
     @SerializedName("location")
     public Coordinate location;
     @SerializedName("heading")
-    public int heading;
+    public Integer heading;
 
     public String getStandingCapacity() {
         return standingCapacity;
@@ -88,19 +88,19 @@ public class Vehicle extends RealmObject{
         this.speed = speed;
     }
 
-    public int getVehicleId() {
+    public Integer getVehicleId() {
         return vehicleId;
     }
 
-    public void setVehicleId(int vehicleId) {
+    public void setVehicleId(Integer vehicleId) {
         this.vehicleId = vehicleId;
     }
 
-    public int getSegmentId() {
+    public Integer getSegmentId() {
         return segmentId;
     }
 
-    public void setSegmentId(int segmentId) {
+    public void setSegmentId(Integer segmentId) {
         this.segmentId = segmentId;
     }
 
@@ -112,11 +112,11 @@ public class Vehicle extends RealmObject{
         this.passengerLoad = passengerLoad;
     }
 
-    public int getRouteId() {
+    public Integer getRouteId() {
         return routeId;
     }
 
-    public void setRouteId(int routeId) {
+    public void setRouteId(Integer routeId) {
         this.routeId = routeId;
     }
 
@@ -144,11 +144,11 @@ public class Vehicle extends RealmObject{
         this.location = location;
     }
 
-    public int getHeading() {
+    public Integer getHeading() {
         return heading;
     }
 
-    public void setHeading(int heading) {
+    public void setHeading(Integer heading) {
         this.heading = heading;
     }
 }

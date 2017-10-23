@@ -1,6 +1,5 @@
 package com.robsterthelobster.ucitransit.data.models;
 
-import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import io.realm.RealmList;

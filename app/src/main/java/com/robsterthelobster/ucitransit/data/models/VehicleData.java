@@ -11,7 +11,7 @@ import io.realm.RealmObject;
  * Created by robin on 10/16/2017.
  */
 
-public class VehicleData{
+public class VehicleData extends RealmObject{
     @SerializedName("rate_limit")
     public Integer rateLimit;
     @SerializedName("expires_in")

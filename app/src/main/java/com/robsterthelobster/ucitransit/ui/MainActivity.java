@@ -355,12 +355,7 @@ public class MainActivity extends AppCompatActivity {
             setEmptyView();
         }
         fetchInitialRouteSub = apiService.getRoutes(Constants.AGENCY_ID)
-                .flatMap(new Func1<RouteData, Observable<Route>>() {
-                    @Override
-                    public Observable<Route> call(RouteData routeData) {
-                        return Observable.from(routeData.getData().getRoutes());
-                    }
-                })
+                .flatMap(routeData -> Observable.from(routeData.getData().getRoutes()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Route>() {

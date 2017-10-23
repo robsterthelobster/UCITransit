@@ -10,7 +10,7 @@ import io.realm.RealmObject;
  * Created by robin on 10/17/2017.
  */
 
-public class RouteList extends RealmObject{
+public class RouteList {
 
     @SerializedName(Constants.AGENCY_ID)
     RealmList<Route> routes;

@@ -3,7 +3,12 @@ package com.robsterthelobster.ucitransit.ui;
 import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -30,6 +35,7 @@ import com.robsterthelobster.ucitransit.data.models.ArrivalData;
 import com.robsterthelobster.ucitransit.data.models.Arrivals;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.RouteData;
+import com.robsterthelobster.ucitransit.data.models.RouteList;
 import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.robsterthelobster.ucitransit.data.models.StopData;
 import com.robsterthelobster.ucitransit.data.models.Vehicle;
@@ -46,11 +52,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
 import io.realm.Realm;
+import io.realm.RealmList;
+import io.realm.RealmResults;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
@@ -75,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     @Inject
     Realm realm;
 
-    //RealmResults<Route> routeResults;
+    RealmResults<Route> routeResults;
     //ArrivalsAdapter arrivalsAdapter;
     //ArrivalsAdapter emptyAdapter;
 
@@ -148,41 +157,6 @@ public class MainActivity extends AppCompatActivity {
         // SAMPLE ROUTE ID ==== 8004734
         // SAMPLE STOP ID ==== 8197552
 
-        fetchInitialRouteSub = apiService.getArrivals(Constants.AGENCY_ID, 8004734, 8197552)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<ArrivalData>() {
-                    @Override
-                    public void onCompleted() {
-                        Log.d("fetchInitialRouteSub", "onCompleted");
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.d("fetchInitialRouteSub", e.getMessage());
-                    }
-
-                    @Override
-                    public void onNext(ArrivalData routeData) {
-                        Log.d("fetchInitialRouteSub", "onNext");
-
-                        System.out.println(routeData.getGeneratedOn());
-
-                        List<Arrivals> arrivals = routeData.getData();
-
-
-                        List<Arrival> routes = null;
-                        if (!arrivals.isEmpty()){
-                            routes = arrivals.get(0).getArrivals();
-                        }
-                        if(routes != null) {
-                            for (Arrival route : routes) {
-                                System.out.println(route.getRouteId() + " " + route.getArrivalAt());
-                            }
-                        }
-                    }
-                });
-
 //        RealmResults<Arrivals> arrivals = realm
 //                .where(Arrivals.class)
 //                .equalTo("isCurrent", true)
@@ -195,15 +169,15 @@ public class MainActivity extends AppCompatActivity {
 //                false, false, realm);
 //        recyclerView.setAdapter(arrivalsAdapter);
 //        recyclerView.setOnRefreshListener(this::refreshTask);
-//
-//        if (realm.isEmpty()) {
-//            fetchInitialRouteData();
-//        }
-//          else {
-//            routeResults = realm.where(Route.class).findAll();
-//            setUpNavigationView();
-//            fetchArrivals();
-//        }
+
+        if (realm.isEmpty()) {
+            fetchInitialRouteData();
+        }
+          else {
+            routeResults = realm.where(Route.class).findAllSorted("shortName");
+            setUpNavigationView();
+            //fetchArrivals();
+        }
     }
 
     @Override
@@ -279,20 +253,28 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    private void setUpNavigationView() {
-//        Menu menu = navigationView.getMenu();
-//        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-//            menu = menu.addSubMenu("Routes");
-//        }
-//        final Menu navMenu = menu;
-//        Observable.from(routeResults).subscribe(route -> {
-//            final Intent intent = new Intent(this, DetailActivity.class);
-//            String name = route.getName();
-//            intent.putExtra(Constants.ROUTE_ID_KEY, name);
-//            MenuItem item = navMenu.add(name);
-//            item.setIntent(intent);
-//        });
-//    }
+    private void setUpNavigationView() {
+        navigationView.setItemIconTintList(null);
+        Menu menu = navigationView.getMenu();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            menu = menu.addSubMenu("Routes");
+        }
+        final Menu navMenu = menu;
+        Observable.from(routeResults).subscribe(route -> {
+            final Intent intent = new Intent(this, DetailActivity.class);
+            String name = route.getShortName() + " " + route.getLongName();
+            intent.putExtra(Constants.ROUTE_ID_KEY, name);
+            MenuItem item = navMenu.add(name);
+            item.setIntent(intent);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                Drawable icon = getDrawable(R.drawable.ic_directions_bus_white_24dp);
+                String routeColor = "#" + route.getColor();
+                icon.mutate().setColorFilter(Color.parseColor(routeColor), PorterDuff.Mode.MULTIPLY);
+                item.setIcon(icon);
+            }
+        });
+    }
 
     private void callLocationService() {
         LocationRequest locationRequest = LocationRequest.create()
@@ -367,6 +349,45 @@ public class MainActivity extends AppCompatActivity {
 //                    }
 //                });
 //    }
+
+        private void fetchInitialRouteData() {
+        if(!Utils.isNetworkConnected(this)){
+            setEmptyView();
+        }
+        fetchInitialRouteSub = apiService.getRoutes(Constants.AGENCY_ID)
+                .flatMap(new Func1<RouteData, Observable<Route>>() {
+                    @Override
+                    public Observable<Route> call(RouteData routeData) {
+                        return Observable.from(routeData.getData().getRoutes());
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Route>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.d("fetchInitialRouteSub", "onCompleted");
+                        routeResults = realm.where(Route.class).findAll();
+                        setUpNavigationView();
+                        //fetchArrivals();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("fetchInitialRouteSub", e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(Route route) {
+                        final Realm realm = Realm.getDefaultInstance();
+                        try {
+                            realm.executeTransaction(r -> r.copyToRealmOrUpdate(route));
+                        } finally {
+                            realm.close();
+                        }
+                    }
+                });
+    }
 
 //    private void refreshTask(){
 //        Observable.just(0)

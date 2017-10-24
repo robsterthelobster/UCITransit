@@ -2,14 +2,13 @@ package com.robsterthelobster.ucitransit.data.models;
 
 import com.google.gson.annotations.SerializedName;
 
-import io.realm.RealmList;
-import io.realm.RealmObject;
+import java.util.List;
 
 /**
  * Created by robin on 10/16/2017.
  */
 
-public class StopData extends RealmObject{
+public class StopData {
 
     @SerializedName("rate_limit")
     public Integer rateLimit;
@@ -20,7 +19,7 @@ public class StopData extends RealmObject{
     @SerializedName("generated_on")
     public String generatedOn;
     @SerializedName("data")
-    public RealmList<Stop> data = null;
+    public List<Stop> data = null;
     @SerializedName("api_version")
     public String apiVersion;
 
@@ -56,11 +55,11 @@ public class StopData extends RealmObject{
         this.generatedOn = generatedOn;
     }
 
-    public RealmList<Stop> getData() {
+    public List<Stop> getData() {
         return data;
     }
 
-    public void setData(RealmList<Stop> data) {
+    public void setData(List<Stop> data) {
         this.data = data;
     }
 

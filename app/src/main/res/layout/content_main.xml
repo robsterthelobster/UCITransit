@@ -8,12 +8,22 @@
     tools:context="com.robsterthelobster.ucitransit.ui.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView
-        android:id="@+id/realm_recycler_view"
+    <android.support.v4.widget.SwipeRefreshLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/swipeContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:rrvIsRefreshable="true"
-        app:rrvEmptyLayoutId="@layout/empty_view"
-        app:rrvLayoutType="LinearLayout"/>
+        android:layout_height="match_parent">
+
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/realm_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <include
+            layout="@layout/empty_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 </RelativeLayout>

@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +22,6 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import rx.Observable;
@@ -36,7 +36,7 @@ import rx.schedulers.Schedulers;
 public class PredictionFragment extends Fragment {
 
     @BindView(R.id.fragment_recycler_view)
-    RealmRecyclerView recyclerView;
+    RecyclerView recyclerView;
     @BindView(R.id.empty_text)
     TextView emptyText;
 

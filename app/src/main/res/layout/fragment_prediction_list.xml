@@ -1,14 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragment_recycler_view"
-    android:name="com.robsterthelobster.ucitransit.ui.DetailActivity.PredictionFragment"
+
+
+<android.support.v4.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/swipeContainer"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    app:rrvIsRefreshable="true"
-    app:rrvEmptyLayoutId="@layout/empty_view"
-    app:rrvLayoutType="LinearLayout"
-    app:layoutManager="LinearLayoutManager"
-    tools:listitem="@layout/prediction_card" />
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.RecyclerView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/fragment_recycler_view"
+        android:name="com.robsterthelobster.ucitransit.ui.DetailActivity.PredictionFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:listitem="@layout/prediction_card" />
+
+    <include
+        layout="@layout/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</android.support.v4.widget.SwipeRefreshLayout>
+

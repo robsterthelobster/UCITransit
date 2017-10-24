@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by robin on 10/16/2017.
@@ -12,11 +13,12 @@ import io.realm.RealmObject;
 public class Arrivals extends RealmObject{
 
     @SerializedName("arrivals")
-    public RealmList<Arrival> arrivals = null;
+    private RealmList<Arrival> arrivals = null;
     @SerializedName("agency_id")
-    public Integer agencyId;
+    private Integer agencyId;
+    @PrimaryKey
     @SerializedName("stop_id")
-    public Integer stopId;
+    private Integer stopId;
 
     public RealmList<Arrival> getArrivals() {
         return arrivals;

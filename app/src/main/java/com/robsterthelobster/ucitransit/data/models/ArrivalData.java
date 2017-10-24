@@ -2,7 +2,7 @@ package com.robsterthelobster.ucitransit.data.models;
 
 import com.google.gson.annotations.SerializedName;
 
-import io.realm.RealmList;
+import java.util.List;
 
 /**
  * Created by robin on 10/16/2017.
@@ -19,7 +19,7 @@ public class ArrivalData {
     @SerializedName("generated_on")
     public String generatedOn;
     @SerializedName("data")
-    public RealmList<Arrivals> data = null;
+    public List<Arrivals> data = null;
     @SerializedName("api_version")
     public String apiVersion;
 
@@ -55,11 +55,11 @@ public class ArrivalData {
         this.generatedOn = generatedOn;
     }
 
-    public RealmList<Arrivals> getData() {
+    public List<Arrivals> getData() {
         return data;
     }
 
-    public void setData(RealmList<Arrivals> data) {
+    public void setData(List<Arrivals> data) {
         this.data = data;
     }
 

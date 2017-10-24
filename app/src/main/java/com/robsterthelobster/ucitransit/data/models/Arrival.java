@@ -20,6 +20,12 @@ public class Arrival extends RealmObject {
     @SerializedName("type")
     private String type;
 
+    private Route route;
+    private Stop stop;
+
+    @PrimaryKey
+    private String id;
+
     public Integer getRouteId() {
         return routeId;
     }
@@ -50,5 +56,29 @@ public class Arrival extends RealmObject {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public Route getRoute() {
+        return route;
+    }
+
+    public void setRoute(Route route) {
+        this.route = route;
+    }
+
+    public Stop getStop() {
+        return stop;
+    }
+
+    public void setStop(Stop stop) {
+        this.stop = stop;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

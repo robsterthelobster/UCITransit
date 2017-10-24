@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by robin on 10/16/2017.
@@ -28,6 +29,7 @@ public class Stop extends RealmObject{
     @SerializedName("location")
     public Coordinate location;
     @SerializedName("stop_id")
+    @PrimaryKey
     public Integer stopId;
     @SerializedName("routes")
     public RealmList<String> routes = null;

@@ -29,6 +29,7 @@ import android.widget.Toast;
 import com.ftinc.scoop.Scoop;
 import com.ftinc.scoop.ui.ScoopSettingsActivity;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.common.data.DataBufferObserver;
 import com.google.android.gms.location.LocationRequest;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitApp;
@@ -219,7 +220,6 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_refresh:
                 Log.i(TAG, "Refresh menu item selected");
                 swipeRefreshLayout.setRefreshing(true);
-//                recyclerView.setRefreshing(true);
                 fetchArrivals();
                 break;
         }
@@ -242,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        //startLocationSubscription();
+        startLocationSubscription();
         drawer.closeDrawer(GravityCompat.START, false);
     }
 
@@ -295,31 +295,31 @@ public class MainActivity extends AppCompatActivity {
         locationUpdatesObservable = locationProvider.getUpdatedLocation(locationRequest);
     }
 
-//    private void startLocationSubscription() {
-//        if (locationUpdatesObservable != null) {
-//            locationSub = locationUpdatesObservable
-//                    .subscribe(new Subscriber<Location>() {
-//                        final String TAG = "Location subscription";
-//
-//                        @Override
-//                        public void onCompleted() {
-//                            Log.d(TAG, "onCompleted");
-//                        }
-//
-//                        @Override
-//                        public void onError(Throwable e) {
-//                            Log.d(TAG, e.toString());
-//                        }
-//
-//                        @Override
-//                        public void onNext(Location location) {
-//                            Log.d(TAG, location.toString());
-//                            mLocation = location;
-//                            fetchArrivals();
-//                        }
-//                    });
-//        }
-//    }
+    private void startLocationSubscription() {
+        if (locationUpdatesObservable != null) {
+            locationSub = locationUpdatesObservable
+                    .subscribe(new Subscriber<Location>() {
+                        final String TAG = "Location subscription";
+
+                        @Override
+                        public void onCompleted() {
+                            Log.d(TAG, "onCompleted");
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.d(TAG, e.toString());
+                        }
+
+                        @Override
+                        public void onNext(Location location) {
+                            Log.d(TAG, location.toString());
+                            mLocation = location;
+                            fetchArrivals();
+                        }
+                    });
+        }
+    }
 
     private void fetchInitialRouteData() {
         if (!Utils.isNetworkConnected(this)) {
@@ -336,7 +336,6 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("fetchInitialRouteSub", "onCompleted");
                         routeResults = realm.where(Route.class).findAll();
                         setUpNavigationView();
-                        fetchArrivals();
                     }
 
                     @Override
@@ -363,6 +362,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onCompleted() {
                         Log.d("fetchInitialStopSub", "onCompleted");
+                        fetchArrivals();
                     }
 
                     @Override
@@ -393,17 +393,15 @@ public class MainActivity extends AppCompatActivity {
                 recyclerView.setAdapter(arrivalsAdapter);
                 emptyText.setText(R.string.empty_default_message);
                 swipeRefreshLayout.setRefreshing(true);
-                //recyclerView.setRefreshing(true);
             }
             fetchArrivalsSub = getArrivalsObservable()
-                    .subscribe(new Subscriber<Arrivals>() {
+                    .subscribe(new Subscriber<Arrival>() {
                         final String TAG = "ArrivalsSub";
 
                         @Override
                         public void onCompleted() {
                             Log.d(TAG, "onCompleted");
                             swipeRefreshLayout.setRefreshing(false);
-                            //recyclerView.setRefreshing(false);
                             //arrivalsAdapter.setFooter(showAd);
                         }
 
@@ -413,10 +411,12 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         @Override
-                        public void onNext(Arrivals arrivals) {
+                        public void onNext(Arrival arrival) {
                             final Realm realm = Realm.getDefaultInstance();
                             try {
-                                realm.executeTransaction(r -> r.copyToRealmOrUpdate(arrivals));
+                                System.out.println(arrival.getArrivalAt());
+                                arrival.setId(arrival.getRouteId() + "" + arrival.getVehicleId());
+                                realm.executeTransaction(r -> r.copyToRealmOrUpdate(arrival));
                             } finally {
                                 realm.close();
                             }
@@ -425,9 +425,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private Observable<Arrivals> getArrivalsObservable() {
+    private Observable<Arrival> getArrivalsObservable() {
         return apiService.getArrivals(Constants.AGENCY_ID)
                 .flatMap(arrivalData -> Observable.from(arrivalData.getData()))
+                .flatMap(arrivals -> Observable.from(arrivals.getArrivals()))
+                .flatMap(arrival -> {
+                    return Observable.just(arrival);
+
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -498,7 +503,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void setEmptyView() {
         showToast("Network is not available", Toast.LENGTH_SHORT);
-        //recyclerView.setRefreshing(false);
         swipeRefreshLayout.setRefreshing(false);
         recyclerView.setAdapter(emptyAdapter);
         emptyText.setText(R.string.empty_network_message);

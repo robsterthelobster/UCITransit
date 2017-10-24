@@ -25,6 +25,8 @@ import com.google.android.gms.ads.AdView;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.data.models.Arrival;
 import com.robsterthelobster.ucitransit.data.models.Arrivals;
+import com.robsterthelobster.ucitransit.data.models.Route;
+import com.robsterthelobster.ucitransit.data.models.Stop;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -63,11 +65,16 @@ public class ArrivalsAdapter
         if(arrival!=null){
             holder.arrival = arrival;
 
-//            if(routeColorOn) {
-//                holder.cardView.setBackgroundColor(Color.parseColor(arrival.getColor()));
-//            }
-            holder.routeText.setText(""+arrival.getRouteId());
-            holder.stopText.setText(""+arrival.getArrivalAt());
+            Route route = arrival.getRoute();
+            System.out.println("route "+route.getShortName());
+            Stop stop = arrival.getStop();
+
+            if(routeColorOn) {
+                holder.cardView.setBackgroundColor(Color.parseColor(route.getColor()));
+            }
+            holder.routeText.setText(route.getShortName() + route.getLongName());
+            holder.arrivalText.setText(arrival.getArrivalAt());
+            holder.stopText.setText(stop.getName());
         }
     }
 

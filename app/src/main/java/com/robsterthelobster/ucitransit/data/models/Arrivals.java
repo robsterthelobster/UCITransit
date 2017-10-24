@@ -16,9 +16,19 @@ public class Arrivals extends RealmObject{
     private RealmList<Arrival> arrivals = null;
     @SerializedName("agency_id")
     private Integer agencyId;
-    @PrimaryKey
     @SerializedName("stop_id")
+    @PrimaryKey
     private Integer stopId;
+
+    private String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public RealmList<Arrival> getArrivals() {
         return arrivals;

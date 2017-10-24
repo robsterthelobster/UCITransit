@@ -27,9 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ftinc.scoop.Scoop;
-import com.ftinc.scoop.ui.ScoopSettingsActivity;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.common.data.DataBufferObserver;
 import com.google.android.gms.location.LocationRequest;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitApp;
@@ -41,9 +39,11 @@ import com.robsterthelobster.ucitransit.data.models.Arrivals;
 import com.robsterthelobster.ucitransit.data.models.ArrivalsFields;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.RouteData;
+import com.robsterthelobster.ucitransit.data.models.RouteFields;
 import com.robsterthelobster.ucitransit.data.models.RouteList;
 import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.robsterthelobster.ucitransit.data.models.StopData;
+import com.robsterthelobster.ucitransit.data.models.StopFields;
 import com.robsterthelobster.ucitransit.data.models.Vehicle;
 import com.robsterthelobster.ucitransit.data.models.VehicleData;
 import com.robsterthelobster.ucitransit.utils.Constants;
@@ -278,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 Drawable icon = getDrawable(R.drawable.ic_directions_bus_white_24dp);
-                int routeColor = Color.parseColor("#" + route.getColor());
+                int routeColor = Color.parseColor(route.getColor());
                 if (icon != null) {
                     icon.mutate().setColorFilter(routeColor, PorterDuff.Mode.MULTIPLY);
                 }
@@ -347,6 +347,8 @@ public class MainActivity extends AppCompatActivity {
                     public void onNext(Route route) {
                         final Realm realm = Realm.getDefaultInstance();
                         try {
+                            // converts color into hex color for later use
+                            route.setColor("#"+route.getColor());
                             realm.executeTransaction(r -> r.copyToRealmOrUpdate(route));
                         } finally {
                             realm.close();
@@ -395,7 +397,7 @@ public class MainActivity extends AppCompatActivity {
                 swipeRefreshLayout.setRefreshing(true);
             }
             fetchArrivalsSub = getArrivalsObservable()
-                    .subscribe(new Subscriber<Arrival>() {
+                    .subscribe(new Subscriber<Arrivals>() {
                         final String TAG = "ArrivalsSub";
 
                         @Override
@@ -411,12 +413,24 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         @Override
-                        public void onNext(Arrival arrival) {
+                        public void onNext(Arrivals arrivals) {
                             final Realm realm = Realm.getDefaultInstance();
+                            for (Arrival arrival : arrivals.getArrivals()) {
+                                Stop stop = realm.where(Stop.class)
+                                        .equalTo(StopFields.STOP_ID, arrivals.getStopId())
+                                        .findFirst();
+                                Route route = realm.where(Route.class)
+                                        .equalTo(RouteFields.ROUTE_ID, arrival.getRouteId())
+                                        .findFirst();
+//                                System.out.println("stop " + stop.getName());
+//                                System.out.println("route " + route.getShortName());
+                                arrival.setRoute(route);
+                                arrival.setStop(stop);
+                                arrival.setId(route.getRouteId().toString() + stop.getStopId());
+                            }
+
                             try {
-                                System.out.println(arrival.getArrivalAt());
-                                arrival.setId(arrival.getRouteId() + "" + arrival.getVehicleId());
-                                realm.executeTransaction(r -> r.copyToRealmOrUpdate(arrival));
+                                realm.executeTransaction(r -> r.copyToRealmOrUpdate(arrivals));
                             } finally {
                                 realm.close();
                             }
@@ -425,16 +439,42 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private Observable<Arrival> getArrivalsObservable() {
+    private Observable<Arrivals> getArrivalsObservable() {
+
         return apiService.getArrivals(Constants.AGENCY_ID)
                 .flatMap(arrivalData -> Observable.from(arrivalData.getData()))
-                .flatMap(arrivals -> Observable.from(arrivals.getArrivals()))
-                .flatMap(arrival -> {
-                    return Observable.just(arrival);
-
-                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
+
+//        return Observable.defer(() -> {
+//            final Realm threadRealm = Realm.getDefaultInstance();
+//            return apiService.getArrivals(Constants.AGENCY_ID)
+//                    .flatMap(arrivalData -> Observable.from(arrivalData.getData()))
+//                    .flatMap(arrivals -> {
+//                        for(Arrival arrival : arrivals.getArrivals()){
+//                            Stop stop = threadRealm.where(Stop.class)
+//                                    .equalTo(StopFields.STOP_ID, arrivals.getStopId())
+//                                    .findFirst();
+//                            Route route = threadRealm.where(Route.class)
+//                                    .equalTo(RouteFields.ROUTE_ID, arrival.getRouteId())
+//                                    .findFirst();
+//
+//                            System.out.println("stop " + stop.getName());
+//                            System.out.println("route " + route.getShortName());
+//                            arrival.setRoute(route);
+//                            arrival.setStop(stop);
+//                        }
+//
+//                        try {
+//                            realm.executeTransaction(r -> r.copyToRealmOrUpdate(arrivals));
+//                        } finally {
+//                            realm.close();
+//                        }
+//                        return Observable.just(arrivals);
+//                    });
+//        })
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread());
     }
 
 //    private Observable<Arrivals> getArrivalsObservable() {

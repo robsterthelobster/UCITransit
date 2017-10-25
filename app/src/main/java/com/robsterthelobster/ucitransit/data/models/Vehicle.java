@@ -32,7 +32,7 @@ public class Vehicle extends RealmObject{
     @SerializedName("route_id")
     public Integer routeId;
     @SerializedName("arrival_estimates")
-    public RealmList<Arrival> arrivalEstimates = null;
+    public RealmList<Prediction> arrivalEstimates = null;
     @SerializedName("tracking_status")
     public String trackingStatus;
     @SerializedName("location")
@@ -120,11 +120,11 @@ public class Vehicle extends RealmObject{
         this.routeId = routeId;
     }
 
-    public RealmList<Arrival> getArrivalEstimates() {
+    public RealmList<Prediction> getArrivalEstimates() {
         return arrivalEstimates;
     }
 
-    public void setArrivalEstimates(RealmList<Arrival> arrivalEstimates) {
+    public void setArrivalEstimates(RealmList<Prediction> arrivalEstimates) {
         this.arrivalEstimates = arrivalEstimates;
     }
 

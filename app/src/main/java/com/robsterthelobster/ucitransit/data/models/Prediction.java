@@ -9,7 +9,7 @@ import io.realm.annotations.PrimaryKey;
  * Created by robin on 10/16/2017.
  */
 
-public class Arrival extends RealmObject {
+public class Prediction extends RealmObject {
 
     @SerializedName("route_id")
     private Integer routeId;
@@ -20,6 +20,7 @@ public class Arrival extends RealmObject {
     @SerializedName("type")
     private String type;
 
+    private String arrivalAtSecondary;
     private Route route;
     private Stop stop;
 

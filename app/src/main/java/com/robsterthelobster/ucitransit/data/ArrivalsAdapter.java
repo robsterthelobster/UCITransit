@@ -1,7 +1,6 @@
 package com.robsterthelobster.ucitransit.data;
 
 import android.animation.ValueAnimator;
-import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Build;
@@ -15,37 +14,33 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.ftinc.scoop.Scoop;
-import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.robsterthelobster.ucitransit.R;
-import com.robsterthelobster.ucitransit.data.models.Arrival;
-import com.robsterthelobster.ucitransit.data.models.Arrivals;
+import com.robsterthelobster.ucitransit.data.models.Prediction;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.Stop;
+import com.robsterthelobster.ucitransit.utils.Utils;
+
+import java.text.ParseException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.realm.OrderedRealmCollection;
-import io.realm.Realm;
-import io.realm.RealmList;
 import io.realm.RealmRecyclerViewAdapter;
-import io.realm.RealmResults;
 
 /**
  * Created by robin on 9/20/2016.
  */
 
 public class ArrivalsAdapter
-        extends RealmRecyclerViewAdapter<Arrival, ArrivalsAdapter.ViewHolder> {
+        extends RealmRecyclerViewAdapter<Prediction, ArrivalsAdapter.ViewHolder> {
 
     private boolean routeColorOn = false;
 
-    public ArrivalsAdapter(@Nullable OrderedRealmCollection<Arrival> data, boolean autoUpdate, boolean updateOnModification) {
+    public ArrivalsAdapter(@Nullable OrderedRealmCollection<Prediction> data, boolean autoUpdate, boolean updateOnModification) {
         super(data, autoUpdate, updateOnModification);
         if(Scoop.getInstance().getCurrentFlavor().getName().contains("Route")){
             routeColorOn = true;
@@ -61,7 +56,7 @@ public class ArrivalsAdapter
 
     @Override
     public void onBindViewHolder(ArrivalsAdapter.ViewHolder holder, int position) {
-        final Arrival arrival = getItem(position);
+        final Prediction arrival = getItem(position);
         if(arrival!=null){
             holder.arrival = arrival;
 
@@ -69,11 +64,18 @@ public class ArrivalsAdapter
             System.out.println("route "+route.getShortName());
             Stop stop = arrival.getStop();
 
+            String arrivalTime = "NA";
+            try {
+                arrivalTime = Utils.getTimeDifferenceInMinutes(arrival.getArrivalAt()) + " min";
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
             if(routeColorOn) {
                 holder.cardView.setBackgroundColor(Color.parseColor(route.getColor()));
             }
-            holder.routeText.setText(route.getShortName() + route.getLongName());
-            holder.arrivalText.setText(arrival.getArrivalAt());
+            holder.routeText.setText(route.getShortName() + " " + route.getLongName());
+            holder.arrivalText.setText(arrivalTime);
             holder.stopText.setText(stop.getName());
         }
     }
@@ -82,7 +84,7 @@ public class ArrivalsAdapter
 
         private float EXPAND_CARD_RATIO = 0.33f;
 
-        public Arrival arrival;
+        public Prediction arrival;
 
         @BindView(R.id.card_view)
         CardView cardView;

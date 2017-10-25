@@ -9,6 +9,11 @@ import android.widget.Toast;
 
 import com.robsterthelobster.ucitransit.R;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 import rx.Subscription;
 
 /**
@@ -53,8 +58,20 @@ public class Utils {
         return activeNetwork != null && activeNetwork.isConnected();
     }
 
-    public void showToast(Context context, String message, int length){
+    public static void showToast(Context context, String message, int length){
         Toast.makeText(context, message, length).show();
+    }
+
+    public static Date convertStringToDate(String strDate) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.US);
+        Date date = dateFormat.parse(strDate);
+        return date;
+    }
+
+    public static int getTimeDifferenceInMinutes(String strDate) throws ParseException {
+        Date date = new Date();
+        int minutes = (int) (convertStringToDate(strDate).getTime() - date.getTime() )/1000/60;
+        return minutes;
     }
 }
 

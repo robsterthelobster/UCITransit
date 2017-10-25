@@ -13,7 +13,7 @@ import io.realm.annotations.PrimaryKey;
 public class Arrivals extends RealmObject{
 
     @SerializedName("arrivals")
-    private RealmList<Arrival> arrivals = null;
+    private RealmList<Prediction> arrivals = null;
     @SerializedName("agency_id")
     private Integer agencyId;
     @SerializedName("stop_id")
@@ -30,11 +30,11 @@ public class Arrivals extends RealmObject{
         this.id = id;
     }
 
-    public RealmList<Arrival> getArrivals() {
+    public RealmList<Prediction> getArrivals() {
         return arrivals;
     }
 
-    public void setArrivals(RealmList<Arrival> arrivals) {
+    public void setArrivals(RealmList<Prediction> arrivals) {
         this.arrivals = arrivals;
     }
 

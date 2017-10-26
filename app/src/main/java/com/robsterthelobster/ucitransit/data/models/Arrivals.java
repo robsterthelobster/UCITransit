@@ -20,6 +20,7 @@ public class Arrivals extends RealmObject{
     @PrimaryKey
     private Integer stopId;
 
+
     private String id;
 
     public String getId() {

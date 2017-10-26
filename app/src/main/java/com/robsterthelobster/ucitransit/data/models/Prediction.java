@@ -24,8 +24,15 @@ public class Prediction extends RealmObject {
     private Route route;
     private Stop stop;
 
+    /*
+        boolean checks for statuses
+     */
+    private boolean isFavorite = false;
+    private boolean isCurrent = false;
+    private boolean isNearby = true;
+
     @PrimaryKey
-    private String id;
+    private String id; // set as routeId + StopId during insertion
 
     public Integer getRouteId() {
         return routeId;

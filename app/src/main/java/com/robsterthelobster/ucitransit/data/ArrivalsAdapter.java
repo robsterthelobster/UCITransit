@@ -64,18 +64,12 @@ public class ArrivalsAdapter
             System.out.println("route "+route.getShortName());
             Stop stop = arrival.getStop();
 
-            String arrivalTime = "NA";
-            try {
-                arrivalTime = Utils.getTimeDifferenceInMinutes(arrival.getArrivalAt()) + " min";
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
 
             if(routeColorOn) {
                 holder.cardView.setBackgroundColor(Color.parseColor(route.getColor()));
             }
             holder.routeText.setText(route.getShortName() + " " + route.getLongName());
-            holder.arrivalText.setText(arrivalTime);
+            holder.arrivalText.setText(arrival.getArrivalAt());
             holder.stopText.setText(stop.getName());
         }
     }

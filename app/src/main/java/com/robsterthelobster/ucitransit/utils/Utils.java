@@ -62,16 +62,9 @@ public class Utils {
         Toast.makeText(context, message, length).show();
     }
 
-    public static Date convertStringToDate(String strDate) throws ParseException {
+    public static long convertStringToTime(String strDate) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.US);
-        Date date = dateFormat.parse(strDate);
-        return date;
-    }
-
-    public static int getTimeDifferenceInMinutes(String strDate) throws ParseException {
-        Date date = new Date();
-        int minutes = (int) (convertStringToDate(strDate).getTime() - date.getTime() )/1000/60;
-        return minutes;
+        return dateFormat.parse(strDate).getTime();
     }
 }
 

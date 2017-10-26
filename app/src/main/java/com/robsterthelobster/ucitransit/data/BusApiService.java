@@ -32,10 +32,10 @@ public interface BusApiService {
     Observable<ArrivalData> getArrivals(@Query("agencies") String agency);
 
     @GET("arrival-estimates.json")
-    Observable<ArrivalData> getArrivals(@Query("agencies") String agency, @Query("routes") int route);
+    Observable<ArrivalData> getArrivals(@Query("agencies") String agency, @Query("routes") String route);
 
     @GET("arrival-estimates.json")
-    Observable<ArrivalData> getArrivals(@Query("agencies") String agency, @Query("routes") int route, @Query("stops") int stop);
+    Observable<ArrivalData> getArrivals(@Query("agencies") String agency, @Query("routes") String route, @Query("stops") int stop);
 
     @GET("arrival-estimates.json")
     Observable<ArrivalData> getArrivalsByStop(@Query("agencies") String agency, @Query("stops") int stop);

@@ -34,6 +34,7 @@ import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.data.ArrivalsAdapter;
 import com.robsterthelobster.ucitransit.data.BusApiService;
+import com.robsterthelobster.ucitransit.data.models.ArrivalData;
 import com.robsterthelobster.ucitransit.data.models.Prediction;
 import com.robsterthelobster.ucitransit.data.models.Arrivals;
 import com.robsterthelobster.ucitransit.data.models.Route;
@@ -43,6 +44,10 @@ import com.robsterthelobster.ucitransit.data.models.StopFields;
 import com.robsterthelobster.ucitransit.utils.Constants;
 import com.robsterthelobster.ucitransit.utils.Utils;
 import com.tbruyelle.rxpermissions.RxPermissions;
+
+import java.text.ParseException;
+import java.util.Calendar;
+import java.util.Date;
 
 import javax.inject.Inject;
 
@@ -56,6 +61,7 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
@@ -341,7 +347,7 @@ public class MainActivity extends AppCompatActivity {
                         final Realm realm = Realm.getDefaultInstance();
                         try {
                             // converts color into hex color for later use
-                            route.setColor("#"+route.getColor());
+                            route.setColor("#" + route.getColor());
                             realm.executeTransaction(r -> r.copyToRealmOrUpdate(route));
                         } finally {
                             realm.close();
@@ -410,21 +416,9 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onNext(Arrivals arrivals) {
                             final Realm realm = Realm.getDefaultInstance();
-                            int count = 0;
                             RealmList<Prediction> predictions = arrivals.getArrivals();
-                            for(int i = 0; i < predictions.size(); i++){
-                                Prediction prediction = predictions.get(i);
-                                Stop stop = realm.where(Stop.class)
-                                        .equalTo(StopFields.STOP_ID, arrivals.getStopId())
-                                        .findFirst();
-                                Route route = realm.where(Route.class)
-                                        .equalTo(RouteFields.ROUTE_ID, prediction.getRouteId())
-                                        .findFirst();
-                                prediction.setRoute(route);
-                                prediction.setStop(stop);
-                                prediction.setId(route.getRouteId().toString() + stop.getStopId());
-                                count++;
-                            }
+                            String routeId = "";
+
                             for (Prediction prediction : arrivals.getArrivals()) {
                                 Stop stop = realm.where(Stop.class)
                                         .equalTo(StopFields.STOP_ID, arrivals.getStopId())
@@ -437,6 +431,14 @@ public class MainActivity extends AppCompatActivity {
                                 prediction.setRoute(route);
                                 prediction.setStop(stop);
                                 prediction.setId(route.getRouteId().toString() + stop.getStopId());
+                                try {
+                                    long timeDifference =
+                                            Utils.convertStringToTime(prediction.getArrivalAt())
+                                                    - new Date().getTime();
+                                    prediction.setArrivalAt(timeDifference/1000/60 + " min");
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
                             }
 
                             try {
@@ -450,11 +452,41 @@ public class MainActivity extends AppCompatActivity {
         arrivalsAdapter.notifyDataSetChanged();
     }
 
+    /**
+     * check if there are routes in the database, if not --> go get them
+     *
+     * Each stop has a list of routes with the route id
+     * For each each route id and stop id, ArrivalData will be pulled with a
+     * unique identifier (combined route + stop id).
+     *
+     * Stop observable
+     * --> for each stop, get routeId list
+     * -------> for each stopId & routeId, call apiService to get Arrival Data
+     * --> observable now emits ArrivalData
+     * --> flatMap to emit lists of Arrivals
+     */
     private Observable<Arrivals> getArrivalsObservable() {
-        return apiService.getArrivals(Constants.AGENCY_ID)
+
+        Observable<Arrivals> arrivalsObservable = null;
+        if (routeResults.isEmpty()) {
+            this.fetchInitialRouteData();
+        }
+        RealmResults<Stop> stopRealmResults = realm.where(Stop.class).findAll();
+
+        arrivalsObservable = Observable.from(stopRealmResults)
+                .flatMap(stop -> Observable.from(stop.getRoutes())
+                        .flatMap(routeId -> apiService.getArrivals(
+                                Constants.AGENCY_ID, routeId, stop.getStopId())))
                 .flatMap(arrivalData -> Observable.from(arrivalData.getData()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
+
+        arrivalsObservable = apiService.getArrivals(Constants.AGENCY_ID)
+                .flatMap(arrivalData -> Observable.from(arrivalData.getData()))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+
+        return arrivalsObservable;
     }
 
     private void setEmptyView() {
@@ -464,13 +496,13 @@ public class MainActivity extends AppCompatActivity {
         emptyText.setText(R.string.empty_network_message);
     }
 
-    private void refreshTask(){
+    private void refreshTask() {
         Observable.just(0)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(s -> {
-                    if(realm.isEmpty()){
+                    if (realm.isEmpty()) {
                         fetchInitialRouteData();
-                    }else {
+                    } else {
                         fetchArrivals();
                     }
                 });

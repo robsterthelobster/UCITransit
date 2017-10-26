@@ -17,6 +17,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -164,10 +165,8 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(arrivalsAdapter);
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            swipeRefreshLayout.setRefreshing(false);
-            fetchArrivals();
-        });
+        recyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
+        swipeRefreshLayout.setOnRefreshListener(this::refreshTask);
 
         if (realm.isEmpty()) {
             fetchInitialRouteData();
@@ -209,8 +208,10 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.action_refresh:
                 Log.i(TAG, "Refresh menu item selected");
-                swipeRefreshLayout.setRefreshing(true);
-                fetchArrivals();
+                refreshTask();
+                break;
+            case R.id.action_empty_realm:
+                realm.executeTransaction(realm -> realm.deleteAll());
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -461,6 +462,18 @@ public class MainActivity extends AppCompatActivity {
         swipeRefreshLayout.setRefreshing(false);
         recyclerView.setAdapter(emptyAdapter);
         emptyText.setText(R.string.empty_network_message);
+    }
+
+    private void refreshTask(){
+        Observable.just(0)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(s -> {
+                    if(realm.isEmpty()){
+                        fetchInitialRouteData();
+                    }else {
+                        fetchArrivals();
+                    }
+                });
     }
 
     private void showToast(String message, int length) {

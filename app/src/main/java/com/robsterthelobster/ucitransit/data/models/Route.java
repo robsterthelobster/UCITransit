@@ -19,7 +19,7 @@ public class Route extends RealmObject {
     public String shortName;
     @SerializedName("route_id")
     @PrimaryKey
-    public Integer routeId;
+    public String routeId;
     @SerializedName("url")
     public String url;
     @SerializedName("segments")
@@ -57,11 +57,11 @@ public class Route extends RealmObject {
         this.shortName = shortName;
     }
 
-    public Integer getRouteId() {
+    public String getRouteId() {
         return routeId;
     }
 
-    public void setRouteId(Integer routeId) {
+    public void setRouteId(String routeId) {
         this.routeId = routeId;
     }
 

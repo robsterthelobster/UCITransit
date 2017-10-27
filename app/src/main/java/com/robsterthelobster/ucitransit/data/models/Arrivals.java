@@ -17,10 +17,12 @@ public class Arrivals extends RealmObject{
     @SerializedName("agency_id")
     private Integer agencyId;
     @SerializedName("stop_id")
-    @PrimaryKey
     private Integer stopId;
 
+    private Route route;
+    private Stop stop;
 
+    @PrimaryKey
     private String id;
 
     public String getId() {
@@ -53,5 +55,21 @@ public class Arrivals extends RealmObject{
 
     public void setStopId(Integer stopId) {
         this.stopId = stopId;
+    }
+
+    public Route getRoute() {
+        return route;
+    }
+
+    public void setRoute(Route route) {
+        this.route = route;
+    }
+
+    public Stop getStop() {
+        return stop;
+    }
+
+    public void setStop(Stop stop) {
+        this.stop = stop;
     }
 }

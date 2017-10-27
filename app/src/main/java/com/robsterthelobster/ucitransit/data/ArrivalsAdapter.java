@@ -19,12 +19,14 @@ import android.widget.TextView;
 import com.ftinc.scoop.Scoop;
 import com.google.android.gms.ads.AdView;
 import com.robsterthelobster.ucitransit.R;
+import com.robsterthelobster.ucitransit.data.models.Arrivals;
 import com.robsterthelobster.ucitransit.data.models.Prediction;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.robsterthelobster.ucitransit.utils.Utils;
 
 import java.text.ParseException;
+import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -36,11 +38,11 @@ import io.realm.RealmRecyclerViewAdapter;
  */
 
 public class ArrivalsAdapter
-        extends RealmRecyclerViewAdapter<Prediction, ArrivalsAdapter.ViewHolder> {
+        extends RealmRecyclerViewAdapter<Arrivals, ArrivalsAdapter.ViewHolder> {
 
     private boolean routeColorOn = false;
 
-    public ArrivalsAdapter(@Nullable OrderedRealmCollection<Prediction> data, boolean autoUpdate, boolean updateOnModification) {
+    public ArrivalsAdapter(@Nullable OrderedRealmCollection<Arrivals> data, boolean autoUpdate, boolean updateOnModification) {
         super(data, autoUpdate, updateOnModification);
         if(Scoop.getInstance().getCurrentFlavor().getName().contains("Route")){
             routeColorOn = true;
@@ -56,18 +58,22 @@ public class ArrivalsAdapter
 
     @Override
     public void onBindViewHolder(ArrivalsAdapter.ViewHolder holder, int position) {
-        final Prediction arrival = getItem(position);
-        if(arrival!=null){
-            holder.arrival = arrival;
+        final Arrivals arrivals = getItem(position);
+        if(arrivals!=null){
+            holder.arrivals = arrivals;
 
-            Route route = arrival.getRoute();
-            Stop stop = arrival.getStop();
+            Route route = arrivals.getRoute();
+            Stop stop = arrivals.getStop();
 
             if(routeColorOn) {
                 holder.cardView.setBackgroundColor(Color.parseColor(route.getColor()));
             }
+
+            long timeDifference =
+                    (arrivals.getArrivals().get(0).getArrivalAt().getTime() - new Date().getTime())
+                            /1000/60;
             holder.routeText.setText(route.getShortName() + " " + route.getLongName());
-            holder.arrivalText.setText(arrival.getArrivalAt());
+            holder.arrivalText.setText(timeDifference + " min");
             holder.stopText.setText(stop.getName());
         }
     }
@@ -76,7 +82,7 @@ public class ArrivalsAdapter
 
         private float EXPAND_CARD_RATIO = 0.33f;
 
-        Prediction arrival;
+        Arrivals arrivals;
 
         @BindView(R.id.card_view)
         CardView cardView;

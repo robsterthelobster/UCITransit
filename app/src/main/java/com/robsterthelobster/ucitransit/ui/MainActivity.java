@@ -159,8 +159,8 @@ public class MainActivity extends AppCompatActivity {
             realm = Realm.getDefaultInstance();
         }
 
-        RealmResults<Prediction> arrivals = realm
-                .where(Prediction.class)
+        RealmResults<Arrivals> arrivals = realm
+                .where(Arrivals.class)
                 .findAll();
 //                .equalTo("isCurrent", true)
 //                .equalTo("isNearby", true)
@@ -408,39 +408,7 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         @Override
-                        public void onNext(Arrivals arrivals) {
-                            final Realm realm = Realm.getDefaultInstance();
-                            RealmList<Prediction> predictions = arrivals.getArrivals();
-                            String routeId = "";
-
-                            for (Prediction prediction : arrivals.getArrivals()) {
-                                Stop stop = realm.where(Stop.class)
-                                        .equalTo(StopFields.STOP_ID, arrivals.getStopId())
-                                        .findFirst();
-                                Route route = realm.where(Route.class)
-                                        .equalTo(RouteFields.ROUTE_ID, prediction.getRouteId())
-                                        .findFirst();
-//                                System.out.println("stop " + stop.getName());
-//                                System.out.println("route " + route.getShortName());
-                                prediction.setRoute(route);
-                                prediction.setStop(stop);
-                                prediction.setId(route.getRouteId().toString() + stop.getStopId());
-                                try {
-                                    long timeDifference =
-                                            Utils.convertStringToTime(prediction.getArrivalAt())
-                                                    - new Date().getTime();
-                                    prediction.setArrivalAt(timeDifference/1000/60 + " min");
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-
-                            try {
-                                realm.executeTransaction(r -> r.copyToRealmOrUpdate(arrivals));
-                            } finally {
-                                realm.close();
-                            }
-                        }
+                        public void onNext(Arrivals arrivals) {}
                     });
         }
         arrivalsAdapter.notifyDataSetChanged();
@@ -469,13 +437,21 @@ public class MainActivity extends AppCompatActivity {
         arrivalsObservable = Observable.defer(() -> {
             final Realm threadRealm = Realm.getDefaultInstance();
             RealmResults<Stop> stopRealmResults = threadRealm.where(Stop.class).findAll();
-            return Observable.from(stopRealmResults)
-                    .doOnCompleted(threadRealm::close);
-        })
-                .flatMap(stop -> Observable.from(stop.getRoutes())
-                .flatMap(routeId -> apiService.getArrivals(
-                        Constants.AGENCY_ID, routeId, stop.getStopId())))
-                .flatMap(arrivalData -> Observable.from(arrivalData.getData()))
+            return Observable.from(stopRealmResults).flatMap(stop -> Observable.from(stop.getRoutes())
+                    .flatMap(routeId -> apiService.getArrivals(Constants.AGENCY_ID, routeId, stop.getStopId())
+                            .flatMap(arrivalData -> Observable.from(arrivalData.getData()).flatMap(arrivals -> {
+                                Route route = threadRealm.where(Route.class)
+                                        .equalTo(RouteFields.ROUTE_ID, routeId)
+                                        .findFirst();
+                                arrivals.setRoute(route);
+                                arrivals.setStop(stop);
+                                arrivals.setId(routeId + stop.getStopId());
+
+                                threadRealm.executeTransaction(r -> r.copyToRealmOrUpdate(arrivals));
+
+                                return Observable.from(arrivalData.getData());
+                            }))))
+                    .doOnCompleted(threadRealm::close);})
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
 

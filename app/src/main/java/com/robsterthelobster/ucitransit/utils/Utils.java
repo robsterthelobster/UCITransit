@@ -62,9 +62,9 @@ public class Utils {
         Toast.makeText(context, message, length).show();
     }
 
-    public static long convertStringToTime(String strDate) throws ParseException {
+    public static long convertStringToTime(Date date) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.US);
-        return dateFormat.parse(strDate).getTime();
+        return date.getTime();
     }
 }
 

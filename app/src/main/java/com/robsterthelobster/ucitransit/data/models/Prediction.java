@@ -2,6 +2,8 @@ package com.robsterthelobster.ucitransit.data.models;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Date;
+
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -16,23 +18,9 @@ public class Prediction extends RealmObject {
     @SerializedName("vehicle_id")
     private Integer vehicleId;
     @SerializedName("arrival_at")
-    private String arrivalAt;
+    private Date arrivalAt;
     @SerializedName("type")
     private String type;
-
-    private String arrivalAtSecondary;
-    private Route route;
-    private Stop stop;
-
-    /*
-        boolean checks for statuses
-     */
-    private boolean isFavorite = false;
-    private boolean isCurrent = false;
-    private boolean isNearby = true;
-
-    @PrimaryKey
-    private String id; // set as routeId + StopId during insertion
 
     public Integer getRouteId() {
         return routeId;
@@ -50,11 +38,11 @@ public class Prediction extends RealmObject {
         this.vehicleId = vehicleId;
     }
 
-    public String getArrivalAt() {
+    public Date getArrivalAt() {
         return arrivalAt;
     }
 
-    public void setArrivalAt(String arrivalAt) {
+    public void setArrivalAt(Date arrivalAt) {
         this.arrivalAt = arrivalAt;
     }
 
@@ -64,29 +52,5 @@ public class Prediction extends RealmObject {
 
     public void setType(String type) {
         this.type = type;
-    }
-
-    public Route getRoute() {
-        return route;
-    }
-
-    public void setRoute(Route route) {
-        this.route = route;
-    }
-
-    public Stop getStop() {
-        return stop;
-    }
-
-    public void setStop(Stop stop) {
-        this.stop = stop;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 }

@@ -35,6 +35,7 @@ import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.data.ArrivalsAdapter;
 import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.models.ArrivalData;
+import com.robsterthelobster.ucitransit.data.models.ArrivalsFields;
 import com.robsterthelobster.ucitransit.data.models.Prediction;
 import com.robsterthelobster.ucitransit.data.models.Arrivals;
 import com.robsterthelobster.ucitransit.data.models.Route;
@@ -56,6 +57,7 @@ import butterknife.ButterKnife;
 import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmResults;
+import io.realm.Sort;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.Observable;
 import rx.Subscriber;
@@ -159,15 +161,16 @@ public class MainActivity extends AppCompatActivity {
             realm = Realm.getDefaultInstance();
         }
 
+        // date from 30 seconds ago
+        Date date = new Date(System.currentTimeMillis() - 30*1000);
         RealmResults<Arrivals> arrivals = realm
                 .where(Arrivals.class)
-                .findAll();
-//                .equalTo("isCurrent", true)
-//                .equalTo("isNearby", true)
-//                .findAllSorted("isFavorite", Sort.DESCENDING);
+                // arrival time should be in the future, with a 30 second buffer
+                .greaterThan(ArrivalsFields.ARRIVAL_TIME, date)
+                .findAllSorted("isFavorite", Sort.DESCENDING);
 
-        arrivalsAdapter = new ArrivalsAdapter(arrivals, true, true);
-        emptyAdapter = new ArrivalsAdapter(arrivals, true, true);
+        arrivalsAdapter = new ArrivalsAdapter(arrivals, true, true, realm);
+        emptyAdapter = new ArrivalsAdapter(arrivals, true, true, realm);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(arrivalsAdapter);
@@ -268,9 +271,10 @@ public class MainActivity extends AppCompatActivity {
         final Menu navMenu = menu;
         Observable.from(routeResults).subscribe(route -> {
             final Intent intent = new Intent(this, DetailActivity.class);
-            String name = route.getShortName() + " " + route.getLongName();
-            intent.putExtra(Constants.ROUTE_ID_KEY, name);
-            MenuItem item = navMenu.add(name);
+            String routeName = route.getShortName() + " " + route.getLongName();
+            intent.putExtra(Constants.ROUTE_ID_KEY, route.getRouteId());
+            intent.putExtra(Constants.ROUTE_NAME_KEY, routeName);
+            MenuItem item = navMenu.add(routeName);
             item.setIntent(intent);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -312,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
                         public void onNext(Location location) {
                             Log.d(TAG, location.toString());
                             mLocation = location;
-                            fetchArrivals();
+                            refreshTask();
                         }
                     });
         }
@@ -382,6 +386,7 @@ public class MainActivity extends AppCompatActivity {
     private void fetchArrivals() {
         boolean showAd = prefs.getBoolean(getString(R.string.key_ad_pref), true);
         if (!Utils.isNetworkConnected(this)) {
+            showToast("Network is not available", Toast.LENGTH_SHORT);
             setEmptyView();
         } else {
             if (mLocation == null) {
@@ -417,15 +422,6 @@ public class MainActivity extends AppCompatActivity {
     /**
      * check if there are routes in the database, if not --> go get them
      *
-     * Each stop has a list of routes with the route id
-     * For each each route id and stop id, ArrivalData will be pulled with a
-     * unique identifier (combined route + stop id).
-     *
-     * Stop observable
-     * --> for each stop, get routeId list
-     * -------> for each stopId & routeId, call apiService to get Arrival Data
-     * --> observable now emits ArrivalData
-     * --> flatMap to emit lists of Arrivals
      */
     private Observable<Arrivals> getArrivalsObservable() {
 
@@ -437,18 +433,19 @@ public class MainActivity extends AppCompatActivity {
         arrivalsObservable = Observable.defer(() -> {
             final Realm threadRealm = Realm.getDefaultInstance();
             RealmResults<Stop> stopRealmResults = threadRealm.where(Stop.class).findAll();
-            return Observable.from(stopRealmResults).flatMap(stop -> Observable.from(stop.getRoutes()).filter(routeId -> {
-                boolean isNearby;
-                if(mLocation == null) {
-                    isNearby = false;
-                }else{
-                    Location stopLocation = new Location("stop");
-                    stopLocation.setLatitude(stop.getLocation().getLatitude());
-                    stopLocation.setLongitude(stop.getLocation().getLongitude());
-                    isNearby = stopLocation.distanceTo(mLocation) <= DISTANCE_FENCE;
-                }
-                return isNearby;
-            })
+            return Observable.from(stopRealmResults).flatMap(stop -> Observable.from(stop.getRoutes())
+                    .filter(routeId -> {
+                        boolean isNearby;
+                        if (mLocation == null) {
+                            isNearby = false;
+                        } else {
+                            Location stopLocation = new Location("stop");
+                            stopLocation.setLatitude(stop.getLocation().getLatitude());
+                            stopLocation.setLongitude(stop.getLocation().getLongitude());
+                            isNearby = stopLocation.distanceTo(mLocation) <= DISTANCE_FENCE;
+                        }
+                        return isNearby;
+                    })
                     .flatMap(routeId -> apiService.getArrivals(Constants.AGENCY_ID, routeId, stop.getStopId())
                             .flatMap(arrivalData -> Observable.from(arrivalData.getData()).flatMap(arrivals -> {
                                 Route route = threadRealm.where(Route.class)
@@ -457,15 +454,26 @@ public class MainActivity extends AppCompatActivity {
                                 arrivals.setRoute(route);
                                 arrivals.setStop(stop);
                                 arrivals.setId(routeId + stop.getStopId());
+                                arrivals.setRouteId(routeId);
 
                                 RealmList<Prediction> predictionList = arrivals.getArrivals();
                                 for(int i = 0; i < predictionList.size(); i++){
-                                    if(i == 0 || i == 1){
-                                        arrivals.setArrivalTime(predictionList.get(i).getArrivalAt());
+                                    Date arrivalTime = predictionList.get(i).getArrivalAt();
+                                    if(i == 0 ){
+                                        arrivals.setArrivalTime(arrivalTime);
+                                    }else if(i == 1){
+                                        arrivals.setSecondaryArrivalTime(arrivalTime);
                                     }else{
                                         break;
                                     }
+                                }
+                                Arrivals oldArrivals = threadRealm
+                                        .where(Arrivals.class)
+                                        .equalTo(ArrivalsFields.ID, arrivals.getId())
+                                        .findFirst();
 
+                                if (oldArrivals != null) {
+                                    arrivals.setFavorite(oldArrivals.isFavorite());
                                 }
 
                                 threadRealm.executeTransaction(r -> r.copyToRealmOrUpdate(arrivals));

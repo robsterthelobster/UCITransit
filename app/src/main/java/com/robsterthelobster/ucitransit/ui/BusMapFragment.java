@@ -101,7 +101,7 @@ public class BusMapFragment extends Fragment{
         String routeName = arguments.getString(Constants.ROUTE_ID_KEY);
         realm = Realm.getDefaultInstance();
 
-       // route = realm.where(Route.class).equalTo(RouteFields.NAME, routeName).findFirst();
+       // route = realm.where(Route.class).equalTo(RouteFields.NAME, routeId).findFirst();
         stopMarkers = new ArrayList<>();
         vehicleMarkers = new HashMap<>();
 

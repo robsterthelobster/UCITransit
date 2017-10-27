@@ -58,13 +58,12 @@ public class Utils {
         return activeNetwork != null && activeNetwork.isConnected();
     }
 
-    public static void showToast(Context context, String message, int length){
-        Toast.makeText(context, message, length).show();
+    public static String getTimeDifferenceInMinutes(Date date){
+        return ((date.getTime() - new Date().getTime())/1000/60) + " min";
     }
 
-    public static long convertStringToTime(Date date) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.US);
-        return date.getTime();
+    public static void showToast(Context context, String message){
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
 }
 

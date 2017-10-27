@@ -5,6 +5,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -29,6 +30,7 @@ public class DetailActivity extends AppCompatActivity {
     @BindView(R.id.detail_toolbar) Toolbar toolbar;
     @BindView(R.id.sliding_tabs) TabLayout tabLayout;
 
+    String routeId;
     String routeName;
 
     @Override
@@ -39,8 +41,9 @@ public class DetailActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         Bundle bundle = getIntent().getExtras();
-        routeName = bundle.getString(Constants.ROUTE_ID_KEY);
-        Log.d(TAG, "route: " + routeName);
+        routeId = bundle.getString(Constants.ROUTE_ID_KEY);
+        routeName = bundle.getString(Constants.ROUTE_NAME_KEY);
+        Log.d(TAG, "route: " + routeId);
 
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
@@ -71,14 +74,14 @@ public class DetailActivity extends AppCompatActivity {
             case R.id.action_refresh:
                 Log.i(TAG, "Refresh menu item selected");
                 if(predictionFragment != null){
-                    //predictionFragment.refreshTask();
+                    predictionFragment.refreshTask();
                 }
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+    public class SectionsPagerAdapter extends FragmentStatePagerAdapter {
 
         SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -88,10 +91,10 @@ public class DetailActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch(position){
                 case 0:
-                    predictionFragment = PredictionFragment.newInstance(routeName);
+                    predictionFragment = PredictionFragment.newInstance(routeId);
                     return predictionFragment;
                 case 1:
-                    return BusMapFragment.newInstance(routeName);
+                    return BusMapFragment.newInstance(routeId);
                 default:
                     Log.e(TAG, "Not a valid position");
                     return null;

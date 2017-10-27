@@ -21,11 +21,13 @@ public class Arrivals extends RealmObject{
     @SerializedName("stop_id")
     private Integer stopId;
 
+    // easy access for Realm
+    private String routeId;
+
     private Route route;
     private Stop stop;
 
     private boolean isFavorite = false;
-    private boolean isCurrent = false;
 
     private Date arrivalTime;
     private Date secondaryArrivalTime;
@@ -89,14 +91,6 @@ public class Arrivals extends RealmObject{
         isFavorite = favorite;
     }
 
-    public boolean isCurrent() {
-        return isCurrent;
-    }
-
-    public void setCurrent(boolean current) {
-        isCurrent = current;
-    }
-
     public Date getArrivalTime() {
         return arrivalTime;
     }
@@ -111,5 +105,13 @@ public class Arrivals extends RealmObject{
 
     public void setSecondaryArrivalTime(Date secondaryArrivalTime) {
         this.secondaryArrivalTime = secondaryArrivalTime;
+    }
+
+    public String getRouteId() {
+        return routeId;
+    }
+
+    public void setRouteId(String routeId) {
+        this.routeId = routeId;
     }
 }

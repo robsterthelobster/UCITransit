@@ -31,6 +31,7 @@ import java.util.Date;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.realm.OrderedRealmCollection;
+import io.realm.Realm;
 import io.realm.RealmRecyclerViewAdapter;
 
 /**
@@ -40,10 +41,12 @@ import io.realm.RealmRecyclerViewAdapter;
 public class ArrivalsAdapter
         extends RealmRecyclerViewAdapter<Arrivals, ArrivalsAdapter.ViewHolder> {
 
+    private Realm realm;
     private boolean routeColorOn = false;
 
-    public ArrivalsAdapter(@Nullable OrderedRealmCollection<Arrivals> data, boolean autoUpdate, boolean updateOnModification) {
+    public ArrivalsAdapter(@Nullable OrderedRealmCollection<Arrivals> data, boolean autoUpdate, boolean updateOnModification, Realm realm) {
         super(data, autoUpdate, updateOnModification);
+        this.realm = realm;
         if(Scoop.getInstance().getCurrentFlavor().getName().contains("Route")){
             routeColorOn = true;
         }
@@ -62,18 +65,41 @@ public class ArrivalsAdapter
         if(arrivals!=null){
             holder.arrivals = arrivals;
 
+            String arrivalTimeString = "NA";
+            String secondaryArrivalTimeString = "NA";
+            Date arrivalTime = arrivals.getArrivalTime();
+            Date secondaryTime = arrivals.getSecondaryArrivalTime();
+
             Route route = arrivals.getRoute();
             Stop stop = arrivals.getStop();
+
+            System.out.println("adapter : " + arrivals.getId());
 
             if(routeColorOn) {
                 holder.cardView.setBackgroundColor(Color.parseColor(route.getColor()));
             }
 
-            long timeDifference =
-                    (arrivals.getArrivalTime().getTime() - new Date().getTime())/1000/60;
+            if(arrivalTime != null){
+                arrivalTimeString = Utils.getTimeDifferenceInMinutes(arrivalTime);
+            }
+            if(secondaryTime != null){
+                secondaryArrivalTimeString = Utils.getTimeDifferenceInMinutes(secondaryTime);
+            }
             holder.routeText.setText(route.getShortName() + " " + route.getLongName());
-            holder.arrivalText.setText(timeDifference + " min");
+            holder.arrivalText.setText(arrivalTimeString);
+            holder.secondaryArrivalText.setText(secondaryArrivalTimeString);
             holder.stopText.setText(stop.getName());
+            holder.favoriteCheck.setOnCheckedChangeListener(null);
+            holder.favoriteCheck.setChecked(arrivals.isFavorite());
+            holder.favoriteCheck.setOnCheckedChangeListener(
+                    (checkBox, checked) -> {
+                        checkBox.setChecked(checked);
+                        realm.executeTransaction(r -> {
+                            arrivals.setFavorite(checked);
+                            r.copyToRealmOrUpdate(arrivals);
+                        });
+                        notifyDataSetChanged();
+                    });
         }
     }
 

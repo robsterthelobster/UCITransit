@@ -61,9 +61,7 @@ public class ArrivalsAdapter
             holder.arrival = arrival;
 
             Route route = arrival.getRoute();
-            System.out.println("route "+route.getShortName());
             Stop stop = arrival.getStop();
-
 
             if(routeColorOn) {
                 holder.cardView.setBackgroundColor(Color.parseColor(route.getColor()));
@@ -78,7 +76,7 @@ public class ArrivalsAdapter
 
         private float EXPAND_CARD_RATIO = 0.33f;
 
-        public Prediction arrival;
+        Prediction arrival;
 
         @BindView(R.id.card_view)
         CardView cardView;

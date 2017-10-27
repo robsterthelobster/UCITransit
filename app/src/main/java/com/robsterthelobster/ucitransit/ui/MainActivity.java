@@ -344,13 +344,10 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onNext(Route route) {
-                        final Realm realm = Realm.getDefaultInstance();
-                        try {
+                        try (Realm realm = Realm.getDefaultInstance()) {
                             // converts color into hex color for later use
                             route.setColor("#" + route.getColor());
                             realm.executeTransaction(r -> r.copyToRealmOrUpdate(route));
-                        } finally {
-                            realm.close();
                         }
                     }
                 });
@@ -375,11 +372,8 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onNext(Stop stop) {
-                        final Realm realm = Realm.getDefaultInstance();
-                        try {
+                        try (Realm realm = Realm.getDefaultInstance()) {
                             realm.executeTransaction(r -> r.copyToRealmOrUpdate(stop));
-                        } finally {
-                            realm.close();
                         }
                     }
                 });
@@ -467,24 +461,28 @@ public class MainActivity extends AppCompatActivity {
      */
     private Observable<Arrivals> getArrivalsObservable() {
 
-        Observable<Arrivals> arrivalsObservable = null;
+        Observable<Arrivals> arrivalsObservable;
         if (routeResults.isEmpty()) {
             this.fetchInitialRouteData();
         }
-        RealmResults<Stop> stopRealmResults = realm.where(Stop.class).findAll();
 
-        arrivalsObservable = Observable.from(stopRealmResults)
+        arrivalsObservable = Observable.defer(() -> {
+            final Realm threadRealm = Realm.getDefaultInstance();
+            RealmResults<Stop> stopRealmResults = threadRealm.where(Stop.class).findAll();
+            return Observable.from(stopRealmResults)
+                    .doOnCompleted(threadRealm::close);
+        })
                 .flatMap(stop -> Observable.from(stop.getRoutes())
-                        .flatMap(routeId -> apiService.getArrivals(
-                                Constants.AGENCY_ID, routeId, stop.getStopId())))
+                .flatMap(routeId -> apiService.getArrivals(
+                        Constants.AGENCY_ID, routeId, stop.getStopId())))
                 .flatMap(arrivalData -> Observable.from(arrivalData.getData()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
 
-        arrivalsObservable = apiService.getArrivals(Constants.AGENCY_ID)
-                .flatMap(arrivalData -> Observable.from(arrivalData.getData()))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+//        arrivalsObservable = apiService.getArrivals(Constants.AGENCY_ID)
+//                .flatMap(arrivalData -> Observable.from(arrivalData.getData()))
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread());
 
         return arrivalsObservable;
     }

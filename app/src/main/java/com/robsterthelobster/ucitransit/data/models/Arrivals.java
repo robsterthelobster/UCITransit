@@ -2,6 +2,8 @@ package com.robsterthelobster.ucitransit.data.models;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Date;
+
 import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
@@ -21,6 +23,12 @@ public class Arrivals extends RealmObject{
 
     private Route route;
     private Stop stop;
+
+    private boolean isFavorite = false;
+    private boolean isCurrent = false;
+
+    private Date arrivalTime;
+    private Date secondaryArrivalTime;
 
     @PrimaryKey
     private String id;
@@ -71,5 +79,37 @@ public class Arrivals extends RealmObject{
 
     public void setStop(Stop stop) {
         this.stop = stop;
+    }
+
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
+    }
+
+    public boolean isCurrent() {
+        return isCurrent;
+    }
+
+    public void setCurrent(boolean current) {
+        isCurrent = current;
+    }
+
+    public Date getArrivalTime() {
+        return arrivalTime;
+    }
+
+    public void setArrivalTime(Date arrivalTime) {
+        this.arrivalTime = arrivalTime;
+    }
+
+    public Date getSecondaryArrivalTime() {
+        return secondaryArrivalTime;
+    }
+
+    public void setSecondaryArrivalTime(Date secondaryArrivalTime) {
+        this.secondaryArrivalTime = secondaryArrivalTime;
     }
 }

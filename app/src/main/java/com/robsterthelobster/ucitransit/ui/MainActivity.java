@@ -437,7 +437,18 @@ public class MainActivity extends AppCompatActivity {
         arrivalsObservable = Observable.defer(() -> {
             final Realm threadRealm = Realm.getDefaultInstance();
             RealmResults<Stop> stopRealmResults = threadRealm.where(Stop.class).findAll();
-            return Observable.from(stopRealmResults).flatMap(stop -> Observable.from(stop.getRoutes())
+            return Observable.from(stopRealmResults).flatMap(stop -> Observable.from(stop.getRoutes()).filter(routeId -> {
+                boolean isNearby;
+                if(mLocation == null) {
+                    isNearby = false;
+                }else{
+                    Location stopLocation = new Location("stop");
+                    stopLocation.setLatitude(stop.getLocation().getLatitude());
+                    stopLocation.setLongitude(stop.getLocation().getLongitude());
+                    isNearby = stopLocation.distanceTo(mLocation) <= DISTANCE_FENCE;
+                }
+                return isNearby;
+            })
                     .flatMap(routeId -> apiService.getArrivals(Constants.AGENCY_ID, routeId, stop.getStopId())
                             .flatMap(arrivalData -> Observable.from(arrivalData.getData()).flatMap(arrivals -> {
                                 Route route = threadRealm.where(Route.class)
@@ -447,6 +458,16 @@ public class MainActivity extends AppCompatActivity {
                                 arrivals.setStop(stop);
                                 arrivals.setId(routeId + stop.getStopId());
 
+                                RealmList<Prediction> predictionList = arrivals.getArrivals();
+                                for(int i = 0; i < predictionList.size(); i++){
+                                    if(i == 0 || i == 1){
+                                        arrivals.setArrivalTime(predictionList.get(i).getArrivalAt());
+                                    }else{
+                                        break;
+                                    }
+
+                                }
+
                                 threadRealm.executeTransaction(r -> r.copyToRealmOrUpdate(arrivals));
 
                                 return Observable.from(arrivalData.getData());
@@ -454,11 +475,6 @@ public class MainActivity extends AppCompatActivity {
                     .doOnCompleted(threadRealm::close);})
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
-
-//        arrivalsObservable = apiService.getArrivals(Constants.AGENCY_ID)
-//                .flatMap(arrivalData -> Observable.from(arrivalData.getData()))
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread());
 
         return arrivalsObservable;
     }

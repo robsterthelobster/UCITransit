@@ -70,8 +70,7 @@ public class ArrivalsAdapter
             }
 
             long timeDifference =
-                    (arrivals.getArrivals().get(0).getArrivalAt().getTime() - new Date().getTime())
-                            /1000/60;
+                    (arrivals.getArrivalTime().getTime() - new Date().getTime())/1000/60;
             holder.routeText.setText(route.getShortName() + " " + route.getLongName());
             holder.arrivalText.setText(timeDifference + " min");
             holder.stopText.setText(stop.getName());

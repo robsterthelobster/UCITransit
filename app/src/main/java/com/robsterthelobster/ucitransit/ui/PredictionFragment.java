@@ -99,7 +99,7 @@ public class PredictionFragment extends Fragment {
         RealmResults<Arrivals> arrivals = realm
                 .where(Arrivals.class)
                 // arrival time should be in the future, with a 30 second buffer
-                //.greaterThan(ArrivalsFields.ARRIVAL_TIME, date)
+                .greaterThan(ArrivalsFields.ARRIVAL_TIME, date)
                 .equalTo(ArrivalsFields.ROUTE_ID, routeId)
                 .findAll();
 

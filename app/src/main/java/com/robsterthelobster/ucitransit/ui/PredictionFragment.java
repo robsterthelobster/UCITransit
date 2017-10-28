@@ -1,7 +1,6 @@
 package com.robsterthelobster.ucitransit.ui;
 
 import android.content.SharedPreferences;
-import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -14,7 +13,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitApp;
@@ -63,6 +61,7 @@ public class PredictionFragment extends Fragment {
     BusApiService apiService;
 
     String routeId;
+    Date date;
     ArrivalsAdapter arrivalsAdapter;
     ArrivalsAdapter emptyAdapter;
     Subscription fetchArrivalsSub;
@@ -94,7 +93,7 @@ public class PredictionFragment extends Fragment {
             realm = Realm.getDefaultInstance();
         }
         // date from 30 seconds ago
-        Date date = new Date(System.currentTimeMillis() - 30*1000);
+        date = new Date(System.currentTimeMillis() - 30*1000);
 
         RealmResults<Arrivals> arrivals = realm
                 .where(Arrivals.class)
@@ -110,16 +109,7 @@ public class PredictionFragment extends Fragment {
         recyclerView.setAdapter(arrivalsAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), LinearLayoutManager.VERTICAL));
-        swipeRefreshLayout.setOnRefreshListener(
-                () -> {
-                    if(arrivalsAdapter == null){
-                        System.out.println("null adapter");
-                    }else{
-                        System.out.println("items " + arrivalsAdapter.getItemCount());
-                    }
-                    refreshTask();
-                }
-        );
+        swipeRefreshLayout.setOnRefreshListener(this::refreshTask);
         refreshTask();
 
         return view;
@@ -143,8 +133,6 @@ public class PredictionFragment extends Fragment {
                                 arrivals.setId(routeId + arrivals.getStopId());
                                 arrivals.setRouteId(routeId);
 
-                                System.out.println("routeId obs: " + routeId);
-
                                 RealmList<Prediction> predictionList = arrivals.getArrivals();
                                 for (int i = 0; i < predictionList.size(); i++) {
                                     Date arrivalTime = predictionList.get(i).getArrivalAt();
@@ -163,6 +151,7 @@ public class PredictionFragment extends Fragment {
 
                                 if (oldArrivals != null) {
                                     arrivals.setFavorite(oldArrivals.isFavorite());
+                                    arrivals.setNearby(oldArrivals.isNearby());
                                 }
                                 threadRealm.executeTransaction(r -> r.copyToRealmOrUpdate(arrivals));
                                 return Observable.from(arrivalData.getData());
@@ -171,43 +160,6 @@ public class PredictionFragment extends Fragment {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
-
-//    private void fetchArrivals() {
-//        boolean showAd = prefs.getBoolean(getString(R.string.key_ad_pref), true);
-//        if(!Utils.isNetworkConnected(getContext())){
-//            Toast.makeText(getContext(), "Network is not available", Toast.LENGTH_SHORT)
-//                    .show();
-//            emptyText.setText(R.string.empty_network_message);
-//            recyclerView.setAdapter(emptyAdapter);
-//            swipeRefreshLayout.setRefreshing(false);
-//        }else{
-//            swipeRefreshLayout.setRefreshing(true);
-//            recyclerView.setAdapter(arrivalsAdapter);
-//            emptyText.setText(R.string.empty_server_message);
-//            fetchArrivalsSub = getArrivalsObservable()
-//                    .subscribe(new Subscriber<Arrivals>() {
-//                        final String TAG = "DetailArrivalsSub";
-//
-//                        @Override
-//                        public void onCompleted() {
-//                            Log.d(TAG, "onCompleted");
-//                            swipeRefreshLayout.setRefreshing(false);
-//                            //arrivalsAdapter.setFooter(showAd);
-//                        }
-//
-//                        @Override
-//                        public void onError(Throwable e) {
-//                            Log.d(TAG, e.getMessage());
-//                            this.onNext(null);
-//                        }
-//
-//                        @Override
-//                        public void onNext(Arrivals arrivals) {
-//                        }
-//                    });
-//        }
-//        arrivalsAdapter.notifyDataSetChanged();
-//    }
 
     private void fetchArrivals() {
         boolean showAd = prefs.getBoolean(getString(R.string.key_ad_pref), true);
@@ -238,12 +190,15 @@ public class PredictionFragment extends Fragment {
                         public void onNext(Arrivals arrivals) {}
                     });
         }
-        arrivalsAdapter.notifyDataSetChanged();
     }
 
     public void refreshTask(){
         Observable.just(0)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(s -> fetchArrivals());
+                .subscribe(s -> {
+                    fetchArrivals();
+                    date = new Date(System.currentTimeMillis() - 30*1000);
+                    arrivalsAdapter.notifyDataSetChanged();
+                });
     }
 }

@@ -11,10 +11,12 @@
         android:title="Empty Realm"
         android:orderInCategory="300"/>
 
+    <!--
     <item
         android:id="@+id/action_refresh"
         android:orderInCategory="200"
         android:title="@string/action_refresh"
         android:icon="@drawable/ic_auto_renew_white_24dp"
         app:showAsAction="always" />
+    -->
 </menu>

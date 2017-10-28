@@ -34,20 +34,16 @@ import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.data.ArrivalsAdapter;
 import com.robsterthelobster.ucitransit.data.BusApiService;
-import com.robsterthelobster.ucitransit.data.models.ArrivalData;
+import com.robsterthelobster.ucitransit.data.models.Arrivals;
 import com.robsterthelobster.ucitransit.data.models.ArrivalsFields;
 import com.robsterthelobster.ucitransit.data.models.Prediction;
-import com.robsterthelobster.ucitransit.data.models.Arrivals;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.RouteFields;
 import com.robsterthelobster.ucitransit.data.models.Stop;
-import com.robsterthelobster.ucitransit.data.models.StopFields;
 import com.robsterthelobster.ucitransit.utils.Constants;
 import com.robsterthelobster.ucitransit.utils.Utils;
 import com.tbruyelle.rxpermissions.RxPermissions;
 
-import java.text.ParseException;
-import java.util.Calendar;
 import java.util.Date;
 
 import javax.inject.Inject;
@@ -63,7 +59,6 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
@@ -106,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
     Location mLocation;
 
     SharedPreferences prefs;
+    Date date;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,11 +158,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // date from 30 seconds ago
-        Date date = new Date(System.currentTimeMillis() - 30*1000);
+        date = new Date(System.currentTimeMillis() - 30*1000);
         RealmResults<Arrivals> arrivals = realm
                 .where(Arrivals.class)
                 // arrival time should be in the future, with a 30 second buffer
                 .greaterThan(ArrivalsFields.ARRIVAL_TIME, date)
+                .equalTo(ArrivalsFields.IS_NEARBY, true)
                 .findAllSorted("isFavorite", Sort.DESCENDING);
 
         arrivalsAdapter = new ArrivalsAdapter(arrivals, true, true, realm);
@@ -182,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             routeResults = realm.where(Route.class).findAllSorted("shortName");
             setUpNavigationView();
-            fetchArrivals();
+            refreshTask();
         }
     }
 
@@ -366,7 +363,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onCompleted() {
                         Log.d(TAG, "onCompleted");
-                        fetchArrivals();
+                        refreshTask();
                     }
 
                     @Override
@@ -455,6 +452,7 @@ public class MainActivity extends AppCompatActivity {
                                 arrivals.setStop(stop);
                                 arrivals.setId(routeId + stop.getStopId());
                                 arrivals.setRouteId(routeId);
+                                arrivals.setNearby(true);
 
                                 RealmList<Prediction> predictionList = arrivals.getArrivals();
                                 for(int i = 0; i < predictionList.size(); i++){
@@ -501,6 +499,7 @@ public class MainActivity extends AppCompatActivity {
                     if (realm.isEmpty()) {
                         fetchInitialRouteData();
                     } else {
+                        date = new Date(System.currentTimeMillis() - 30*1000);
                         fetchArrivals();
                     }
                 });

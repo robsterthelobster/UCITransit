@@ -20,12 +20,10 @@ import com.ftinc.scoop.Scoop;
 import com.google.android.gms.ads.AdView;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.data.models.Arrivals;
-import com.robsterthelobster.ucitransit.data.models.Prediction;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.robsterthelobster.ucitransit.utils.Utils;
 
-import java.text.ParseException;
 import java.util.Date;
 
 import butterknife.BindView;

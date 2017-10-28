@@ -1,18 +1,11 @@
 package com.robsterthelobster.ucitransit.utils;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.preference.PreferenceManager;
 import android.widget.Toast;
 
-import com.robsterthelobster.ucitransit.R;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 import rx.Subscription;
 

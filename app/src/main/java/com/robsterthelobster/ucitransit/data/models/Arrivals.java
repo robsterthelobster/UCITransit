@@ -28,6 +28,7 @@ public class Arrivals extends RealmObject{
     private Stop stop;
 
     private boolean isFavorite = false;
+    private boolean isNearby = false;
 
     private Date arrivalTime;
     private Date secondaryArrivalTime;
@@ -113,5 +114,13 @@ public class Arrivals extends RealmObject{
 
     public void setRouteId(String routeId) {
         this.routeId = routeId;
+    }
+
+    public boolean isNearby() {
+        return isNearby;
+    }
+
+    public void setNearby(boolean nearby) {
+        isNearby = nearby;
     }
 }

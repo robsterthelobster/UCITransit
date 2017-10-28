@@ -4,17 +4,14 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import com.robsterthelobster.ucitransit.BuildConfig;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.data.BusApiService;
-import com.robsterthelobster.ucitransit.data.models.RealmString;
 
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import retrofit2.Retrofit;

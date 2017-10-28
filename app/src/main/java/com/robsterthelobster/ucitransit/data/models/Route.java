@@ -14,32 +14,34 @@ public class Route extends RealmObject {
 
 
     @SerializedName("description")
-    public String description;
+    private String description;
     @SerializedName("short_name")
-    public String shortName;
+    private String shortName;
     @SerializedName("route_id")
     @PrimaryKey
-    public String routeId;
+    private String routeId;
     @SerializedName("url")
-    public String url;
+    private String url;
     @SerializedName("segments")
-    transient String segments = "";
+    private transient String segments = "";
     @SerializedName("is_active")
-    public Boolean isActive;
+    private Boolean isActive;
     @SerializedName("agency_id")
-    public Integer agencyId;
+    private Integer agencyId;
     @SerializedName("text_color")
-    public String textColor;
+    private String textColor;
     @SerializedName("long_name")
-    public String longName;
+    private String longName;
     @SerializedName("stops")
-    public RealmList<String> stops = null;
+    private RealmList<String> stopIdList = null;
     @SerializedName("is_hidden")
-    public Boolean isHidden;
+    private Boolean isHidden;
     @SerializedName("type")
-    public String type;
+    private String type;
     @SerializedName("color")
-    public String color;
+    private String color;
+
+    private RealmList<Stop> stopsList;
 
     public String getDescription() {
         return description;
@@ -105,12 +107,12 @@ public class Route extends RealmObject {
         this.longName = longName;
     }
 
-    public RealmList<String>  getStops() {
-        return stops;
+    public RealmList<String> getStopIdList() {
+        return stopIdList;
     }
 
-    public void setStops(RealmList<String> stops) {
-        this.stops = stops;
+    public void setStopIdList(RealmList<String> stopIdList) {
+        this.stopIdList = stopIdList;
     }
 
     public Boolean getHidden() {
@@ -135,5 +137,21 @@ public class Route extends RealmObject {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public String getSegments() {
+        return segments;
+    }
+
+    public void setSegments(String segments) {
+        this.segments = segments;
+    }
+
+    public RealmList<Stop> getStops() {
+        return stopsList;
+    }
+
+    public void setStops(RealmList<Stop> stops) {
+        this.stopsList = stops;
     }
 }

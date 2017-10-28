@@ -71,8 +71,6 @@ public class ArrivalsAdapter
             Route route = arrivals.getRoute();
             Stop stop = arrivals.getStop();
 
-            System.out.println("adapter : " + arrivals.getId());
-
             if(routeColorOn) {
                 holder.cardView.setBackgroundColor(Color.parseColor(route.getColor()));
             }

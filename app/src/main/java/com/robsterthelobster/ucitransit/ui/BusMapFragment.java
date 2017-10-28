@@ -1,5 +1,7 @@
 package com.robsterthelobster.ucitransit.ui;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -8,8 +10,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,13 +23,24 @@ import android.widget.TextView;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.data.BusApiService;
+import com.robsterthelobster.ucitransit.data.models.Arrivals;
+import com.robsterthelobster.ucitransit.data.models.ArrivalsFields;
+import com.robsterthelobster.ucitransit.data.models.Coordinate;
+import com.robsterthelobster.ucitransit.data.models.Route;
+import com.robsterthelobster.ucitransit.data.models.RouteFields;
+import com.robsterthelobster.ucitransit.data.models.Stop;
+import com.robsterthelobster.ucitransit.data.models.StopFields;
 import com.robsterthelobster.ucitransit.utils.Constants;
 import com.robsterthelobster.ucitransit.utils.SnackbarManager;
 import com.robsterthelobster.ucitransit.utils.Utils;
@@ -46,7 +61,7 @@ import rx.Subscription;
  * Created by robin on 9/29/2016.
  */
 
-public class BusMapFragment extends Fragment{
+public class BusMapFragment extends Fragment implements OnMapReadyCallback {
 
     final String TAG = BusMapFragment.class.getSimpleName();
     final int MAP_PADDING = 200;
@@ -59,7 +74,7 @@ public class BusMapFragment extends Fragment{
     BusApiService apiService;
 
     GoogleMap map;
-    //Route route;
+    Route route;
     Snackbar snackbar;
     SnackbarManager snackbarManager;
     CoordinatorLayout snackbarLayout;
@@ -84,35 +99,36 @@ public class BusMapFragment extends Fragment{
         UCITransitApp.getComponent(getContext()).inject(this);
 
         Bundle arguments = getArguments();
-        String routeName = arguments.getString(Constants.ROUTE_ID_KEY);
+        String routeId = arguments.getString(Constants.ROUTE_ID_KEY);
         realm = Realm.getDefaultInstance();
 
-       // route = realm.where(Route.class).equalTo(RouteFields.NAME, routeId).findFirst();
+        route = realm.where(Route.class).equalTo(RouteFields.ROUTE_ID, routeId).findFirst();
         stopMarkers = new ArrayList<>();
         vehicleMarkers = new HashMap<>();
 
-//        snackbarLayout =
-//                (CoordinatorLayout) container.getRootView().findViewById(R.id.detail_content);
-//        ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
+        snackbarLayout =
+                container.getRootView().findViewById(R.id.detail_content);
+        ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
 
         return view;
     }
 
-//    private void setUpStopMarkers() {
-//        Log.d(TAG, "setUpStopMarkers");
-//        for (Stop stop : route.getStops()) {
-//            LatLng latLng = new LatLng(stop.getLatitude(), stop.getLongitude());
-//            Marker marker = map.addMarker(new MarkerOptions()
-//                    .icon(getBitmapDescriptor(
-//                            R.drawable.ic_directions_bus_black_24dp,
-//                            Color.parseColor(route.getColor())))
-//                    .position(latLng)
-//                    .title(stop.getName()));
-//            marker.setTag(route.getId() + "" + stop.getId());
-//            stopMarkers.add(marker);
-//        }
-//        centerMapToStops();
-//    }
+    private void setUpStopMarkers() {
+        Log.d(TAG, "setUpStopMarkers");
+        for (Stop stop : route.getStops()) {
+            Coordinate coordinate = stop.getLocation();
+            LatLng latLng = new LatLng(coordinate.getLatitude(), coordinate.getLongitude());
+            Marker marker = map.addMarker(new MarkerOptions()
+                    .icon(getBitmapDescriptor(
+                            R.drawable.ic_directions_bus_black_24dp,
+                            Color.parseColor(route.getColor())))
+                    .position(latLng)
+                    .title(stop.getName()));
+            marker.setTag(route.getRouteId() + "" + stop.getStopId());
+            stopMarkers.add(marker);
+        }
+        centerMapToStops();
+    }
 
 //    private void fetchVehicleData() {
 //        final Context context = getContext();
@@ -161,9 +177,9 @@ public class BusMapFragment extends Fragment{
 //                });
 //    }
 
-//    @Override
-//    public void onMapReady(GoogleMap googleMap) {
-//        this.map = googleMap;
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        this.map = googleMap;
 //        map.setOnMarkerClickListener(marker -> {
 //            if (stopMarkers.contains(marker)) {
 //                Arrivals arrivals =
@@ -180,19 +196,19 @@ public class BusMapFragment extends Fragment{
 //            }
 //            return false;
 //        });
-//        centerButton.setVisibility(View.VISIBLE);
-//        map.setOnMyLocationButtonClickListener(() -> false);
-//        map.getUiSettings().setZoomControlsEnabled(true);
-//        if (ActivityCompat.checkSelfPermission(getContext(),
-//                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-//                ActivityCompat.checkSelfPermission(getContext(),
-//                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//        }else{
-//            map.setMyLocationEnabled(true);
-//        }
-//        setUpStopMarkers();
-//        fetchVehicleData();
-//    }
+        centerButton.setVisibility(View.VISIBLE);
+        map.setOnMyLocationButtonClickListener(() -> false);
+        map.getUiSettings().setZoomControlsEnabled(true);
+        if (ActivityCompat.checkSelfPermission(getContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(getContext(),
+                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        }else{
+            map.setMyLocationEnabled(true);
+        }
+        setUpStopMarkers();
+        //fetchVehicleData();
+    }
 
     @Override
     public void onDestroy(){

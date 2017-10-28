@@ -40,6 +40,7 @@ import com.robsterthelobster.ucitransit.data.models.Prediction;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.RouteFields;
 import com.robsterthelobster.ucitransit.data.models.Stop;
+import com.robsterthelobster.ucitransit.data.models.StopFields;
 import com.robsterthelobster.ucitransit.utils.Constants;
 import com.robsterthelobster.ucitransit.utils.Utils;
 import com.tbruyelle.rxpermissions.RxPermissions;
@@ -51,6 +52,7 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.realm.Realm;
+import io.realm.RealmChangeListener;
 import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -319,10 +321,42 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * fetch stops first
+     *
+     * for each route, insert all the stops into route for easy access
+     *
+     */
     private void fetchInitialRouteData() {
         if (!Utils.isNetworkConnected(this)) {
             setEmptyView();
         }
+
+        fetchInitialStopSub = apiService.getStops(Constants.AGENCY_ID)
+                .flatMap(stopData -> Observable.from(stopData.getData()))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Stop>() {
+                    final String TAG = "fetchInitialStopSub";
+
+                    @Override
+                    public void onCompleted() {
+                        Log.d(TAG, "onCompleted");
+                        refreshTask();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(TAG, e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(Stop stop) {
+                        try (Realm realm = Realm.getDefaultInstance()) {
+                            realm.executeTransaction(r -> r.copyToRealmOrUpdate(stop));
+                        }
+                    }
+                });
 
         fetchInitialRouteSub = apiService.getRoutes(Constants.AGENCY_ID)
                 .flatMap(routeData -> Observable.from(routeData.getData().getRoutes()))
@@ -348,33 +382,15 @@ public class MainActivity extends AppCompatActivity {
                         try (Realm realm = Realm.getDefaultInstance()) {
                             // converts color into hex color for later use
                             route.setColor("#" + route.getColor());
+                            RealmList<Stop> stops = new RealmList<Stop>();
+                            for(String stopId : route.getStopIdList()){
+                                Stop stop = realm.where(Stop.class)
+                                        .equalTo(StopFields.STOP_ID, Integer.parseInt(stopId))
+                                        .findFirst();
+                                stops.add(stop);
+                            }
+                            route.setStops(stops);
                             realm.executeTransaction(r -> r.copyToRealmOrUpdate(route));
-                        }
-                    }
-                });
-
-        fetchInitialStopSub = apiService.getStops(Constants.AGENCY_ID)
-                .flatMap(stopData -> Observable.from(stopData.getData()))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Stop>() {
-                    final String TAG = "fetchInitialStopSub";
-
-                    @Override
-                    public void onCompleted() {
-                        Log.d(TAG, "onCompleted");
-                        refreshTask();
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.d(TAG, e.getMessage());
-                    }
-
-                    @Override
-                    public void onNext(Stop stop) {
-                        try (Realm realm = Realm.getDefaultInstance()) {
-                            realm.executeTransaction(r -> r.copyToRealmOrUpdate(stop));
                         }
                     }
                 });
@@ -423,7 +439,7 @@ public class MainActivity extends AppCompatActivity {
     private Observable<Arrivals> getArrivalsObservable() {
 
         Observable<Arrivals> arrivalsObservable;
-        if (routeResults.isEmpty()) {
+        if (routeResults == null || routeResults.isEmpty()) {
             this.fetchInitialRouteData();
         }
 

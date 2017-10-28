@@ -102,8 +102,6 @@ public class PredictionFragment extends Fragment {
                 .equalTo(ArrivalsFields.ROUTE_ID, routeId)
                 .findAll();
 
-        System.out.println("prediction fragment routeid " + routeId);
-
         arrivalsAdapter = new ArrivalsAdapter(arrivals, true, true, realm);
         emptyAdapter = new ArrivalsAdapter(arrivals, true, true, realm);
         recyclerView.setAdapter(arrivalsAdapter);

@@ -11,7 +11,7 @@
     <string name="empty_network_message">You are not connected to the internet!</string>
     <string name="empty_location_message">Location not found!</string>
     <string name="empty_default_message">No stops are nearby!</string>
-    <string name="empty_server_message">No shuttle data is available.</string>
+    <string name="empty_server_message">Shuttle data is currently unavailable.</string>
 
     <string name="snackbar_dismiss">Dismiss</string>
     <string name="button_center_string">Center</string>

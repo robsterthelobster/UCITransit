@@ -67,6 +67,15 @@ public class ArrivalsAdapter
             String secondaryArrivalTimeString = "NA";
             Date arrivalTime = arrivals.getArrivalTime();
             Date secondaryTime = arrivals.getSecondaryArrivalTime();
+            Date currentTime = new Date();
+            long difference = currentTime.getTime() - arrivalTime.getTime();
+            if(difference < 0){
+
+                realm.executeTransaction(r -> {
+                    r.copyToRealmOrUpdate(arrivals);
+                });
+                notifyDataSetChanged();
+            }
 
             Route route = arrivals.getRoute();
             Stop stop = arrivals.getStop();

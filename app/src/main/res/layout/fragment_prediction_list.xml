@@ -7,7 +7,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.RecyclerView
+    <include
+        layout="@layout/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <com.robsterthelobster.ucitransit.utils.EmptyRecyclerView
         android:id="@+id/fragment_recycler_view"
         android:name="com.robsterthelobster.ucitransit.ui.DetailActivity.PredictionFragment"
         android:layout_width="match_parent"
@@ -15,11 +20,6 @@
         android:visibility="visible"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:listitem="@layout/prediction_card" />
-
-    <include
-        layout="@layout/empty_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
 </android.support.v4.widget.SwipeRefreshLayout>
 

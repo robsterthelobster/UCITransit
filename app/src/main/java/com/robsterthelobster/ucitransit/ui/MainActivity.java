@@ -19,11 +19,11 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,10 +40,10 @@ import com.robsterthelobster.ucitransit.data.models.Prediction;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.RouteFields;
 import com.robsterthelobster.ucitransit.data.models.Segment;
-import com.robsterthelobster.ucitransit.data.models.SegmentData;
 import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.robsterthelobster.ucitransit.data.models.StopFields;
 import com.robsterthelobster.ucitransit.utils.Constants;
+import com.robsterthelobster.ucitransit.utils.EmptyRecyclerView;
 import com.robsterthelobster.ucitransit.utils.Utils;
 import com.tbruyelle.rxpermissions.RxPermissions;
 
@@ -54,7 +54,6 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.realm.Realm;
-import io.realm.RealmChangeListener;
 import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -63,7 +62,6 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
@@ -79,9 +77,9 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.realm_recycler_view)
-    RecyclerView recyclerView;
+    EmptyRecyclerView recyclerView;
     @BindView(R.id.empty_text)
-    TextView emptyText;
+    TextView emptyView;
     @BindView(R.id.swipeContainer)
     SwipeRefreshLayout swipeRefreshLayout;
 
@@ -92,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
 
     RealmResults<Route> routeResults;
     ArrivalsAdapter arrivalsAdapter;
-    ArrivalsAdapter emptyAdapter;
 
     Subscription fetchInitialRouteSub;
     Subscription fetchInitialStopSub;
@@ -173,9 +170,9 @@ public class MainActivity extends AppCompatActivity {
                 .findAllSorted("isFavorite", Sort.DESCENDING);
 
         arrivalsAdapter = new ArrivalsAdapter(arrivals, true, true, realm);
-        emptyAdapter = new ArrivalsAdapter(arrivals, true, true, realm);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setEmptyView(emptyView);
         recyclerView.setAdapter(arrivalsAdapter);
         recyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
         swipeRefreshLayout.setOnRefreshListener(this::refreshTask);
@@ -337,6 +334,7 @@ public class MainActivity extends AppCompatActivity {
             setEmptyView();
         }
 
+        swipeRefreshLayout.setRefreshing(true);
         fetchInitialStopSub = apiService.getStops(Constants.AGENCY_ID)
                 .flatMap(stopData -> Observable.from(stopData.getData()))
                 .subscribeOn(Schedulers.io())
@@ -347,7 +345,6 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onCompleted() {
                         Log.d(TAG, "onCompleted");
-                        refreshTask();
                     }
 
                     @Override
@@ -376,6 +373,7 @@ public class MainActivity extends AppCompatActivity {
                         routeResults = realm.where(Route.class).findAllSorted(RouteFields.SHORT_NAME);
                         fetchSegments();
                         setUpNavigationView();
+                        refreshTask();
                     }
 
                     @Override
@@ -443,15 +441,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void fetchArrivals() {
         boolean showAd = prefs.getBoolean(getString(R.string.key_ad_pref), true);
+        emptyView.setText(R.string.empty_server_message);
         if (!Utils.isNetworkConnected(this)) {
             showToast("Network is not available", Toast.LENGTH_SHORT);
             setEmptyView();
         } else {
             if (mLocation == null) {
-                emptyText.setText(R.string.empty_location_message);
+                emptyView.setText(R.string.empty_location_message);
             } else {
-                recyclerView.setAdapter(arrivalsAdapter);
-                emptyText.setText(R.string.empty_default_message);
+                //recyclerView.setAdapter(arrivalsAdapter);
+                emptyView.setText(R.string.empty_default_message);
                 swipeRefreshLayout.setRefreshing(true);
             }
             fetchArrivalsSub = getArrivalsObservable()
@@ -462,6 +461,9 @@ public class MainActivity extends AppCompatActivity {
                         public void onCompleted() {
                             Log.d(TAG, "onCompleted");
                             swipeRefreshLayout.setRefreshing(false);
+                            if(arrivalsAdapter.getItemCount() == 0){
+                                emptyView.setText(R.string.empty_server_message);
+                            }
                             //arrivalsAdapter.setFooter(showAd);
                         }
 
@@ -549,8 +551,7 @@ public class MainActivity extends AppCompatActivity {
     private void setEmptyView() {
         showToast("Network is not available", Toast.LENGTH_SHORT);
         swipeRefreshLayout.setRefreshing(false);
-        recyclerView.setAdapter(emptyAdapter);
-        emptyText.setText(R.string.empty_network_message);
+        emptyView.setText(R.string.empty_network_message);
     }
 
     private void refreshTask() {

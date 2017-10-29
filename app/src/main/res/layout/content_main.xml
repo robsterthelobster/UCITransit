@@ -14,15 +14,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/realm_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
         <include
             layout="@layout/empty_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
+        <com.robsterthelobster.ucitransit.utils.EmptyRecyclerView
+            android:id="@+id/realm_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
     </android.support.v4.widget.SwipeRefreshLayout>
 
 </RelativeLayout>

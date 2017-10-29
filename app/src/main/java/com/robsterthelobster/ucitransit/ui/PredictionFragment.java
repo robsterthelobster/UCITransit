@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +25,8 @@ import com.robsterthelobster.ucitransit.data.models.RouteFields;
 import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.robsterthelobster.ucitransit.data.models.StopFields;
 import com.robsterthelobster.ucitransit.utils.Constants;
+import com.robsterthelobster.ucitransit.utils.EmptyRecyclerView;
+import com.robsterthelobster.ucitransit.utils.EmptyRecyclerView;
 import com.robsterthelobster.ucitransit.utils.Utils;
 
 import java.util.Date;
@@ -49,7 +50,7 @@ import rx.schedulers.Schedulers;
 public class PredictionFragment extends Fragment {
 
     @BindView(R.id.fragment_recycler_view)
-    RecyclerView recyclerView;
+    EmptyRecyclerView recyclerView;
     @BindView(R.id.empty_text)
     TextView emptyText;
     @BindView(R.id.fragmentSwipeLayout)
@@ -63,7 +64,6 @@ public class PredictionFragment extends Fragment {
     String routeId;
     Date date;
     ArrivalsAdapter arrivalsAdapter;
-    ArrivalsAdapter emptyAdapter;
     Subscription fetchArrivalsSub;
     SharedPreferences prefs;
 
@@ -103,10 +103,10 @@ public class PredictionFragment extends Fragment {
                 .findAll();
 
         arrivalsAdapter = new ArrivalsAdapter(arrivals, true, true, realm);
-        emptyAdapter = new ArrivalsAdapter(arrivals, true, true, realm);
         recyclerView.setAdapter(arrivalsAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), LinearLayoutManager.VERTICAL));
+        recyclerView.setEmptyView(emptyText);
         swipeRefreshLayout.setOnRefreshListener(this::refreshTask);
         refreshTask();
 
@@ -165,8 +165,8 @@ public class PredictionFragment extends Fragment {
         if (!Utils.isNetworkConnected(getContext())) {
             Utils.showToast(getContext(),"Network is not available");
         } else {
-            recyclerView.setAdapter(arrivalsAdapter);
-            emptyText.setText(R.string.empty_default_message);
+            //recyclerView.setAdapter(arrivalsAdapter);
+            emptyText.setText(R.string.empty_server_message);
             swipeRefreshLayout.setRefreshing(true);
             fetchArrivalsSub = getArrivalsObservable()
                     .subscribe(new Subscriber<Arrivals>() {

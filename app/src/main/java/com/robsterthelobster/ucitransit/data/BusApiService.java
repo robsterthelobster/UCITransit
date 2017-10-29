@@ -27,7 +27,7 @@ public interface BusApiService {
     Observable<VehicleData> getVehicles(@Query("agencies") String agency);
 
     @GET("vehicles.json")
-    Observable<VehicleData> getVehicles(@Query("agencies") String agency, @Query("routes") int route);
+    Observable<VehicleData> getVehicles(@Query("agencies") String agency, @Query("routes") String route);
 
     @GET("arrival-estimates.json")
     Observable<ArrivalData> getArrivals(@Query("agencies") String agency);

@@ -219,9 +219,9 @@ public class MainActivity extends AppCompatActivity {
                 Log.i(TAG, "Refresh menu item selected");
                 refreshTask();
                 break;
-            case R.id.action_empty_realm:
-                realm.executeTransaction(realm -> realm.deleteAll());
-                break;
+//            case R.id.action_empty_realm:
+//                realm.executeTransaction(realm -> realm.deleteAll());
+//                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -450,7 +450,7 @@ public class MainActivity extends AppCompatActivity {
                 emptyView.setText(R.string.empty_location_message);
             } else {
                 //recyclerView.setAdapter(arrivalsAdapter);
-                emptyView.setText(R.string.empty_default_message);
+                //emptyView.setText(R.string.empty_default_message);
                 swipeRefreshLayout.setRefreshing(true);
             }
             fetchArrivalsSub = getArrivalsObservable()

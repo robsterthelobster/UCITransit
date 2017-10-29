@@ -76,7 +76,7 @@ import rx.schedulers.Schedulers;
 public class BusMapFragment extends Fragment implements OnMapReadyCallback {
 
     final String TAG = BusMapFragment.class.getSimpleName();
-    final int MAP_PADDING = 200;
+    final int MAP_PADDING = 100;
 
     @BindView(R.id.map_button_center)
     Button centerButton;

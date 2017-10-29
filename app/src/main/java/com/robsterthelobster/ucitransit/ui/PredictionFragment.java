@@ -199,4 +199,10 @@ public class PredictionFragment extends Fragment {
                     arrivalsAdapter.notifyDataSetChanged();
                 });
     }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        Utils.unsubscribe(fetchArrivalsSub);
+    }
 }

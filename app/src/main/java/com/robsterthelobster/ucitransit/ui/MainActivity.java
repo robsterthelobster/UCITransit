@@ -96,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
 
     Subscription fetchInitialRouteSub;
     Subscription fetchInitialStopSub;
+    Subscription fetchInitialSegmentSub;
     Subscription fetchArrivalsSub;
     Subscription permissionSub;
     Subscription locationSub;
@@ -233,6 +234,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         realm.close();
         recyclerView.setAdapter(null);
+        Utils.unsubscribe(fetchInitialSegmentSub);
         Utils.unsubscribe(fetchInitialRouteSub);
         Utils.unsubscribe(fetchArrivalsSub);
         Utils.unsubscribe(permissionSub);
@@ -402,7 +404,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void fetchSegments(){
 
-        Observable.defer(() -> {
+        fetchInitialSegmentSub = Observable.defer(() -> {
             final Realm threadRealm = Realm.getDefaultInstance();
             RealmResults<Route> routeResults = threadRealm.where(Route.class).findAll();
             return Observable.from(routeResults)

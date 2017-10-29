@@ -39,6 +39,8 @@ import com.robsterthelobster.ucitransit.data.models.ArrivalsFields;
 import com.robsterthelobster.ucitransit.data.models.Prediction;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.RouteFields;
+import com.robsterthelobster.ucitransit.data.models.Segment;
+import com.robsterthelobster.ucitransit.data.models.SegmentData;
 import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.robsterthelobster.ucitransit.data.models.StopFields;
 import com.robsterthelobster.ucitransit.utils.Constants;
@@ -61,6 +63,7 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
@@ -369,6 +372,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onCompleted() {
                         Log.d(TAG, "onCompleted");
                         routeResults = realm.where(Route.class).findAll();
+                        fetchSegments();
                         setUpNavigationView();
                     }
 
@@ -382,7 +386,7 @@ public class MainActivity extends AppCompatActivity {
                         try (Realm realm = Realm.getDefaultInstance()) {
                             // converts color into hex color for later use
                             route.setColor("#" + route.getColor());
-                            RealmList<Stop> stops = new RealmList<Stop>();
+                            RealmList<Stop> stops = new RealmList<>();
                             for(String stopId : route.getStopIdList()){
                                 Stop stop = realm.where(Stop.class)
                                         .equalTo(StopFields.STOP_ID, Integer.parseInt(stopId))
@@ -391,6 +395,44 @@ public class MainActivity extends AppCompatActivity {
                             }
                             route.setStops(stops);
                             realm.executeTransaction(r -> r.copyToRealmOrUpdate(route));
+                        }
+                    }
+                });
+    }
+
+    private void fetchSegments(){
+
+        Observable.defer(() -> {
+            final Realm threadRealm = Realm.getDefaultInstance();
+            RealmResults<Route> routeResults = threadRealm.where(Route.class).findAll();
+            return Observable.from(routeResults)
+                    .flatMap(route -> apiService.getSegments(Constants.AGENCY_ID, route.getRouteId())
+                            .flatMap(segmentData -> Observable.from(segmentData.getData())
+                                    .flatMap(segment -> {
+                                        segment.setRouteId(route.getRouteId());
+                                        return Observable.from(segmentData.getData());
+                                    })))
+                    .doOnCompleted(threadRealm::close);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Segment>() {
+                    private final static String TAG = "fetchSegmentsSub";
+
+                    @Override
+                    public void onCompleted() {
+                        Log.d(TAG, "onCompleted");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(TAG, e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(Segment segment) {
+                        try (Realm realm = Realm.getDefaultInstance()) {
+                            realm.executeTransaction(r -> r.copyToRealmOrUpdate(segment));
                         }
                     }
                 });

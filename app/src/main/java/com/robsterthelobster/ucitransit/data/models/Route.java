@@ -154,4 +154,12 @@ public class Route extends RealmObject {
     public void setStops(RealmList<Stop> stops) {
         this.stopsList = stops;
     }
+
+    public RealmList<Stop> getStopsList() {
+        return stopsList;
+    }
+
+    public void setStopsList(RealmList<Stop> stopsList) {
+        this.stopsList = stopsList;
+    }
 }

@@ -3,6 +3,7 @@ package com.robsterthelobster.ucitransit.data;
 
 import com.robsterthelobster.ucitransit.data.models.ArrivalData;
 import com.robsterthelobster.ucitransit.data.models.RouteData;
+import com.robsterthelobster.ucitransit.data.models.SegmentData;
 import com.robsterthelobster.ucitransit.data.models.StopData;
 import com.robsterthelobster.ucitransit.data.models.VehicleData;
 
@@ -39,4 +40,7 @@ public interface BusApiService {
 
     @GET("arrival-estimates.json")
     Observable<ArrivalData> getArrivalsByStop(@Query("agencies") String agency, @Query("stops") int stop);
+
+    @GET("segments.json")
+    Observable<SegmentData> getSegments(@Query("agencies") String agency, @Query("routes") String route);
 }

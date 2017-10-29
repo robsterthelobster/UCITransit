@@ -7,6 +7,8 @@ import com.google.gson.GsonBuilder;
 import com.robsterthelobster.ucitransit.BuildConfig;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.data.BusApiService;
+import com.robsterthelobster.ucitransit.data.SegmentDeserializer;
+import com.robsterthelobster.ucitransit.data.models.SegmentData;
 
 import javax.inject.Singleton;
 
@@ -45,13 +47,13 @@ public class RestModule {
         OkHttpClient client = builder.build();
 
         Gson gson = new GsonBuilder()
-                .excludeFieldsWithoutExposeAnnotation()
+                .registerTypeAdapter(SegmentData.class, new SegmentDeserializer())
                 .create();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(context.getString(R.string.root_url))
                 .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
 

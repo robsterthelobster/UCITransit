@@ -31,6 +31,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.PolyUtil;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.data.BusApiService;
@@ -128,6 +130,11 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
             stopMarkers.add(marker);
         }
         centerMapToStops();
+    }
+
+    private void setUpRouteSegments(){
+        PolyUtil.decode("");
+
     }
 
 //    private void fetchVehicleData() {

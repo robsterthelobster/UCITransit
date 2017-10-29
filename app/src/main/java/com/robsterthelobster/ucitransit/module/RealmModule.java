@@ -22,7 +22,7 @@ public class RealmModule {
                 .deleteRealmIfMigrationNeeded()
                 .build();
         Realm.setDefaultConfiguration(realmConfig);
-
+        Realm.getInstance(realmConfig);
     }
 
     @Provides

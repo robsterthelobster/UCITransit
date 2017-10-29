@@ -373,7 +373,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onCompleted() {
                         Log.d(TAG, "onCompleted");
-                        routeResults = realm.where(Route.class).findAll();
+                        routeResults = realm.where(Route.class).findAllSorted(RouteFields.SHORT_NAME);
                         fetchSegments();
                         setUpNavigationView();
                     }
@@ -412,6 +412,7 @@ public class MainActivity extends AppCompatActivity {
                             .flatMap(segmentData -> Observable.from(segmentData.getData())
                                     .flatMap(segment -> {
                                         segment.setRouteId(route.getRouteId());
+                                        segment.setId(route.getRouteId()+segment.getSegmentId());
                                         return Observable.from(segmentData.getData());
                                     })))
                     .doOnCompleted(threadRealm::close);

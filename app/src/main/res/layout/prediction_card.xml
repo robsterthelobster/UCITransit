@@ -57,8 +57,9 @@
                 android:layout_alignParentStart="true"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:textColor="?attr/editTextColor"
+                android:maxLines="1"
                 android:ellipsize="end"
-                android:maxLength="50"
+                android:maxEms="12"
                 tools:text="University Center - North (UCI Admin)" />
 
             <TextView

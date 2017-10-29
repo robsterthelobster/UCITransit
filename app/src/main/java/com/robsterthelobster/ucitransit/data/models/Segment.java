@@ -9,9 +9,11 @@ import io.realm.annotations.PrimaryKey;
 
 public class Segment extends RealmObject{
 
+    // need a custom id as routes and segments are shared
+    // storing duplicate segments but easier access
     @PrimaryKey
+    private String id;
     private String routeId;
-
     private String segmentId;
     private String segmentCode;
 
@@ -37,5 +39,13 @@ public class Segment extends RealmObject{
 
     public void setRouteId(String routeId) {
         this.routeId = routeId;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

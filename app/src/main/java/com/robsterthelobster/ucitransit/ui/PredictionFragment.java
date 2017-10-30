@@ -25,8 +25,6 @@ import com.robsterthelobster.ucitransit.data.models.RouteFields;
 import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.robsterthelobster.ucitransit.data.models.StopFields;
 import com.robsterthelobster.ucitransit.utils.Constants;
-import com.robsterthelobster.ucitransit.utils.EmptyRecyclerView;
-import com.robsterthelobster.ucitransit.utils.EmptyRecyclerView;
 import com.robsterthelobster.ucitransit.utils.Utils;
 
 import java.util.Date;
@@ -51,10 +49,12 @@ public class PredictionFragment extends Fragment {
 
     @BindView(R.id.fragment_recycler_view)
     EmptyRecyclerView recyclerView;
-    @BindView(R.id.empty_text)
+    @BindView(R.id.fragment_empty_view)
     TextView emptyText;
-    @BindView(R.id.fragmentSwipeLayout)
+    @BindView(R.id.fragment_swipe_layout)
     SwipeRefreshLayout swipeRefreshLayout;
+    @BindView(R.id.empty_fragment_swipe_layout)
+    SwipeRefreshLayout emptyRefreshLayout;
 
     @Inject
     Realm realm;
@@ -107,7 +107,9 @@ public class PredictionFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), LinearLayoutManager.VERTICAL));
         recyclerView.setEmptyView(emptyText);
+        recyclerView.setSwipeRefreshLayout(swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(this::refreshTask);
+        emptyRefreshLayout.setOnRefreshListener(this::refreshTask);
         refreshTask();
 
         return view;
@@ -176,7 +178,11 @@ public class PredictionFragment extends Fragment {
                         public void onCompleted() {
                             Log.d(TAG, "onCompleted");
                             swipeRefreshLayout.setRefreshing(false);
+                            emptyRefreshLayout.setRefreshing(false);
                             //arrivalsAdapter.setFooter(showAd);
+                            if(arrivalsAdapter.getItemCount() == 0){
+                                emptyText.setText(R.string.empty_server_message);
+                            }
                         }
 
                         @Override

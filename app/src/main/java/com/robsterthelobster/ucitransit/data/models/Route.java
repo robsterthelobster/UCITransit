@@ -14,30 +14,30 @@ public class Route extends RealmObject {
 
 
     @SerializedName("description")
-    private String description;
+    transient private String description;
     @SerializedName("short_name")
     private String shortName;
     @SerializedName("route_id")
     @PrimaryKey
     private String routeId;
     @SerializedName("url")
-    private String url;
+    transient private String url;
     @SerializedName("segments")
     private transient String segments = "";
     @SerializedName("is_active")
-    private Boolean isActive;
+    transient private Boolean isActive;
     @SerializedName("agency_id")
-    private Integer agencyId;
+    transient private Integer agencyId;
     @SerializedName("text_color")
-    private String textColor;
+    transient private String textColor;
     @SerializedName("long_name")
     private String longName;
     @SerializedName("stops")
     private RealmList<String> stopIdList = null;
     @SerializedName("is_hidden")
-    private Boolean isHidden;
+    transient private Boolean isHidden;
     @SerializedName("type")
-    private String type;
+    transient private String type;
     @SerializedName("color")
     private String color;
 

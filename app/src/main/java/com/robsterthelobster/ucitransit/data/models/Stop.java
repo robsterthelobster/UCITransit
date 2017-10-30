@@ -13,19 +13,19 @@ import io.realm.annotations.PrimaryKey;
 public class Stop extends RealmObject{
 
     @SerializedName("code")
-    private String code;
+    transient private String code;
     @SerializedName("description")
-    private String description;
+    transient private String description;
     @SerializedName("url")
-    private String url;
+    transient private String url;
     @SerializedName("parent_station_id")
-    private Integer parentStationId;
+    transient private Integer parentStationId;
     @SerializedName("agency_ids")
-    private RealmList<String> agencyIds = null;
+    transient private RealmList<String> agencyIds = null;
     @SerializedName("station_id")
-    private Integer stationId;
+    transient private Integer stationId;
     @SerializedName("location_type")
-    private String locationType;
+    transient private String locationType;
     @SerializedName("location")
     private Coordinate location;
     @SerializedName("stop_id")

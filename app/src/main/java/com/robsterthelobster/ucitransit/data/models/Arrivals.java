@@ -17,7 +17,7 @@ public class Arrivals extends RealmObject{
     @SerializedName("arrivals")
     private RealmList<Prediction> arrivals = null;
     @SerializedName("agency_id")
-    private Integer agencyId;
+    transient private Integer agencyId;
     @SerializedName("stop_id")
     private Integer stopId;
 

@@ -60,25 +60,22 @@ public class ArrivalsAdapter
     @Override
     public void onBindViewHolder(ArrivalsAdapter.ViewHolder holder, int position) {
         final Arrivals arrivals = getItem(position);
-        if(arrivals!=null){
+
+        Route route = null;
+        Stop stop = null;
+
+        if(arrivals != null){
+            route = arrivals.getRoute();
+            stop = arrivals.getStop();
+        }
+
+        if(arrivals!=null && stop != null && route != null){
             holder.arrivals = arrivals;
 
             String arrivalTimeString = "NA";
             String secondaryArrivalTimeString = "NA";
             Date arrivalTime = arrivals.getArrivalTime();
             Date secondaryTime = arrivals.getSecondaryArrivalTime();
-            Date currentTime = new Date();
-            long difference = currentTime.getTime() - arrivalTime.getTime();
-            if(difference < 0){
-
-                realm.executeTransaction(r -> {
-                    r.copyToRealmOrUpdate(arrivals);
-                });
-                notifyDataSetChanged();
-            }
-
-            Route route = arrivals.getRoute();
-            Stop stop = arrivals.getStop();
 
             if(routeColorOn) {
                 holder.cardView.setBackgroundColor(Color.parseColor(route.getColor()));

@@ -1,4 +1,4 @@
-package com.robsterthelobster.ucitransit.utils;
+package com.robsterthelobster.ucitransit.ui;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -10,23 +10,31 @@ import android.view.View;
  *
  * https://stackoverflow.com/questions/27414173/
  * equivalent-of-listview-setemptyview-in-recyclerview/27801394#27801394
+ *
+ * Changed to include SwipeRefreshLayout
  */
 
 public class EmptyRecyclerView extends RecyclerView {
+
     private View emptyView;
+    private View swipeRefreshLayout;
+
     final private AdapterDataObserver observer = new AdapterDataObserver() {
         @Override
         public void onChanged() {
+            super.onChanged();
             checkIfEmpty();
         }
 
         @Override
         public void onItemRangeInserted(int positionStart, int itemCount) {
+            super.onItemRangeInserted(positionStart, itemCount);
             checkIfEmpty();
         }
 
         @Override
         public void onItemRangeRemoved(int positionStart, int itemCount) {
+            super.onItemRangeRemoved(positionStart, itemCount);
             checkIfEmpty();
         }
     };
@@ -44,11 +52,11 @@ public class EmptyRecyclerView extends RecyclerView {
     }
 
     void checkIfEmpty() {
-        if (emptyView != null && getAdapter() != null) {
+        if (emptyView != null && swipeRefreshLayout != null && getAdapter() != null) {
             final boolean emptyViewVisible = getAdapter().getItemCount() == 0;
-            System.out.println(emptyViewVisible);
             emptyView.setVisibility(emptyViewVisible ? VISIBLE : GONE);
             setVisibility(emptyViewVisible ? GONE : VISIBLE);
+            swipeRefreshLayout.setVisibility(emptyViewVisible ? GONE : VISIBLE);
         }
     }
 
@@ -68,6 +76,11 @@ public class EmptyRecyclerView extends RecyclerView {
 
     public void setEmptyView(View emptyView) {
         this.emptyView = emptyView;
+        checkIfEmpty();
+    }
+
+    public void setSwipeRefreshLayout(View swipeRefreshLayout){
+        this.swipeRefreshLayout = swipeRefreshLayout;
         checkIfEmpty();
     }
 }

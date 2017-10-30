@@ -10,19 +10,31 @@
 
     <android.support.v4.widget.SwipeRefreshLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/swipeContainer"
+        android:id="@+id/swipe_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <include
-            layout="@layout/empty_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <com.robsterthelobster.ucitransit.utils.EmptyRecyclerView
+        <com.robsterthelobster.ucitransit.ui.EmptyRecyclerView
             android:id="@+id/realm_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/empty_swipe_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/empty_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:visibility="gone"
+            android:padding="@dimen/text_margin"
+            android:text="@string/empty_default_message" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
 

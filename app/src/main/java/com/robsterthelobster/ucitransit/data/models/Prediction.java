@@ -15,11 +15,11 @@ public class Prediction extends RealmObject {
     @SerializedName("route_id")
     private Integer routeId;
     @SerializedName("vehicle_id")
-    private Integer vehicleId;
+    transient private Integer vehicleId;
     @SerializedName("arrival_at")
     private Date arrivalAt;
     @SerializedName("type")
-    private String type;
+    transient private String type;
 
     public Integer getRouteId() {
         return routeId;

@@ -59,7 +59,7 @@
                 android:textColor="?attr/editTextColor"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:maxEms="12"
+                android:maxEms="11"
                 tools:text="University Center - North (UCI Admin)" />
 
             <TextView

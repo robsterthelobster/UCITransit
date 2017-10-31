@@ -18,6 +18,7 @@ public class EmptyRecyclerView extends RecyclerView {
 
     private View emptyView;
     private View swipeRefreshLayout;
+    private View emptySwipeRefreshLayout;
 
     final private AdapterDataObserver observer = new AdapterDataObserver() {
         @Override
@@ -52,9 +53,11 @@ public class EmptyRecyclerView extends RecyclerView {
     }
 
     void checkIfEmpty() {
-        if (emptyView != null && swipeRefreshLayout != null && getAdapter() != null) {
+        if (emptyView != null && swipeRefreshLayout != null
+                && emptySwipeRefreshLayout != null && getAdapter() != null) {
             final boolean emptyViewVisible = getAdapter().getItemCount() == 0;
             emptyView.setVisibility(emptyViewVisible ? VISIBLE : GONE);
+            emptySwipeRefreshLayout.setVisibility(emptyViewVisible ? VISIBLE : GONE);
             setVisibility(emptyViewVisible ? GONE : VISIBLE);
             swipeRefreshLayout.setVisibility(emptyViewVisible ? GONE : VISIBLE);
         }
@@ -81,6 +84,11 @@ public class EmptyRecyclerView extends RecyclerView {
 
     public void setSwipeRefreshLayout(View swipeRefreshLayout){
         this.swipeRefreshLayout = swipeRefreshLayout;
+        checkIfEmpty();
+    }
+
+    public void setEmptySwipeRefreshLayout(View swipeRefreshLayout){
+        this.emptySwipeRefreshLayout = swipeRefreshLayout;
         checkIfEmpty();
     }
 }

@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     TextView emptyView;
     @BindView(R.id.swipe_container)
     SwipeRefreshLayout swipeRefreshLayout;
-    @BindView(R.id.empty_swipe_container)
+    @BindView(R.id.empty_swipe_layout)
     SwipeRefreshLayout emptySwipeRefreshLayout;
 
     @Inject
@@ -175,8 +175,9 @@ public class MainActivity extends AppCompatActivity {
         arrivalsAdapter = new ArrivalsAdapter(arrivals, true, true, realm);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setEmptyView(emptySwipeRefreshLayout);
+        recyclerView.setEmptyView(emptyView);
         recyclerView.setSwipeRefreshLayout(swipeRefreshLayout);
+        recyclerView.setEmptySwipeRefreshLayout(emptySwipeRefreshLayout);
         recyclerView.setAdapter(arrivalsAdapter);
         recyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
         swipeRefreshLayout.setOnRefreshListener(this::refreshTask);
@@ -333,7 +334,12 @@ public class MainActivity extends AppCompatActivity {
                 "Initializing route and stop data...", true);
 
         fetchInitialStopSub = apiService.getStops(Constants.AGENCY_ID)
-                .flatMap(stopData -> Observable.from(stopData.getData()))
+                .flatMap(stopData -> {
+                    try (Realm realm = Realm.getDefaultInstance()) {
+                        realm.executeTransaction(r -> r.copyToRealmOrUpdate(stopData));
+                    }
+                    return Observable.from(stopData.getData());
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Stop>() {
@@ -352,9 +358,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onNext(Stop stop) {
-                        try (Realm realm = Realm.getDefaultInstance()) {
-                            realm.executeTransaction(r -> r.copyToRealmOrUpdate(stop));
-                        }
+
                     }
                 });
     }
@@ -371,7 +375,21 @@ public class MainActivity extends AppCompatActivity {
         }
 
         fetchInitialRouteSub = apiService.getRoutes(Constants.AGENCY_ID)
-                .flatMap(routeData -> Observable.from(routeData.getData().getRoutes()))
+                .flatMap(routeData -> Observable.from(routeData.getData().getRoutes()).flatMap(route -> {
+                    try (Realm realm = Realm.getDefaultInstance()) {
+                        // converts color into hex color for later use
+                        route.setColor("#" + route.getColor());
+                        RealmList<Stop> stops = new RealmList<>();
+                        for(String stopId : route.getStopIdList()){
+                            Stop stop = realm.where(Stop.class)
+                                    .equalTo(StopFields.STOP_ID, Integer.parseInt(stopId))
+                                    .findFirst();
+                            stops.add(stop);
+                        }
+                        route.setStops(stops);
+                        realm.executeTransaction(r -> r.copyToRealmOrUpdate(route));
+                    }
+                    return Observable.from(routeData.getData().getRoutes());}))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Route>() {
@@ -383,7 +401,6 @@ public class MainActivity extends AppCompatActivity {
                         routeResults = realm.where(Route.class).findAllSorted(RouteFields.SHORT_NAME);
                         fetchSegments();
                         setUpNavigationView();
-                        refreshTask();
                     }
 
                     @Override
@@ -393,20 +410,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onNext(Route route) {
-                        try (Realm realm = Realm.getDefaultInstance()) {
-                            // converts color into hex color for later use
-                            route.setColor("#" + route.getColor());
-                            RealmList<Stop> stops = new RealmList<>();
-                            List<String> stopList = route.getStopIdList();
-                            for(String stopId : route.getStopIdList()){
-                                Stop stop = realm.where(Stop.class)
-                                        .equalTo(StopFields.STOP_ID, Integer.parseInt(stopId))
-                                        .findFirst();
-                                stops.add(stop);
-                            }
-                            route.setStops(stops);
-                            realm.executeTransaction(r -> r.copyToRealmOrUpdate(route));
-                        }
+
                     }
                 });
     }
@@ -422,6 +426,9 @@ public class MainActivity extends AppCompatActivity {
                                     .flatMap(segment -> {
                                         segment.setRouteId(route.getRouteId());
                                         segment.setId(route.getRouteId()+segment.getSegmentId());
+                                        try (Realm realm = Realm.getDefaultInstance()) {
+                                            realm.executeTransaction(r -> r.copyToRealmOrUpdate(segment));
+                                        }
                                         return Observable.from(segmentData.getData());
                                     })))
                     .doOnCompleted(threadRealm::close);
@@ -436,6 +443,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.d(TAG, "onCompleted");
                         swipeRefreshLayout.setRefreshing(false);
                         progress.dismiss();
+                        refreshTask();
                     }
 
                     @Override
@@ -445,9 +453,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onNext(Segment segment) {
-                        try (Realm realm = Realm.getDefaultInstance()) {
-                            realm.executeTransaction(r -> r.copyToRealmOrUpdate(segment));
-                        }
+
                     }
                 });
     }

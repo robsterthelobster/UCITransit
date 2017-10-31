@@ -108,6 +108,7 @@ public class PredictionFragment extends Fragment {
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), LinearLayoutManager.VERTICAL));
         recyclerView.setEmptyView(emptyText);
         recyclerView.setSwipeRefreshLayout(swipeRefreshLayout);
+        recyclerView.setEmptySwipeRefreshLayout(emptyRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(this::refreshTask);
         emptyRefreshLayout.setOnRefreshListener(this::refreshTask);
         refreshTask();

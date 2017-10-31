@@ -2,26 +2,33 @@ package com.robsterthelobster.ucitransit.data.models;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
+import io.realm.RealmList;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by robin on 10/16/2017.
+ *
+ * only need data
  */
 
-public class StopData {
+public class StopData extends RealmObject{
 
     @SerializedName("rate_limit")
-    public Integer rateLimit;
+    transient private Integer rateLimit;
     @SerializedName("expires_in")
-    public Integer expiresIn;
+    transient private Integer expiresIn;
     @SerializedName("api_latest_version")
-    public String apiLatestVersion;
+    transient private String apiLatestVersion;
     @SerializedName("generated_on")
-    public String generatedOn;
+    transient private String generatedOn;
     @SerializedName("data")
-    public List<Stop> data = null;
+    private RealmList<Stop> data = null;
     @SerializedName("api_version")
-    public String apiVersion;
+    transient private String apiVersion;
+
+    @PrimaryKey
+    private int id = 0;
 
     public Integer getRateLimit() {
         return rateLimit;
@@ -55,11 +62,11 @@ public class StopData {
         this.generatedOn = generatedOn;
     }
 
-    public List<Stop> getData() {
+    public RealmList<Stop> getData() {
         return data;
     }
 
-    public void setData(List<Stop> data) {
+    public void setData(RealmList<Stop> data) {
         this.data = data;
     }
 

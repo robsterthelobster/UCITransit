@@ -2,160 +2,153 @@ package com.robsterthelobster.ucitransit.data.models;
 
 import com.google.gson.annotations.SerializedName;
 
+import io.realm.RealmList;
 import io.realm.RealmObject;
 
 /**
- * Created by robin on 6/20/2016.
+ * Created by robin on 10/16/2017.
  */
-public class Vehicle extends RealmObject {
-    @SerializedName("ID")
-    private int id;
-    @SerializedName("APCPercentage")
-    private int apcPercentage;
-    @SerializedName("RouteId")
-    private int routeId;
-    @SerializedName("PatternId")
-    private int patternId;
-    @SerializedName("Name")
-    private String name;
-    @SerializedName("HasAPC")
-    private boolean hasAPC;
-    @SerializedName("IconPrefix")
-    private String iconPrefix;
-    @SerializedName("DoorStatus")
-    private int doorStatus;
-    @SerializedName("Latitude")
-    private double latitude;
-    @SerializedName("Longitude")
-    private double longitude;
-    @SerializedName("Coordinate")
-    private Coordinate coordinate;
-    @SerializedName("Speed")
-    private int speed;
-    @SerializedName("Heading")
-    private String heading;
-    @SerializedName("Updated")
-    private String updated;
-    @SerializedName("UpdatedAgo")
-    private String updatedAgo;
 
-    public int getId() {
-        return id;
+public class Vehicle extends RealmObject{
+
+    @SerializedName("standing_capacity")
+    public String standingCapacity;
+    @SerializedName("description")
+    public String description;
+    @SerializedName("seating_capacity")
+    public String seatingCapacity;
+    @SerializedName("last_updated_on")
+    public String lastUpdatedOn;
+    @SerializedName("call_name")
+    public String callName;
+    @SerializedName("speed")
+    public double speed;
+    @SerializedName("vehicle_id")
+    public Integer vehicleId;
+    @SerializedName("segment_id")
+    public Integer segmentId;
+    @SerializedName("passenger_load")
+    public String passengerLoad;
+    @SerializedName("route_id")
+    public Integer routeId;
+    @SerializedName("arrival_estimates")
+    public RealmList<Prediction> arrivalEstimates = null;
+    @SerializedName("tracking_status")
+    public String trackingStatus;
+    @SerializedName("location")
+    public Coordinate location;
+    @SerializedName("heading")
+    public Integer heading;
+
+    public String getStandingCapacity() {
+        return standingCapacity;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setStandingCapacity(String standingCapacity) {
+        this.standingCapacity = standingCapacity;
     }
 
-    public int getApcPercentage() {
-        return apcPercentage;
+    public String getDescription() {
+        return description;
     }
 
-    public void setApcPercentage(int apcPercentage) {
-        this.apcPercentage = apcPercentage;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public int getRouteId() {
-        return routeId;
+    public String getSeatingCapacity() {
+        return seatingCapacity;
     }
 
-    public void setRouteId(int routeId) {
-        this.routeId = routeId;
+    public void setSeatingCapacity(String seatingCapacity) {
+        this.seatingCapacity = seatingCapacity;
     }
 
-    public int getPatternId() {
-        return patternId;
+    public String getLastUpdatedOn() {
+        return lastUpdatedOn;
     }
 
-    public void setPatternId(int patternId) {
-        this.patternId = patternId;
+    public void setLastUpdatedOn(String lastUpdatedOn) {
+        this.lastUpdatedOn = lastUpdatedOn;
     }
 
-    public String getName() {
-        return name;
+    public String getCallName() {
+        return callName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setCallName(String callName) {
+        this.callName = callName;
     }
 
-    public boolean isHasAPC() {
-        return hasAPC;
-    }
-
-    public void setHasAPC(boolean hasAPC) {
-        this.hasAPC = hasAPC;
-    }
-
-    public String getIconPrefix() {
-        return iconPrefix;
-    }
-
-    public void setIconPrefix(String iconPrefix) {
-        this.iconPrefix = iconPrefix;
-    }
-
-    public int getDoorStatus() {
-        return doorStatus;
-    }
-
-    public void setDoorStatus(int doorStatus) {
-        this.doorStatus = doorStatus;
-    }
-
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
-
-    public Coordinate getCoordinate() {
-        return coordinate;
-    }
-
-    public void setCoordinate(Coordinate coordinate) {
-        this.coordinate = coordinate;
-    }
-
-    public int getSpeed() {
+    public double getSpeed() {
         return speed;
     }
 
-    public void setSpeed(int speed) {
+    public void setSpeed(double speed) {
         this.speed = speed;
     }
 
-    public String getHeading() {
+    public Integer getVehicleId() {
+        return vehicleId;
+    }
+
+    public void setVehicleId(Integer vehicleId) {
+        this.vehicleId = vehicleId;
+    }
+
+    public Integer getSegmentId() {
+        return segmentId;
+    }
+
+    public void setSegmentId(Integer segmentId) {
+        this.segmentId = segmentId;
+    }
+
+    public String getPassengerLoad() {
+        return passengerLoad;
+    }
+
+    public void setPassengerLoad(String passengerLoad) {
+        this.passengerLoad = passengerLoad;
+    }
+
+    public Integer getRouteId() {
+        return routeId;
+    }
+
+    public void setRouteId(Integer routeId) {
+        this.routeId = routeId;
+    }
+
+    public RealmList<Prediction> getArrivalEstimates() {
+        return arrivalEstimates;
+    }
+
+    public void setArrivalEstimates(RealmList<Prediction> arrivalEstimates) {
+        this.arrivalEstimates = arrivalEstimates;
+    }
+
+    public String getTrackingStatus() {
+        return trackingStatus;
+    }
+
+    public void setTrackingStatus(String trackingStatus) {
+        this.trackingStatus = trackingStatus;
+    }
+
+    public Coordinate getLocation() {
+        return location;
+    }
+
+    public void setLocation(Coordinate location) {
+        this.location = location;
+    }
+
+    public Integer getHeading() {
         return heading;
     }
 
-    public void setHeading(String heading) {
+    public void setHeading(Integer heading) {
         this.heading = heading;
-    }
-
-    public String getUpdated() {
-        return updated;
-    }
-
-    public void setUpdated(String updated) {
-        this.updated = updated;
-    }
-
-    public String getUpdatedAgo() {
-        return updatedAgo;
-    }
-
-    public void setUpdatedAgo(String updatedAgo) {
-        this.updatedAgo = updatedAgo;
     }
 }

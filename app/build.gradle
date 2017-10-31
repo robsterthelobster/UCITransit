@@ -1,20 +1,20 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'realm-android'
-apply plugin: 'me.tatarka.retrolambda'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25"
+    compileSdkVersion 27
+    buildToolsVersion "27.0.0"
 
     defaultConfig {
         applicationId "com.robsterthelobster.ucibustracker"
         minSdkVersion 16
-        targetSdkVersion 25
+        targetSdkVersion 27
         versionCode 10
         versionName "2.6"
         multiDexEnabled true
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    dexOptions {
+        javaMaxHeapSize "4g"
     }
     buildTypes {
         release {
@@ -22,70 +22,76 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    buildTypes.each {
+        it.buildConfigField "String", "OPEN_API_KEY", getMyApiKey("open_api_key")
+    }
     productFlavors {
+        flavorDimensions "default"
         uci {
+            dimension "default"
             applicationId "com.robsterthelobster.ucibustracker"
         }
         bronco {
+            dimension "default"
             applicationId "com.robsterthelobster.cpptransit"
         }
         upenn{
+            dimension "default"
             applicationId "com.robsterthelobster.upenntransit"
         }
         ucsd {
+            dimension "default"
             applicationId "com.robsterthelobster.ucsdtransit"
         }
         usc {
+            dimension "default"
             applicationId "com.robsterthelobster.usctransit"
         }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+        incremental = false
+    }
+    lintOptions {
+        disable 'RestrictedApi'
     }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2') {
-        exclude group: 'com.android.support', module: 'appcompat'
-        exclude group: 'com.android.support', module: 'support-v4'
-        exclude group: 'com.android.support', module: 'support-annotations'
-        exclude module: 'recyclerview-v7'
-    }
-    androidTestCompile 'junit:junit:4.12'
-    androidTestCompile 'com.android.support.test:runner:0.5'
-    androidTestCompile 'com.android.support.test:rules:0.5'
-    androidTestCompile 'com.android.support:support-annotations:25.0.0'
 
-    compile "com.android.support:support-core-utils:25.0.0"
-    compile 'com.android.support:appcompat-v7:25.0.0'
-    compile 'com.android.support:design:25.0.0'
-    compile 'com.android.support:cardview-v7:25.0.0'
-    compile 'com.android.support:support-v4:25.0.0'
-    compile 'com.android.support:recyclerview-v7:25.0.0'
+    compile "com.android.support:support-core-utils:27.0.0"
+    compile 'com.android.support:appcompat-v7:27.0.0'
+    compile 'com.android.support:design:27.0.0'
+    compile 'com.android.support:cardview-v7:27.0.0'
+    compile 'com.android.support:support-v4:27.0.0'
+    compile 'com.android.support:recyclerview-v7:27.0.0'
+    compile 'com.android.support:multidex:1.0.2'
 
-    compile 'com.google.dagger:dagger:2.6.1'
-    apt 'com.google.dagger:dagger-compiler:2.6.1'
+    compile 'com.google.dagger:dagger:2.8'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.8'
     compile 'com.jakewharton:butterknife:8.4.0'
-    apt 'com.jakewharton:butterknife-compiler:8.4.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
 
     compile 'io.reactivex:rxandroid:1.2.1'
-    compile 'io.reactivex:rxjava:1.1.6'
+    compile 'io.reactivex:rxjava:1.3.0'
     compile 'com.tbruyelle.rxpermissions:rxpermissions:0.7.0@aar'
     compile 'pl.charmas.android:android-reactive-location:0.9@aar'
 
-    compile 'com.squareup.retrofit2:retrofit:2.1.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-    compile 'com.squareup.retrofit2:adapter-rxjava:2.1.0'
-    compile 'com.google.code.gson:gson:2.7'
+    compile 'com.squareup.retrofit2:retrofit:2.3.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.3.0'
+    compile 'com.squareup.retrofit2:adapter-rxjava:2.3.0'
+    compile 'com.google.code.gson:gson:2.8.2'
+    compile 'com.squareup.okhttp3:okhttp:3.9.0'
 
-    compile 'com.github.thorbenprimke:realm-recyclerview:0.9.23'
-    apt 'dk.ilios:realmfieldnameshelper:1.1.0'
+    compile 'io.realm:android-adapters:2.1.0'
+    annotationProcessor 'dk.ilios:realmfieldnameshelper:1.1.1'
 
-    compile 'com.google.android.gms:play-services-location:9.6.1'
-    compile 'com.google.android.gms:play-services-maps:9.6.1'
-    compile 'com.google.android.gms:play-services-ads:9.6.1'
+    compile 'com.google.android.gms:play-services-location:11.4.2'
+    compile 'com.google.android.gms:play-services-maps:11.4.2'
+    compile 'com.google.android.gms:play-services-ads:11.4.2'
+    compile 'com.google.maps.android:android-maps-utils:0.5'
 
     compile 'com.52inc:scoops:1.0.0'
 }

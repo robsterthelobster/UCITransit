@@ -1,14 +1,14 @@
 package com.robsterthelobster.ucitransit.data;
 
-import com.robsterthelobster.ucitransit.data.models.Arrivals;
-import com.robsterthelobster.ucitransit.data.models.Route;
-import com.robsterthelobster.ucitransit.data.models.Stop;
-import com.robsterthelobster.ucitransit.data.models.Vehicle;
 
-import java.util.List;
+import com.robsterthelobster.ucitransit.data.models.ArrivalData;
+import com.robsterthelobster.ucitransit.data.models.RouteData;
+import com.robsterthelobster.ucitransit.data.models.SegmentData;
+import com.robsterthelobster.ucitransit.data.models.StopData;
+import com.robsterthelobster.ucitransit.data.models.VehicleData;
 
 import retrofit2.http.GET;
-import retrofit2.http.Path;
+import retrofit2.http.Query;
 import rx.Observable;
 
 /**
@@ -16,15 +16,31 @@ import rx.Observable;
  * Retrofit interface
  */
 public interface BusApiService {
-    @GET("Region/0/Routes")
-    Observable<List<Route>> getRoutes();
 
-    @GET("Route/{route}/Direction/0/Stops")
-    Observable<List<Stop>> getStops(@Path("route") int route);
+    @GET("routes.json")
+    Observable<RouteData> getRoutes(@Query("agencies") String agency);
 
-    @GET("Route/{route}/Stop/{stop}/Arrivals")
-    Observable<Arrivals> getArrivalTimes(@Path("route") int route, @Path("stop") int stop);
+    @GET("stops.json")
+    Observable<StopData> getStops(@Query("agencies") String agency);
 
-    @GET("Route/{route}/Vehicles")
-    Observable<List<Vehicle>> getVehicles(@Path("route") int route);
+    @GET("vehicles.json")
+    Observable<VehicleData> getVehicles(@Query("agencies") String agency);
+
+    @GET("vehicles.json")
+    Observable<VehicleData> getVehicles(@Query("agencies") String agency, @Query("routes") String route);
+
+    @GET("arrival-estimates.json")
+    Observable<ArrivalData> getArrivals(@Query("agencies") String agency);
+
+    @GET("arrival-estimates.json")
+    Observable<ArrivalData> getArrivals(@Query("agencies") String agency, @Query("routes") String route);
+
+    @GET("arrival-estimates.json")
+    Observable<ArrivalData> getArrivals(@Query("agencies") String agency, @Query("routes") String route, @Query("stops") int stop);
+
+    @GET("arrival-estimates.json")
+    Observable<ArrivalData> getArrivalsByStop(@Query("agencies") String agency, @Query("stops") int stop);
+
+    @GET("segments.json")
+    Observable<SegmentData> getSegments(@Query("agencies") String agency, @Query("routes") String route);
 }

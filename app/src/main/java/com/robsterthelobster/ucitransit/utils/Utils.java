@@ -1,12 +1,11 @@
 package com.robsterthelobster.ucitransit.utils;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.preference.PreferenceManager;
+import android.widget.Toast;
 
-import com.robsterthelobster.ucitransit.R;
+import java.util.Date;
 
 import rx.Subscription;
 
@@ -50,6 +49,14 @@ public class Utils {
                 (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         return activeNetwork != null && activeNetwork.isConnected();
+    }
+
+    public static String getTimeDifferenceInMinutes(Date date){
+        return ((date.getTime() - new Date().getTime())/1000/60) + " min";
+    }
+
+    public static void showToast(Context context, String message){
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
 }
 

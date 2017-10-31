@@ -15,20 +15,19 @@ import io.realm.RealmConfiguration;
 @Module
 public class RealmModule {
 
-    private final Context context;
-
     public RealmModule(Context context) {
-        this.context = context;
+        Realm.init(context);
+        RealmConfiguration realmConfig = new RealmConfiguration
+                .Builder()
+                .deleteRealmIfMigrationNeeded()
+                .build();
+        Realm.setDefaultConfiguration(realmConfig);
+        Realm.getInstance(realmConfig);
     }
 
     @Provides
     @Singleton
     Realm provideRealmInstance(){
-        RealmConfiguration realmConfig = new RealmConfiguration
-                .Builder(context)
-                .deleteRealmIfMigrationNeeded()
-                .build();
-        Realm.setDefaultConfiguration(realmConfig);
         return Realm.getDefaultInstance();
     }
 }

@@ -7,144 +7,48 @@ import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
 /**
- * Created by robin on 6/20/2016.
- *
+ * Created by robin on 10/16/2017.
  */
+
 public class Route extends RealmObject {
-    @SerializedName("ID")
-    @PrimaryKey
-    private Integer id;
-    @SerializedName("ArrivalsEnabled")
-    private boolean arrivalsEnabled;
-    @SerializedName("DisplayName")
-    private String displayName;
-    @SerializedName("CustomerID")
-    private Integer customerID;
-    @SerializedName("DirectionStops")
-    private String directionStops;
-    @SerializedName("Points")
-    private String points;
-    @SerializedName("Color")
-    private String color;
-    @SerializedName("TextColor")
-    private String textColor;
-    @SerializedName("ArrivalsShowVehicleNames")
-    private boolean arrivalsShowVehicleNames;
-    @SerializedName("IsHeadway")
-    private boolean isHeadway;
-    @SerializedName("ShowLine")
-    private boolean showLine;
-    @SerializedName("Name")
-    private String name;
-    @SerializedName("ShortName")
+
+
+    @SerializedName("description")
+    transient private String description;
+    @SerializedName("short_name")
     private String shortName;
-    @SerializedName("RegionIDs")
-    private RealmList<RealmString> regionIDs;
-    @SerializedName("ForwardDirectionName")
-    private String forwardDirectionName;
-    @SerializedName("BackwardDirectionName")
-    private String backwardDirectionName;
-    @SerializedName("NumberOfVehicles")
-    private int numberOfVehicles;
-    @SerializedName("Patterns")
-    private String patterns;
+    @SerializedName("route_id")
+    @PrimaryKey
+    private String routeId;
+    @SerializedName("url")
+    transient private String url;
+    @SerializedName("segments")
+    private transient String segments = "";
+    @SerializedName("is_active")
+    transient private Boolean isActive;
+    @SerializedName("agency_id")
+    transient private Integer agencyId;
+    @SerializedName("text_color")
+    transient private String textColor;
+    @SerializedName("long_name")
+    private String longName;
+    @SerializedName("stops")
+    private RealmList<String> stopIdList = null;
+    @SerializedName("is_hidden")
+    transient private Boolean isHidden;
+    @SerializedName("type")
+    transient private String type;
+    @SerializedName("color")
+    private String color;
 
-    private RealmList<Stop> stops;
+    private RealmList<Stop> stopsList;
 
-    public boolean isArrivalsEnabled() {
-        return arrivalsEnabled;
+    public String getDescription() {
+        return description;
     }
 
-    public void setArrivalsEnabled(boolean arrivalsEnabled) {
-        this.arrivalsEnabled = arrivalsEnabled;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public Integer getCustomerID() {
-        return customerID;
-    }
-
-    public void setCustomerID(Integer customerID) {
-        this.customerID = customerID;
-    }
-
-    public String getDirectionStops() {
-        return directionStops;
-    }
-
-    public void setDirectionStops(String directionStops) {
-        this.directionStops = directionStops;
-    }
-
-    public String getPoints() {
-        return points;
-    }
-
-    public void setPoints(String points) {
-        this.points = points;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    public String getTextColor() {
-        return textColor;
-    }
-
-    public void setTextColor(String textColor) {
-        this.textColor = textColor;
-    }
-
-    public boolean isArrivalsShowVehicleNames() {
-        return arrivalsShowVehicleNames;
-    }
-
-    public void setArrivalsShowVehicleNames(boolean arrivalsShowVehicleNames) {
-        this.arrivalsShowVehicleNames = arrivalsShowVehicleNames;
-    }
-
-    public boolean isHeadway() {
-        return isHeadway;
-    }
-
-    public void setHeadway(boolean headway) {
-        isHeadway = headway;
-    }
-
-    public boolean isShowLine() {
-        return showLine;
-    }
-
-    public void setShowLine(boolean showLine) {
-        this.showLine = showLine;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getShortName() {
@@ -155,51 +59,107 @@ public class Route extends RealmObject {
         this.shortName = shortName;
     }
 
-    public RealmList<RealmString> getRegionIDs() {
-        return regionIDs;
+    public String getRouteId() {
+        return routeId;
     }
 
-    public void setRegionIDs(RealmList<RealmString> regionIDs) {
-        this.regionIDs = regionIDs;
+    public void setRouteId(String routeId) {
+        this.routeId = routeId;
     }
 
-    public String getForwardDirectionName() {
-        return forwardDirectionName;
+    public String getUrl() {
+        return url;
     }
 
-    public void setForwardDirectionName(String forwardDirectionName) {
-        this.forwardDirectionName = forwardDirectionName;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
-    public String getBackwardDirectionName() {
-        return backwardDirectionName;
+    public Boolean getActive() {
+        return isActive;
     }
 
-    public void setBackwardDirectionName(String backwardDirectionName) {
-        this.backwardDirectionName = backwardDirectionName;
+    public void setActive(Boolean active) {
+        isActive = active;
     }
 
-    public int getNumberOfVehicles() {
-        return numberOfVehicles;
+    public Integer getAgencyId() {
+        return agencyId;
     }
 
-    public void setNumberOfVehicles(int numberOfVehicles) {
-        this.numberOfVehicles = numberOfVehicles;
+    public void setAgencyId(Integer agencyId) {
+        this.agencyId = agencyId;
     }
 
-    public String getPatterns() {
-        return patterns;
+    public String getTextColor() {
+        return textColor;
     }
 
-    public void setPatterns(String patterns) {
-        this.patterns = patterns;
+    public void setTextColor(String textColor) {
+        this.textColor = textColor;
+    }
+
+    public String getLongName() {
+        return longName;
+    }
+
+    public void setLongName(String longName) {
+        this.longName = longName;
+    }
+
+    public RealmList<String> getStopIdList() {
+        return stopIdList;
+    }
+
+    public void setStopIdList(RealmList<String> stopIdList) {
+        this.stopIdList = stopIdList;
+    }
+
+    public Boolean getHidden() {
+        return isHidden;
+    }
+
+    public void setHidden(Boolean hidden) {
+        isHidden = hidden;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getSegments() {
+        return segments;
+    }
+
+    public void setSegments(String segments) {
+        this.segments = segments;
     }
 
     public RealmList<Stop> getStops() {
-        return stops;
+        return stopsList;
     }
 
     public void setStops(RealmList<Stop> stops) {
-        this.stops = stops;
+        this.stopsList = stops;
+    }
+
+    public RealmList<Stop> getStopsList() {
+        return stopsList;
+    }
+
+    public void setStopsList(RealmList<Stop> stopsList) {
+        this.stopsList = stopsList;
     }
 }

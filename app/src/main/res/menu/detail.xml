@@ -5,6 +5,6 @@
         android:id="@+id/action_refresh"
         android:orderInCategory="100"
         android:title="@string/action_refresh"
-        android:icon="@drawable/ic_autorenew_white_24dp"
+        android:icon="@drawable/ic_auto_renew_white_24dp"
         app:showAsAction="always" />
 </menu>

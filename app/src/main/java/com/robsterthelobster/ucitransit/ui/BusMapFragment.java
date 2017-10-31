@@ -32,14 +32,18 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.PolyUtil;
 import com.robsterthelobster.ucitransit.R;
 import com.robsterthelobster.ucitransit.UCITransitApp;
 import com.robsterthelobster.ucitransit.data.BusApiService;
 import com.robsterthelobster.ucitransit.data.models.Arrivals;
 import com.robsterthelobster.ucitransit.data.models.ArrivalsFields;
-import com.robsterthelobster.ucitransit.data.models.Prediction;
+import com.robsterthelobster.ucitransit.data.models.Coordinate;
 import com.robsterthelobster.ucitransit.data.models.Route;
 import com.robsterthelobster.ucitransit.data.models.RouteFields;
+import com.robsterthelobster.ucitransit.data.models.Segment;
+import com.robsterthelobster.ucitransit.data.models.SegmentFields;
 import com.robsterthelobster.ucitransit.data.models.Stop;
 import com.robsterthelobster.ucitransit.data.models.Vehicle;
 import com.robsterthelobster.ucitransit.utils.Constants;
@@ -47,6 +51,7 @@ import com.robsterthelobster.ucitransit.utils.SnackbarManager;
 import com.robsterthelobster.ucitransit.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -57,6 +62,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.realm.Realm;
+import io.realm.RealmResults;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
@@ -70,7 +76,7 @@ import rx.schedulers.Schedulers;
 public class BusMapFragment extends Fragment implements OnMapReadyCallback {
 
     final String TAG = BusMapFragment.class.getSimpleName();
-    final int MAP_PADDING = 200;
+    final int MAP_PADDING = 100;
 
     @BindView(R.id.map_button_center)
     Button centerButton;
@@ -84,10 +90,13 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
     Snackbar snackbar;
     SnackbarManager snackbarManager;
     CoordinatorLayout snackbarLayout;
+    RealmResults<Segment> segmentRealmList;
 
     List<Marker> stopMarkers;
     HashMap<String, Marker> vehicleMarkers;
     Subscription vehicleSub;
+    Subscription setUpStopsSub;
+    Subscription setUpSegmentSub;
 
     public static BusMapFragment newInstance(String routeName) {
         BusMapFragment fragment = new BusMapFragment();
@@ -105,15 +114,17 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
         UCITransitApp.getComponent(getContext()).inject(this);
 
         Bundle arguments = getArguments();
-        String routeName = arguments.getString(Constants.ROUTE_ID_KEY);
+        String routeId = arguments.getString(Constants.ROUTE_ID_KEY);
         realm = Realm.getDefaultInstance();
 
-        route = realm.where(Route.class).equalTo(RouteFields.NAME, routeName).findFirst();
+        route = realm.where(Route.class).equalTo(RouteFields.ROUTE_ID, routeId).findFirst();
+        segmentRealmList = realm.where(Segment.class).equalTo(SegmentFields.ROUTE_ID, routeId).findAll();
+        System.out.println("segment count: " + segmentRealmList.size());
         stopMarkers = new ArrayList<>();
         vehicleMarkers = new HashMap<>();
 
         snackbarLayout =
-                (CoordinatorLayout) container.getRootView().findViewById(R.id.detail_content);
+                container.getRootView().findViewById(R.id.detail_content);
         ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
 
         return view;
@@ -121,26 +132,68 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
 
     private void setUpStopMarkers() {
         Log.d(TAG, "setUpStopMarkers");
-        for (Stop stop : route.getStops()) {
-            LatLng latLng = new LatLng(stop.getLatitude(), stop.getLongitude());
-            Marker marker = map.addMarker(new MarkerOptions()
-                    .icon(getBitmapDescriptor(
-                            R.drawable.ic_directions_bus_black_24dp,
-                            Color.parseColor(route.getColor())))
-                    .position(latLng)
-                    .title(stop.getName()));
-            marker.setTag(route.getId() + "" + stop.getId());
-            stopMarkers.add(marker);
-        }
-        centerMapToStops();
+        setUpStopsSub = Observable.from(route.getStops())
+                .subscribe(new Subscriber<Stop>() {
+                    private final static String TAG = "setUpStopMarkers";
+
+                    @Override
+                    public void onCompleted() {
+                        Log.d(TAG, "onCompleted");
+                        centerMapToStops();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(TAG, e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(Stop stop) {
+                        Coordinate coordinate = stop.getLocation();
+                        LatLng latLng = new LatLng(coordinate.getLatitude(), coordinate.getLongitude());
+                        Marker marker = map.addMarker(new MarkerOptions()
+                                .icon(getBitmapDescriptor(
+                                        R.drawable.ic_directions_bus_black_24dp,
+                                        Color.parseColor(route.getColor())))
+                                .position(latLng)
+                                .title(stop.getName()));
+                        marker.setTag(route.getRouteId() + "" + stop.getStopId());
+                        stopMarkers.add(marker);
+                    }
+                });
+    }
+
+    private void setUpRouteSegments() {
+
+        setUpSegmentSub = Observable.from(segmentRealmList)
+                .subscribe(new Subscriber<Segment>() {
+                    private final static String TAG = "setUpRouteSegments";
+
+                    @Override
+                    public void onCompleted() {
+                        Log.d(TAG, "onCompleted");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(TAG, e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(Segment segment) {
+                        List<LatLng> decodedPath = PolyUtil.decode(segment.getSegmentCode());
+                        map.addPolyline(new PolylineOptions().color(Color.parseColor(route.getColor()))
+                                .addAll(decodedPath));
+                    }
+                });
     }
 
     private void fetchVehicleData() {
         final Context context = getContext();
-        int id = route.getId();
+        String routeId = route.getRouteId();
         vehicleSub = Observable.interval(0, 30, TimeUnit.SECONDS)
-                .flatMap(tick -> apiService.getVehicles(id))
-                .flatMap(Observable::from)
+                .flatMap(tick -> apiService.getVehicles(Constants.AGENCY_ID, routeId))
+                .flatMap(vehicleData -> Observable.from(vehicleData.getData().getVehicles()))
                 .distinct()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -160,9 +213,10 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
                     @Override
                     public void onNext(Vehicle vehicle) {
                         Log.d(TAG, "onNext");
-                        String key = "Bus " + vehicle.getName();
-                        LatLng latLng = new LatLng(vehicle.getLatitude(), vehicle.getLongitude());
-                        float rotation = Utils.getRotationFromDirection(vehicle.getHeading());
+                        String key = "Bus " + vehicle.getCallName();
+                        Coordinate location = vehicle.getLocation();
+                        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                        float rotation = vehicle.getHeading();
                         if (vehicleMarkers.containsKey(key)) {
                             Marker marker = vehicleMarkers.get(key);
                             marker.setPosition(latLng);
@@ -187,18 +241,24 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
         this.map = googleMap;
         map.setOnMarkerClickListener(marker -> {
             if (stopMarkers.contains(marker)) {
-                Arrivals arrivals =
-                        realm.where(Arrivals.class).equalTo(ArrivalsFields.ID, (String) marker.getTag()).findFirst();
-                if (!arrivals.getPredictions().isEmpty()) {
-                    Prediction prediction = arrivals.getPredictions().first();
-                    showSnackbar("Arrives in " + prediction.getMinutes() + " min");
+                Date date = new Date();
+
+                Arrivals arrivals = realm.where(Arrivals.class)
+                        .equalTo(ArrivalsFields.ID, (String) marker.getTag())
+                        .greaterThan(ArrivalsFields.ARRIVAL_TIME, date)
+                        .findFirst();
+
+                if (arrivals != null) {
+                    String timeDifference =
+                            Utils.getTimeDifferenceInMinutes(arrivals.getArrivalTime());
+                    showSnackbar("Arrives in " + timeDifference);
                 }
             }
-            if (vehicleMarkers.containsKey(marker.getTitle())) {
-                Vehicle vehicle = (Vehicle) vehicleMarkers.get(marker.getTitle()).getTag();
-                if (vehicle != null)
-                    showSnackbar("Bus is " + vehicle.getApcPercentage() + "% full");
-            }
+//            if (vehicleMarkers.containsKey(marker.getTitle())) {
+//                Vehicle vehicle = (Vehicle) vehicleMarkers.get(marker.getTitle()).getTag();
+//                if (vehicle != null)
+//                    showSnackbar("Bus is " + vehicle.getApcPercentage() + "% full");
+//            }
             return false;
         });
         centerButton.setVisibility(View.VISIBLE);
@@ -208,17 +268,20 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(getContext(),
                         Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-        }else{
+        } else {
             map.setMyLocationEnabled(true);
         }
         setUpStopMarkers();
+        setUpRouteSegments();
         fetchVehicleData();
     }
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         super.onDestroy();
         Utils.unsubscribe(vehicleSub);
+        Utils.unsubscribe(setUpSegmentSub);
+        Utils.unsubscribe(setUpStopsSub);
     }
 
     private BitmapDescriptor getBitmapDescriptor(int id, int color) {
@@ -239,8 +302,8 @@ public class BusMapFragment extends Fragment implements OnMapReadyCallback {
     // http://stackoverflow.com/questions/14828217/
     // android-map-v2-zoom-to-show-all-the-markers
     @OnClick(R.id.map_button_center)
-    public void centerMapToStops(){
-        if(stopMarkers.isEmpty()){
+    public void centerMapToStops() {
+        if (stopMarkers.isEmpty()) {
             return;
         }
         LatLngBounds.Builder builder = new LatLngBounds.Builder();

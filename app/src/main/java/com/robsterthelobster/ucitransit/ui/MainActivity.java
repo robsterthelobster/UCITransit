@@ -47,7 +47,6 @@ import com.robsterthelobster.ucitransit.utils.Utils;
 import com.tbruyelle.rxpermissions.RxPermissions;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -168,8 +167,8 @@ public class MainActivity extends AppCompatActivity {
         RealmResults<Arrivals> arrivals = realm
                 .where(Arrivals.class)
                 // arrival time should be in the future, with a 30 second buffer
-                .greaterThan(ArrivalsFields.ARRIVAL_TIME, date)
-                .equalTo(ArrivalsFields.IS_NEARBY, true)
+                //.greaterThan(ArrivalsFields.ARRIVAL_TIME, date)
+                //.equalTo(ArrivalsFields.IS_NEARBY, true)
                 .findAllSorted("isFavorite", Sort.DESCENDING);
 
         arrivalsAdapter = new ArrivalsAdapter(arrivals, true, true, realm);
@@ -482,7 +481,7 @@ public class MainActivity extends AppCompatActivity {
                             if(arrivalsAdapter.getItemCount() == 0){
                                 emptyView.setText(R.string.empty_server_message);
                             }
-                            //arrivalsAdapter.setFooter(showAd);
+                            arrivalsAdapter.setShowAd(showAd);
                         }
 
                         @Override
@@ -585,7 +584,6 @@ public class MainActivity extends AppCompatActivity {
                     emptySwipeRefreshLayout.setRefreshing(false);
                 });
     }
-
 
     private void showToast(String message, int length) {
         Toast.makeText(this, message, length).show();

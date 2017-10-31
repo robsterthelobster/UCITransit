@@ -184,6 +184,7 @@ public class PredictionFragment extends Fragment {
                             if(arrivalsAdapter.getItemCount() == 0){
                                 emptyText.setText(R.string.empty_server_message);
                             }
+                            arrivalsAdapter.setShowAd(showAd);
                         }
 
                         @Override

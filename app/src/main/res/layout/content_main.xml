@@ -17,7 +17,20 @@
         <com.robsterthelobster.ucitransit.ui.EmptyRecyclerView
             android:id="@+id/realm_recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:id="@+id/bottomBox"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@android:color/holo_red_dark"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="TEST" />
+        </LinearLayout>
 
     </android.support.v4.widget.SwipeRefreshLayout>
 

@@ -15,3 +15,5 @@ gradle
 gradlew.bat
 gradlew
 *.apk
+open_api_key
+app/src/debug/res/values/open_api_key.xml

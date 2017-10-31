@@ -172,7 +172,7 @@ public class ArrivalsAdapter
                 valueAnimator = ValueAnimator.ofInt(originalHeight + expandingHeight,
                         originalHeight);
 
-                Animation a = new AlphaAnimation(1.00f, 0.00f); // Fade out
+                Animation a = new AlphaAnimation(1.00f, 1.00f); // Fade out
                 a.setDuration(100);
                 a.setAnimationListener(new Animation.AnimationListener() {
                     @Override
@@ -187,7 +187,7 @@ public class ArrivalsAdapter
                     @Override
                     public void onAnimationRepeat(Animation animation) {}
                 });
-                secondaryArrivalText.startAnimation(a);
+                cardView.startAnimation(a);
             }
             valueAnimator.setDuration(100);
             valueAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
